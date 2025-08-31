@@ -1,12 +1,4 @@
-import {
-  Calculator,
-  Calendar,
-  CreditCard,
-  Loader2Icon,
-  Settings,
-  Smile,
-  User,
-} from 'lucide-react';
+import { Calculator, Loader2Icon } from 'lucide-react';
 
 import {
   CommandDialog,
@@ -16,11 +8,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-  CommandShortcut,
 } from '@/components/ui/command';
-import { BookmarkNode, FlatBookmark } from '@/types/bookmarks';
-import { flattenBookmarks } from '@/lib/utils';
-import { sendMessage } from '@/messaging';
 import { useBookmarks } from '@/hooks/useBookmarks';
 
 interface CommandDialogDemoProps {
