@@ -1,10 +1,9 @@
-import {
-  ContentScriptContext,
-  createShadowRootUi,
-  defineContentScript,
-} from '#imports';
 import '@/assets/tailwind.css';
+
 import { createRoot } from 'react-dom/client';
+
+import { createShadowRootUi, defineContentScript } from '#imports';
+
 import { CommandDialogDemo } from './App.tsx';
 
 export default defineContentScript({

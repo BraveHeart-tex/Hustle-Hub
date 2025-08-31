@@ -9,16 +9,6 @@ export default defineConfig({
   manifest: {
     permissions: ['tabs', 'scripting', 'bookmarks'],
     action: {},
-    commands: {
-      'toggle-overlay': {
-        description: 'Toggle Overlay',
-        global: true,
-        suggested_key: {
-          default: 'Ctrl+Shift+O',
-          mac: 'Command+Shift+O',
-        },
-      },
-    },
   },
   vite: () => ({
     plugins: [tailwindcss()],

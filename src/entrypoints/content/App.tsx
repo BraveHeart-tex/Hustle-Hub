@@ -18,14 +18,30 @@ interface CommandDialogDemoProps {
 }
 
 export function CommandDialogDemo({ portalContainer }: CommandDialogDemoProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const { bookmarks, isLoading } = useBookmarks();
 
   const handleOpenBookmark = (bookmark: FlatBookmark) => {
     sendMessage('openBookmark', bookmark.url);
   };
 
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'j' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setIsOpen((open) => !open);
+      }
+    };
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
+  }, []);
+
   return (
-    <CommandDialog defaultOpen container={portalContainer}>
+    <CommandDialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      container={portalContainer}
+    >
       <CommandInput placeholder="Type a command or search..." />
       <CommandList>
         {isLoading ? (
