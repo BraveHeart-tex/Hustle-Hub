@@ -13,7 +13,16 @@ export default defineConfig([
     extends: ['js/recommended'],
     languageOptions: { globals: globals.browser },
   },
-  tseslint.configs.recommended,
+  {
+    files: ['**/*.{ts,mts,cts,tsx}'],
+    extends: [...tseslint.configs.recommended],
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
+  },
   pluginReact.configs.flat.recommended,
   {
     plugins: { 'react-hooks': pluginReactHooks },
