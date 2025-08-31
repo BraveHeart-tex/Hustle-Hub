@@ -1,5 +1,6 @@
 import { RefreshCwIcon } from 'lucide-react';
 
+import { ModeToggle } from '@/components/ModeToggle';
 import { Button } from '@/components/ui/button';
 
 export default function Header() {
@@ -17,6 +18,7 @@ export default function Header() {
           </div>
 
           <div className="flex items-center space-x-3">
+            <ModeToggle />
             <Button variant="ghost" size="icon">
               <RefreshCwIcon className="h-5 w-5" />
             </Button>

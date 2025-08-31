@@ -89,10 +89,10 @@ export default function NotesSection() {
         {pendingNotes.map((note) => (
           <div
             key={note.id}
-            className="group p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+            className="group p-3 rounded-lg border bg-card hover:bg-accent/50 cursor-pointer"
           >
             <div className="flex items-start gap-3">
-              <button className="mt-0.5 text-muted-foreground hover:text-foreground transition-colors">
+              <button className="mt-0.5 text-muted-foreground hover:text-foreground">
                 <Circle className="h-4 w-4" />
               </button>
               <div className="flex-1 min-w-0">
@@ -126,7 +126,7 @@ export default function NotesSection() {
         {completedCount > 0 && (
           <div className="pt-2 border-t">
             <details className="group">
-              <summary className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+              <summary className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground">
                 <CheckCircle2 className="h-4 w-4" />
                 <span>Show {completedCount} completed</span>
               </summary>
