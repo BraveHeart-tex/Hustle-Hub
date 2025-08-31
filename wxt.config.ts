@@ -7,7 +7,7 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   srcDir: 'src',
   manifest: {
-    permissions: ['tabs', 'scripting'],
+    permissions: ['tabs', 'scripting', 'bookmarks'],
     action: {},
     commands: {
       'toggle-overlay': {

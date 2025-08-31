@@ -1,3 +1,5 @@
+import { onMessage } from '@/messaging';
+
 export default defineBackground(() => {
   browser.commands.onCommand.addListener(async (command) => {
     console.log('command', command);
@@ -15,5 +17,9 @@ export default defineBackground(() => {
         files: ['content-scripts/content.js'],
       });
     }
+  });
+
+  onMessage('geetBookmarks', async () => {
+    return await browser.bookmarks.getTree();
   });
 });
