@@ -10,7 +10,7 @@ export const useBookmarks = () => {
     const fetchBookmarks = async () => {
       setIsLoading(true);
       try {
-        const result = await sendMessage('geetBookmarks');
+        const result = await sendMessage('getBookmarks');
 
         setBookmarks(flattenBookmarks(result || []));
       } catch (error) {

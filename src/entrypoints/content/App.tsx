@@ -10,6 +10,8 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { useBookmarks } from '@/hooks/useBookmarks';
+import { sendMessage } from '@/messaging';
+import { FlatBookmark } from '@/types/bookmarks';
 
 interface CommandDialogDemoProps {
   portalContainer?: HTMLElement;
@@ -17,6 +19,10 @@ interface CommandDialogDemoProps {
 
 export function CommandDialogDemo({ portalContainer }: CommandDialogDemoProps) {
   const { bookmarks, isLoading } = useBookmarks();
+
+  const handleOpenBookmark = (bookmark: FlatBookmark) => {
+    sendMessage('openBookmark', bookmark.url);
+  };
 
   return (
     <CommandDialog defaultOpen container={portalContainer}>
@@ -34,7 +40,12 @@ export function CommandDialogDemo({ portalContainer }: CommandDialogDemoProps) {
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup heading="Bookmarks">
               {bookmarks.map((bookmark) => (
-                <CommandItem key={bookmark.id}>
+                <CommandItem
+                  key={bookmark.id}
+                  onSelect={() => {
+                    handleOpenBookmark(bookmark);
+                  }}
+                >
                   <Calculator />
                   <span>{bookmark.title}</span>
                 </CommandItem>
