@@ -1,9 +1,11 @@
 import BookmarkDialog from '@/components/content/BookmarkDialog';
+import JiraShortcutDialog from '@/components/content/JiraShortcutDialog';
 import CalendarSection from '@/components/newtab/CalendarSection';
 import GitlabSection from '@/components/newtab/GitlabSection';
 import Header from '@/components/newtab/Header';
 import JiraSection from '@/components/newtab/JiraSection';
 import NotesSection from '@/components/newtab/NotesSection';
+import { Toaster } from '@/components/ui/sonner';
 
 const NewTab = () => {
   return (
@@ -28,6 +30,8 @@ const NewTab = () => {
         </main>
       </div>
       <BookmarkDialog portalContainer={document.body} />
+      <JiraShortcutDialog portalContainer={document.body} />
+      <Toaster />
     </>
   );
 };

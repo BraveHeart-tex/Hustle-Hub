@@ -14,3 +14,7 @@ export function flattenBookmarks(nodes: BookmarkNode[]): FlatBookmark[] {
   }
   return result;
 }
+
+export function getJiraTaskUrl(issueKey: string): string {
+  return `https://letgotr.atlassian.net/browse/${issueKey}`;
+}

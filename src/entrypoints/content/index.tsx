@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 
 import { createShadowRootUi, defineContentScript } from '#imports';
 
-import App from './App.tsx';
+import ContentScriptUI from './ContentScriptUI.tsx';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -31,7 +31,7 @@ export default defineContentScript({
         container.appendChild(wrapper);
         const root = createRoot(wrapper);
 
-        root.render(<App portalContainer={container} />);
+        root.render(<ContentScriptUI portalContainer={container} />);
         return {
           root,
           wrapper,
