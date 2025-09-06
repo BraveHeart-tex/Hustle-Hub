@@ -11,6 +11,14 @@ export default function GitlabSection() {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('http://localhost:3001/api/data/gitlab/mrs');
+      const data = await response.json();
+      console.log(data);
+    };
+
+    fetchData();
+
     const unsubscribe = onMessage('gitlabOAuthCallback', (message) => {
       if (message.data.status === 'error') {
         toast.error('Gitlab authorization failed.');

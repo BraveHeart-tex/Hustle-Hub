@@ -2,6 +2,7 @@ import { GitLabMRResponse } from '@/types/gitlab';
 
 const GITLAB_API_URL = 'https://gitlab.com/api/v4';
 
+// Will call our backend from here
 export const fetchStats = async (): Promise<GitLabMRResponse> => {
   const [assignedResponse, reviewResponse] = await Promise.all([
     fetch(

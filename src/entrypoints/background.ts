@@ -2,8 +2,6 @@ import { onMessage, sendMessage } from '@/messaging';
 import { OAuthStatus } from '@/types/auth';
 
 export default defineBackground(() => {
-  console.log(browser.runtime.id);
-
   onMessage('getBookmarks', async () => {
     return await browser.bookmarks.getTree();
   });
