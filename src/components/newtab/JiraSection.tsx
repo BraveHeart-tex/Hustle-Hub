@@ -1,5 +1,6 @@
 import { AlertCircle, CheckSquare, Clock } from 'lucide-react';
 
+import JiraIcon from '@/components/misc/JiraIcon';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const mockTickets = [
@@ -57,7 +58,7 @@ export default function JiraSection() {
     <Card className="h-fit">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <CheckSquare className="h-5 w-5 text-primary" />
+          <JiraIcon className="h-5 w-5 text-blue-500" />
           Jira Tickets
         </CardTitle>
       </CardHeader>
