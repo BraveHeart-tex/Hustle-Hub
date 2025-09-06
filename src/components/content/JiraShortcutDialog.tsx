@@ -83,14 +83,14 @@ export default function JiraShortcutDialog({
       const issueKey = input.trim().toUpperCase();
       const jiraUrl = getJiraTaskUrl(issueKey);
 
+      setIsOpen(false);
+
       if (metaKey || ctrlKey) {
         navigator.clipboard.writeText(jiraUrl);
         toast.success('Jira URL copied to clipboard');
       } else {
         window.open(jiraUrl, '_blank');
       }
-
-      setIsOpen(false);
     },
     [input, suggestion],
   );
