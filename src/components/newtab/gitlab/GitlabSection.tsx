@@ -1,24 +1,12 @@
 import GitlabIcon from '@/components/misc/GitlabIcon';
-import MRItem from '@/components/newtab/gitlab/MRItem';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { fetchStats } from '@/services/gitlab';
-import { GitLabMRResponse } from '@/types/gitlab';
+import { sendMessage } from '@/messaging';
 
 export default function GitlabSection() {
-  const [mrDdata, setMrDdata] = useState<GitLabMRResponse>({
-    assigned: [],
-    review: [],
-  });
-
-  useEffect(() => {
-    const getData = async () => {
-      const result = await fetchStats();
-
-      setMrDdata(result);
-    };
-
-    getData();
-  }, []);
+  const handleAuthorize = () => {
+    sendMessage('authorizeGitlab');
+  };
 
   return (
     <Card className="h-fit">
@@ -29,12 +17,13 @@ export default function GitlabSection() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {mrDdata.assigned.map((mr) => (
+        <Button onClick={handleAuthorize}>Authorize</Button>
+        {/* {mrDdata.assigned.map((mr) => (
           <MRItem mr={mr} key={mr.id} />
         ))}
         {mrDdata.review.map((mr) => (
           <MRItem mr={mr} key={mr.id} />
-        ))}
+        ))} */}
       </CardContent>
     </Card>
   );

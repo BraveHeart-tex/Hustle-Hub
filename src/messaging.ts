@@ -4,6 +4,7 @@ import { defineExtensionMessaging } from '@webext-core/messaging';
 interface ProtocolMap {
   getBookmarks(): BookmarkNode[];
   openBookmark(bookmarkUrl: string): void;
+  authorizeGitlab(): void;
 }
 
 export const { sendMessage, onMessage } =
