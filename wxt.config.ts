@@ -7,7 +7,7 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   srcDir: 'src',
   manifest: {
-    permissions: ['tabs', 'scripting', 'bookmarks'],
+    permissions: ['tabs', 'scripting', 'bookmarks', 'identity'],
     action: {},
   },
   vite: () => ({

@@ -6,6 +6,7 @@ interface ProtocolMap {
   openBookmark(bookmarkUrl: string): void;
   authorizeGitlab(): void;
   goHome(): void;
+  gitlabOAuthCallback(params: { status: 'success' | 'error' }): void;
 }
 
 export const { sendMessage, onMessage } =

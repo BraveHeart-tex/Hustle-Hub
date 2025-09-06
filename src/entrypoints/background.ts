@@ -1,6 +1,9 @@
-import { onMessage } from '@/messaging';
+import { onMessage, sendMessage } from '@/messaging';
+import { OAuthStatus } from '@/types/auth';
 
 export default defineBackground(() => {
+  console.log(browser.runtime.id);
+
   onMessage('getBookmarks', async () => {
     return await browser.bookmarks.getTree();
   });
@@ -8,16 +11,33 @@ export default defineBackground(() => {
     await browser.tabs.create({ url: message.data });
   });
   onMessage('authorizeGitlab', async () => {
-    const authUrl = new URL('https://gitlab.com/oauth/authorize');
-    authUrl.search = new URLSearchParams({
-      client_id: import.meta.env.VITE_GITLAB_CLIENT_ID,
-      redirect_uri: import.meta.env.VITE_GITLAB_REDIRECT_URI,
-      response_type: 'code',
-      scope: 'read_api read_user read_repository',
+    const extensionRedirect = `https://${browser.runtime.id}.chromiumapp.org/gitlab-callback`;
+    const backendOAuthUrl = new URL(import.meta.env.VITE_GITLAB_REDIRECT_URI);
+    backendOAuthUrl.search = new URLSearchParams({
+      client_redirect_uri: extensionRedirect,
       state: crypto.randomUUID(),
     }).toString();
 
-    await browser.tabs.create({ url: authUrl.toString() });
+    browser.identity.launchWebAuthFlow(
+      {
+        url: backendOAuthUrl.toString(),
+        interactive: true,
+      },
+      async (redirectUrl) => {
+        if (browser.runtime.lastError) {
+          console.error(browser.runtime.lastError);
+          return;
+        }
+
+        const params = new URLSearchParams(new URL(redirectUrl!).search);
+        const status: OAuthStatus =
+          (params.get('status') as OAuthStatus) || 'error';
+
+        sendMessage('gitlabOAuthCallback', {
+          status,
+        });
+      },
+    );
   });
   onMessage('goHome', async () => {
     const newTabEntryName = 'newtab';

@@ -1,12 +1,29 @@
+import { toast } from 'sonner';
+
 import GitlabIcon from '@/components/misc/GitlabIcon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { sendMessage } from '@/messaging';
+import { onMessage, sendMessage } from '@/messaging';
 
 export default function GitlabSection() {
   const handleAuthorize = () => {
     sendMessage('authorizeGitlab');
   };
+
+  useEffect(() => {
+    const unsubscribe = onMessage('gitlabOAuthCallback', (message) => {
+      if (message.data.status === 'error') {
+        toast.error('Gitlab authorization failed.');
+        return;
+      }
+
+      toast.success('Gitlab authorization is successful.');
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <Card className="h-fit">
