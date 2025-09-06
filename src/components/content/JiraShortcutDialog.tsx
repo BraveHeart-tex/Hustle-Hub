@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import JiraIcon from '@/components/misc/JiraIcon';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -104,26 +105,29 @@ export default function JiraShortcutDialog({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="sm:max-w-lg p-0 gap-0"
+        className="sm:max-w-lg p-2 gap-0"
         container={portalContainer}
       >
         <div className="flex flex-col min-h-[300px]">
           <div className="flex-1 p-6">
             <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <JiraIcon />
+              </div>
               <Input
                 ref={inputRef}
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter Jira issue key (e.g., PRD-499)"
-                className="text-lg md:text-lg h-12 pr-4"
+                className="text-lg md:text-lg h-12 pr-4 pl-8"
                 autoComplete="off"
                 spellCheck={false}
               />
 
               {suggestion && (
                 <div className="absolute inset-0 flex items-center pointer-events-none">
-                  <span className="text-lg text-transparent pl-3">{input}</span>
+                  <span className="text-lg text-transparent pl-8">{input}</span>
                   <span className="text-lg text-muted-foreground mt-[1px]">
                     {suggestion.slice(input.length)}
                   </span>
