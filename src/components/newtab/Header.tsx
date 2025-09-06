@@ -1,6 +1,6 @@
 import { RefreshCwIcon } from 'lucide-react';
 
-import { ModeToggle } from '@/components/ModeToggle';
+import { ModeToggle } from '@/components/newtab/ModeToggle';
 import { Button } from '@/components/ui/button';
 
 export default function Header() {
