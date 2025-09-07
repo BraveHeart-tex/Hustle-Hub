@@ -41,7 +41,7 @@ export const useCalendarEvents = () => {
         });
       }
     } catch (err) {
-      console.error('Error fetching GitLab MRs:', err);
+      console.error('Error fetching Google Calendar events:', err);
       setState({
         isLoading: false,
         isUnauthorized: false,
