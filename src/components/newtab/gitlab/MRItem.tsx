@@ -80,10 +80,13 @@ const getStatusBadge = ({
 };
 
 const MRItem = ({ mr }: MRItemProps) => {
+  const handleCardClick = () => {
+    window.open(mr.web_url, '_blank', 'noopener,noreferrer');
+  };
   return (
     <div
-      key={mr.id}
       className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+      onClick={handleCardClick}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">

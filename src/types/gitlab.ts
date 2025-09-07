@@ -1,3 +1,5 @@
+import { ApiResponse } from '@/types/api';
+
 export interface GitLabUser {
   id: number;
   username: string;
@@ -81,11 +83,6 @@ export interface GitLabMergeRequest {
   approvals_before_merge: number | null;
 }
 
-export interface GitLabMRResponse {
-  assigned: GitLabMergeRequest[];
-  review: GitLabMergeRequest[];
-}
-
 export type MergeStatus =
   | 'can_be_merged'
   | 'cannot_be_merged'
@@ -94,3 +91,10 @@ export type MergeStatus =
   | 'needs_review'
   | 'approved'
   | string; // fallback for unexpected values
+
+export interface GitLabMRResponse {
+  assigned: GitLabMergeRequest[];
+  review: GitLabMergeRequest[];
+}
+
+export type GitlabAPIResponse = ApiResponse<GitLabMRResponse>;
