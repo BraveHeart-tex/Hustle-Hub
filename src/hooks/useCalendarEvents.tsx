@@ -1,38 +1,35 @@
-import { useCallback, useEffect, useState } from 'react';
+import { GoogleCalendarAPIResponse, GoogleCalendarEvent } from '@/types/google';
 
-import { GitlabAPIResponse, GitLabMergeRequest } from '@/types/gitlab';
-
-export interface UseGitlabMrsState {
+export interface UseCalendarEventsState {
   isLoading: boolean;
   isUnauthorized: boolean;
   isError: boolean;
   errorMessage?: string;
-  assigned: GitLabMergeRequest[];
-  review: GitLabMergeRequest[];
+  events: GoogleCalendarEvent[];
 }
 
-export const useGitlabMrs = () => {
-  const [state, setState] = useState<UseGitlabMrsState>({
+export const useCalendarEvents = () => {
+  const [state, setState] = useState<UseCalendarEventsState>({
     isLoading: true,
     isUnauthorized: false,
     isError: false,
-    assigned: [],
-    review: [],
+    events: [],
   });
 
   const fetchData = useCallback(async () => {
     setState((s) => ({ ...s, isLoading: true }));
     try {
-      const res = await fetch('http://localhost:3001/api/data/gitlab/mrs');
-      const data: GitlabAPIResponse = await res.json();
+      const res = await fetch(
+        'http://localhost:3001/api/data/google-calendar/events',
+      );
+      const data: GoogleCalendarAPIResponse = await res.json();
 
       if (data.success) {
         setState({
           isLoading: false,
           isUnauthorized: false,
           isError: false,
-          assigned: data.data.assigned,
-          review: data.data.review,
+          events: data.data.items,
         });
       } else {
         setState({
@@ -40,8 +37,7 @@ export const useGitlabMrs = () => {
           isUnauthorized: data.error.type === 'UNAUTHORIZED',
           isError: data.error.type === 'INTERNAL',
           errorMessage: data.error.message,
-          assigned: [],
-          review: [],
+          events: [],
         });
       }
     } catch (err) {
@@ -51,8 +47,7 @@ export const useGitlabMrs = () => {
         isUnauthorized: false,
         isError: true,
         errorMessage: 'Unexpected error',
-        assigned: [],
-        review: [],
+        events: [],
       });
     }
   }, []);

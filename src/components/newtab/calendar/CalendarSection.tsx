@@ -1,36 +1,30 @@
-import { useCallback, useEffect } from 'react';
+import { Calendar } from 'lucide-react';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 
-import GitlabIcon from '@/components/misc/GitlabIcon';
-import MRItem from '@/components/newtab/gitlab/MRItem';
+import CalendarItem from '@/components/newtab/calendar/CalendarItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGitlabMrs } from '@/hooks/useGitlabMrs';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { onMessage, sendMessage } from '@/messaging';
 
-export default function GitlabSection() {
-  const {
-    assigned,
-    isError,
-    isLoading,
-    isUnauthorized,
-    review,
-    errorMessage,
-    refetch,
-  } = useGitlabMrs();
+const CalendarSection = () => {
+  const { events, isError, isLoading, isUnauthorized, refetch, errorMessage } =
+    useCalendarEvents();
+
   const handleAuthorize = () => {
-    sendMessage('authorizeGitlab');
+    sendMessage('authorizeGoogleCalendar');
   };
 
   useEffect(() => {
-    const unsubscribe = onMessage('gitlabOAuthCallback', (message) => {
+    const unsubscribe = onMessage('googleCalendarOAuthCallback', (message) => {
       if (message.data.status === 'error') {
-        toast.error('Gitlab authorization failed.');
+        toast.error('Google Calendar authorization failed.');
         return;
       }
 
-      toast.success('Gitlab authorization is successful.');
+      toast.success('Google Calendar authorization is successful.');
       refetch();
     });
 
@@ -59,7 +53,7 @@ export default function GitlabSection() {
       return (
         <div className="flex justify-center">
           <Button onClick={handleAuthorize} variant="default">
-            Authorize GitLab
+            Authorize Google Calendar
           </Button>
         </div>
       );
@@ -69,31 +63,24 @@ export default function GitlabSection() {
       return <p className="text-destructive font-medium">{errorMessage}</p>;
     }
 
-    if (assigned.length === 0 && review.length === 0) {
-      return <p className="text-muted-foreground">No MRs found.</p>;
+    if (events.length === 0) {
+      return <p className="text-muted-foreground">No events found.</p>;
     }
 
-    return (
-      <>
-        {assigned.map((mr) => (
-          <MRItem mr={mr} key={`assigned-${mr.id}`} />
-        ))}
-        {review.map((mr) => (
-          <MRItem mr={mr} key={`review-${mr.id}`} />
-        ))}
-      </>
-    );
-  }, [assigned, errorMessage, isError, isLoading, isUnauthorized, review]);
+    return events.map((event) => <CalendarItem event={event} key={event.id} />);
+  }, [errorMessage, events, isError, isLoading, isUnauthorized]);
 
   return (
     <Card className="h-fit">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <GitlabIcon className="h-5 w-5" />
-          GitLab MRs
+          <Calendar className="h-5 w-5 text-primary" />
+          Today&apos;s Meetings
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">{renderContent()}</CardContent>
     </Card>
   );
-}
+};
+
+export default CalendarSection;

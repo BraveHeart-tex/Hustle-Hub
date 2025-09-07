@@ -5,8 +5,11 @@ interface ProtocolMap {
   getBookmarks(): BookmarkNode[];
   openBookmark(bookmarkUrl: string): void;
   authorizeGitlab(): void;
+  authorizeJira(): void;
+  authorizeGoogleCalendar(): void;
   goHome(): void;
   gitlabOAuthCallback(params: { status: 'success' | 'error' }): void;
+  googleCalendarOAuthCallback(params: { status: 'success' | 'error' }): void;
 }
 
 export const { sendMessage, onMessage } =

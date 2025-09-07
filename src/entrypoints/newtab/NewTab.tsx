@@ -1,6 +1,6 @@
 import BookmarkDialog from '@/components/content/BookmarkDialog';
 import JiraShortcutDialog from '@/components/content/JiraShortcutDialog';
-import CalendarSection from '@/components/newtab/CalendarSection';
+import CalendarSection from '@/components/newtab/calendar/CalendarSection';
 import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
 import Header from '@/components/newtab/Header';
 import JiraSection from '@/components/newtab/JiraSection';
