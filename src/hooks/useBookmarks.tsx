@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import { flattenBookmarks } from '@/lib/utils';
 import { sendMessage } from '@/messaging';
 import { FlatBookmark } from '@/types/bookmarks';
