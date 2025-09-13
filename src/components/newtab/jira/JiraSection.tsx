@@ -1,5 +1,4 @@
 import { ClipboardListIcon, TargetIcon } from 'lucide-react';
-import { toast } from 'sonner';
 
 import JiraIcon from '@/components/misc/JiraIcon';
 import JiraItem from '@/components/newtab/jira/JiraItem';
@@ -8,30 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
 import { JIRA_FILTERS, JiraFilter } from '@/lib/constants';
-import { onMessage } from '@/messaging';
 
 export default function JiraSection() {
   const [filter, setFilter] = useState<JiraFilter>(
     JIRA_FILTERS.LITERALLY_WORKING_ON,
   );
-  const { issues, isLoading, isError, refetch, errorMessage } =
-    useJiraTickets(filter);
-
-  useEffect(() => {
-    const unsubscribe = onMessage('jiraOAuthCallback', (message) => {
-      if (message.data.status === 'success') {
-        toast.success('Jira authorized successfully');
-        refetch();
-      }
-      if (message.data.status === 'error') {
-        toast.error('Jira authorization failed');
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [refetch]);
+  const { issues, isLoading, isError, errorMessage } = useJiraTickets(filter);
 
   const renderContent = useCallback(() => {
     if (isLoading) {
