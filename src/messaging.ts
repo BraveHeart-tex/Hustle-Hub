@@ -10,6 +10,7 @@ interface ProtocolMap {
   goHome(): void;
   gitlabOAuthCallback(params: { status: 'success' | 'error' }): void;
   googleCalendarOAuthCallback(params: { status: 'success' | 'error' }): void;
+  jiraOAuthCallback(params: { status: 'success' | 'error' }): void;
 }
 
 export const { sendMessage, onMessage } =

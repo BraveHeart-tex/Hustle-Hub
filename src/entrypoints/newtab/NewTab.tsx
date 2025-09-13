@@ -3,7 +3,7 @@ import JiraShortcutDialog from '@/components/content/JiraShortcutDialog';
 import CalendarSection from '@/components/newtab/calendar/CalendarSection';
 import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
 import Header from '@/components/newtab/Header';
-import JiraSection from '@/components/newtab/JiraSection';
+import JiraSection from '@/components/newtab/jira/JiraSection';
 import NotesSection from '@/components/newtab/NotesSection';
 import { Toaster } from '@/components/ui/sonner';
 
