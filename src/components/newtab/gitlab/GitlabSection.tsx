@@ -86,14 +86,17 @@ export default function GitlabSection() {
   }, [assigned, errorMessage, isError, isLoading, isUnauthorized, review]);
 
   return (
-    <Card className="h-fit">
-      <CardHeader className="pb-3">
+    <Card className="h-[calc(100vh-110px)] flex flex-col">
+      <CardHeader className="pb-3 shrink-0">
         <CardTitle className="flex items-center gap-2 text-lg">
           <GitlabIcon className="h-5 w-5" />
           GitLab MRs
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">{renderContent()}</CardContent>
+
+      <CardContent className="flex-1 overflow-y-auto space-y-3">
+        {renderContent()}
+      </CardContent>
     </Card>
   );
 }
