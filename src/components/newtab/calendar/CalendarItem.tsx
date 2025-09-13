@@ -1,6 +1,7 @@
 import { Clock, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { GoogleCalendarEvent } from '@/types/google';
 
 interface CalendarItemProps {
@@ -12,7 +13,6 @@ const CalendarItem = ({ event }: CalendarItemProps) => {
   const isRecurring = Boolean(event.recurringEventId);
   const isOutOfOffice = event.eventType === 'outOfOffice';
 
-  // Handle all-day vs. timed events
   const start = (event.start.dateTime || event.start.date) as string;
   const end = (event.end.dateTime || event.end.date) as string;
 
@@ -36,8 +36,30 @@ const CalendarItem = ({ event }: CalendarItemProps) => {
 
   const attendeesCount = event.attendees?.length ?? 0;
 
+  const now = new Date().getTime();
+  const startTime = new Date(start).getTime();
+  const endTime = new Date(end).getTime();
+  const hasJoinLink = Boolean(
+    event.hangoutLink || event.conferenceData?.entryPoints?.[0]?.uri,
+  );
+
+  const shouldShowJoin =
+    hasJoinLink &&
+    event.start.dateTime &&
+    startTime - now <= 10 * 60 * 1000 &&
+    now < endTime;
+
+  const handleJoin = (mouseEvent: React.MouseEvent) => {
+    mouseEvent.stopPropagation();
+
+    const joinUrl =
+      event.hangoutLink || event.conferenceData?.entryPoints?.[0]?.uri;
+
+    if (joinUrl) window.open(joinUrl, '_blank');
+  };
+
   return (
-    <div className="flex items-start justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer">
+    <div className="flex flex-col p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="font-medium text-sm text-foreground truncate">
@@ -69,12 +91,18 @@ const CalendarItem = ({ event }: CalendarItemProps) => {
         </div>
       </div>
 
-      {duration && (
-        <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-          {duration}
-        </span>
-      )}
+      <div className="flex items-center gap-2 mt-2">
+        {duration && (
+          <span className="text-xs text-muted-foreground">{duration}</span>
+        )}
+        {shouldShowJoin && (
+          <Button size="sm" className="text-xs" onClick={handleJoin}>
+            Join
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
+
 export default CalendarItem;
