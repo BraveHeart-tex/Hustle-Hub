@@ -122,4 +122,61 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  html {
+    scroll-behavior: smooth !important;
+  }
+
+  html > body[data-scroll-locked] {
+    overflow: visible !important;
+    margin-right: 0 !important;
+  }
+
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(0 0% 97%);
+    border-radius: 0.625rem;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 20% / 0.7);
+    border-radius: 0.625rem;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(0 0% 20% / 0.8);
+  }
+
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-track {
+    background: hsl(0 0% 27%);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 92% / 0.7);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: hsl(0 0% 92% / 0.8);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(0 0% 20% / 0.7) hsl(0 0% 97%);
+  }
+
+  .dark * {
+    scrollbar-color: hsl(0 0% 92% / 0.7) hsl(0 0% 27%);
+  }
+
+  /* For Internet Explorer and Edge (older versions) */
+  body {
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
 }
