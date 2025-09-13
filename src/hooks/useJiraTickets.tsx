@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { JiraFilter } from '@/lib/constants';
+import { ENDPOINTS } from '@/lib/endpoints';
 import { JiraIssue } from '@/types/jira';
 
 export interface UseJiraTicketsState {
@@ -22,9 +23,7 @@ export const useJiraTickets = (filter: JiraFilter) => {
   const fetchData = useCallback(async () => {
     setState((s) => ({ ...s, isLoading: true }));
     try {
-      const res = await fetch(
-        `http://localhost:3001/api/data/jira/tickets?filter=${filter}`,
-      );
+      const res = await fetch(ENDPOINTS.JIRA_ISSUES(filter));
       const data = await res.json();
 
       if (data.success) {

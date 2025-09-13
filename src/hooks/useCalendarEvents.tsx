@@ -1,3 +1,4 @@
+import { ENDPOINTS } from '@/lib/endpoints';
 import { GoogleCalendarAPIResponse, GoogleCalendarEvent } from '@/types/google';
 
 export interface UseCalendarEventsState {
@@ -19,9 +20,7 @@ export const useCalendarEvents = () => {
   const fetchData = useCallback(async () => {
     setState((s) => ({ ...s, isLoading: true }));
     try {
-      const res = await fetch(
-        'http://localhost:3001/api/data/google-calendar/events',
-      );
+      const res = await fetch(ENDPOINTS.CALENDAR_EVENTS);
       const data: GoogleCalendarAPIResponse = await res.json();
 
       if (data.success) {

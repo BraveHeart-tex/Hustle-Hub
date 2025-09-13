@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { ENDPOINTS } from '@/lib/endpoints';
 import { GitlabAPIResponse, GitLabMergeRequest } from '@/types/gitlab';
 
 export interface UseGitlabMrsState {
@@ -23,7 +24,7 @@ export const useGitlabMrs = () => {
   const fetchData = useCallback(async () => {
     setState((s) => ({ ...s, isLoading: true }));
     try {
-      const res = await fetch('http://localhost:3001/api/data/gitlab/mrs');
+      const res = await fetch(ENDPOINTS.GITLAB_MRS);
       const data: GitlabAPIResponse = await res.json();
 
       if (data.success) {
