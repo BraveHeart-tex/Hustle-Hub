@@ -1,3 +1,5 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 import BookmarkDialog from '@/components/content/BookmarkDialog';
 import JiraShortcutDialog from '@/components/content/JiraShortcutDialog';
 import CalendarSection from '@/components/newtab/calendar/CalendarSection';
@@ -7,9 +9,11 @@ import JiraSection from '@/components/newtab/jira/JiraSection';
 import NotesSection from '@/components/newtab/NotesSection';
 import { Toaster } from '@/components/ui/sonner';
 
+const queryClient = new QueryClient();
+
 const NewTab = () => {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container mx-auto px-4 py-6">
@@ -32,7 +36,7 @@ const NewTab = () => {
       <BookmarkDialog portalContainer={document.body} />
       <JiraShortcutDialog portalContainer={document.body} />
       <Toaster />
-    </>
+    </QueryClientProvider>
   );
 };
 

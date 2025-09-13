@@ -12,7 +12,7 @@ export default function JiraSection() {
   const [filter, setFilter] = useState<JiraFilter>(
     JIRA_FILTERS.LITERALLY_WORKING_ON,
   );
-  const { issues, isLoading, isError, errorMessage } = useJiraTickets(filter);
+  const { data, isLoading, isError, error } = useJiraTickets(filter);
 
   const renderContent = useCallback(() => {
     if (isLoading) {
@@ -31,15 +31,17 @@ export default function JiraSection() {
     }
 
     if (isError) {
-      return <p className="text-destructive font-medium">{errorMessage}</p>;
+      return <p className="text-destructive font-medium">{error?.message}</p>;
     }
 
-    if (issues.length === 0) {
+    if (data?.issues.length === 0) {
       return <p className="text-muted-foreground">No issues found.</p>;
     }
 
-    return issues.map((issue) => <JiraItem key={issue.id} issue={issue} />);
-  }, [errorMessage, isError, isLoading, issues]);
+    return data?.issues.map((issue) => (
+      <JiraItem key={issue.id} issue={issue} />
+    ));
+  }, [data?.issues, error?.message, isError, isLoading]);
 
   const toggleFilterType = () => {
     setFilter((prev) =>

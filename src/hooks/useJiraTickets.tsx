@@ -1,62 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
-
-import { JiraFilter } from '@/lib/constants';
+import { useApi } from '@/hooks/useApi';
+import { JiraFilter, QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
+import { ApiResponse } from '@/types/api';
 import { JiraIssue } from '@/types/jira';
 
-export interface UseJiraTicketsState {
-  isLoading: boolean;
-  isUnauthorized: boolean;
-  isError: boolean;
-  errorMessage?: string;
-  issues: JiraIssue[];
-}
-
-export const useJiraTickets = (filter: JiraFilter) => {
-  const [state, setState] = useState<UseJiraTicketsState>({
-    isLoading: true,
-    isUnauthorized: false,
-    isError: false,
-    issues: [],
+export const useJiraTickets = (filter: JiraFilter) =>
+  useApi(QUERY_KEYS.JIRA_ISSUES(filter), async () => {
+    const response = await fetch(ENDPOINTS.JIRA_ISSUES(filter));
+    return (await response.json()) as ApiResponse<{ issues: JiraIssue[] }>;
   });
-
-  const fetchData = useCallback(async () => {
-    setState((s) => ({ ...s, isLoading: true }));
-    try {
-      const res = await fetch(ENDPOINTS.JIRA_ISSUES(filter));
-      const data = await res.json();
-
-      if (data.success) {
-        setState({
-          isLoading: false,
-          isUnauthorized: false,
-          isError: false,
-          issues: data.data.issues,
-        });
-      } else {
-        setState({
-          isLoading: false,
-          isUnauthorized: data.error.type === 'UNAUTHORIZED',
-          isError: data.error.type === 'INTERNAL',
-          errorMessage: data.error.message,
-          issues: [],
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching GitLab MRs:', err);
-      setState({
-        isLoading: false,
-        isUnauthorized: false,
-        isError: true,
-        errorMessage: 'Unexpected error',
-        issues: [],
-      });
-    }
-  }, [filter]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return { ...state, refetch: fetchData };
-};

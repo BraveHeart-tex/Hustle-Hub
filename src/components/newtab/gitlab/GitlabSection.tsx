@@ -10,15 +10,8 @@ import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { onMessage, sendMessage } from '@/messaging';
 
 export default function GitlabSection() {
-  const {
-    assigned,
-    isError,
-    isLoading,
-    isUnauthorized,
-    review,
-    errorMessage,
-    refetch,
-  } = useGitlabMrs();
+  const { data, isError, isLoading, isUnauthorized, error, refetch } =
+    useGitlabMrs();
   const handleAuthorize = () => {
     sendMessage('authorizeGitlab');
   };
@@ -66,24 +59,31 @@ export default function GitlabSection() {
     }
 
     if (isError) {
-      return <p className="text-destructive font-medium">{errorMessage}</p>;
+      return <p className="text-destructive font-medium">{error?.message}</p>;
     }
 
-    if (assigned.length === 0 && review.length === 0) {
+    if (data?.assigned.length === 0 && data?.review.length === 0) {
       return <p className="text-muted-foreground">No MRs found.</p>;
     }
 
     return (
       <>
-        {assigned.map((mr) => (
+        {data?.assigned.map((mr) => (
           <MRItem mr={mr} key={`assigned-${mr.id}`} />
         ))}
-        {review.map((mr) => (
+        {data?.review.map((mr) => (
           <MRItem mr={mr} key={`review-${mr.id}`} />
         ))}
       </>
     );
-  }, [assigned, errorMessage, isError, isLoading, isUnauthorized, review]);
+  }, [
+    data?.assigned,
+    data?.review,
+    error?.message,
+    isError,
+    isLoading,
+    isUnauthorized,
+  ]);
 
   return (
     <Card className="max-h-[calc(100vh-110px)] flex flex-col">

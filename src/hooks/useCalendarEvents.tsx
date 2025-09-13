@@ -1,5 +1,8 @@
+import { useApi } from '@/hooks/useApi';
+import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
-import { GoogleCalendarAPIResponse, GoogleCalendarEvent } from '@/types/google';
+import { ApiResponse } from '@/types/api';
+import { GoogleCalendarEvent } from '@/types/google';
 
 export interface UseCalendarEventsState {
   isLoading: boolean;
@@ -9,51 +12,8 @@ export interface UseCalendarEventsState {
   events: GoogleCalendarEvent[];
 }
 
-export const useCalendarEvents = () => {
-  const [state, setState] = useState<UseCalendarEventsState>({
-    isLoading: true,
-    isUnauthorized: false,
-    isError: false,
-    events: [],
+export const useCalendarEvents = () =>
+  useApi(QUERY_KEYS.CALENDAR_EVENTS, async () => {
+    const res = await fetch(ENDPOINTS.CALENDAR_EVENTS);
+    return (await res.json()) as ApiResponse<{ items: GoogleCalendarEvent[] }>;
   });
-
-  const fetchData = useCallback(async () => {
-    setState((s) => ({ ...s, isLoading: true }));
-    try {
-      const res = await fetch(ENDPOINTS.CALENDAR_EVENTS);
-      const data: GoogleCalendarAPIResponse = await res.json();
-
-      if (data.success) {
-        setState({
-          isLoading: false,
-          isUnauthorized: false,
-          isError: false,
-          events: data.data.items,
-        });
-      } else {
-        setState({
-          isLoading: false,
-          isUnauthorized: data.error.type === 'UNAUTHORIZED',
-          isError: data.error.type === 'INTERNAL',
-          errorMessage: data.error.message,
-          events: [],
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching Google Calendar events:', err);
-      setState({
-        isLoading: false,
-        isUnauthorized: false,
-        isError: true,
-        errorMessage: 'Unexpected error',
-        events: [],
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return { ...state, refetch: fetchData };
-};

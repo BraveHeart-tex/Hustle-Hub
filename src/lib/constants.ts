@@ -9,3 +9,9 @@ export const JIRA_FILTERS = {
   FOR_YOU: 'for_you',
 } as const;
 export type JiraFilter = (typeof JIRA_FILTERS)[keyof typeof JIRA_FILTERS];
+
+export const QUERY_KEYS = {
+  JIRA_ISSUES: (filter: JiraFilter) => ['jiraIssues', filter] as const,
+  CALENDAR_EVENTS: ['calendarEvents'] as const,
+  GITLAB_MRS: ['gitlabMrs'] as const,
+} as const;

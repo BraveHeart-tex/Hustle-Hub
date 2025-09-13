@@ -10,7 +10,7 @@ import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { onMessage, sendMessage } from '@/messaging';
 
 const CalendarSection = () => {
-  const { events, isError, isLoading, isUnauthorized, refetch, errorMessage } =
+  const { data, isError, isLoading, isUnauthorized, refetch, error } =
     useCalendarEvents();
 
   const handleAuthorize = () => {
@@ -60,15 +60,17 @@ const CalendarSection = () => {
     }
 
     if (isError) {
-      return <p className="text-destructive font-medium">{errorMessage}</p>;
+      return <p className="text-destructive font-medium">{error?.message}</p>;
     }
 
-    if (events.length === 0) {
+    if (data?.items.length === 0) {
       return <p className="text-muted-foreground">No events found.</p>;
     }
 
-    return events.map((event) => <CalendarItem event={event} key={event.id} />);
-  }, [errorMessage, events, isError, isLoading, isUnauthorized]);
+    return data?.items.map((event) => (
+      <CalendarItem event={event} key={event.id} />
+    ));
+  }, [data?.items, error?.message, isError, isLoading, isUnauthorized]);
 
   return (
     <Card className="h-fit">

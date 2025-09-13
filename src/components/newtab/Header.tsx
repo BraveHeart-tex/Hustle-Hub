@@ -1,9 +1,23 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCwIcon } from 'lucide-react';
 
 import { ModeToggle } from '@/components/newtab/ModeToggle';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export default function Header() {
+  const [isPending, setIsPending] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleRefreshData = async () => {
+    setIsPending(true);
+    try {
+      await queryClient.invalidateQueries();
+    } finally {
+      setIsPending(false);
+    }
+  };
+
   return (
     <header className="border-b border-border bg-card">
       <div className="container mx-auto px-4 py-3">
@@ -19,8 +33,15 @@ export default function Header() {
 
           <div className="flex items-center space-x-3">
             <ModeToggle />
-            <Button variant="ghost" size="icon">
-              <RefreshCwIcon className="h-5 w-5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRefreshData}
+              disabled={isPending}
+            >
+              <RefreshCwIcon
+                className={cn('h-5 w-5', isPending && 'animate-spin')}
+              />
             </Button>
           </div>
         </div>
