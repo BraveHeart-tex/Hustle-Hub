@@ -11,5 +11,7 @@ interface ProtocolMap {
   googleCalendarOAuthCallback(params: { status: 'success' | 'error' }): void;
 }
 
+export type OAuthCallbackKey = keyof ProtocolMap & `${string}OAuthCallback`;
+
 export const { sendMessage, onMessage } =
   defineExtensionMessaging<ProtocolMap>();

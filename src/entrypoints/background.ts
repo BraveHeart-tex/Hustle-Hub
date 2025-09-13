@@ -1,5 +1,5 @@
-import { onMessage, sendMessage } from '@/messaging';
-import { OAuthStatus } from '@/types/auth';
+import { launchOAuthFlow } from '@/lib/utils';
+import { onMessage } from '@/messaging';
 
 export default defineBackground(() => {
   onMessage('getBookmarks', async () => {
@@ -7,35 +7,6 @@ export default defineBackground(() => {
   });
   onMessage('openBookmark', async (message) => {
     await browser.tabs.create({ url: message.data });
-  });
-  onMessage('authorizeGitlab', async () => {
-    const extensionRedirect = `https://${browser.runtime.id}.chromiumapp.org/gitlab-callback`;
-    const backendOAuthUrl = new URL(import.meta.env.VITE_GITLAB_REDIRECT_URI);
-    backendOAuthUrl.search = new URLSearchParams({
-      client_redirect_uri: extensionRedirect,
-      state: crypto.randomUUID(),
-    }).toString();
-
-    browser.identity.launchWebAuthFlow(
-      {
-        url: backendOAuthUrl.toString(),
-        interactive: true,
-      },
-      async (redirectUrl) => {
-        if (browser.runtime.lastError) {
-          console.error(browser.runtime.lastError);
-          return;
-        }
-
-        const params = new URLSearchParams(new URL(redirectUrl!).search);
-        const status: OAuthStatus =
-          (params.get('status') as OAuthStatus) || 'error';
-
-        sendMessage('gitlabOAuthCallback', {
-          status,
-        });
-      },
-    );
   });
   onMessage('goHome', async () => {
     const newTabEntryName = 'newtab';
@@ -49,35 +20,18 @@ export default defineBackground(() => {
       browser.tabs.create({ url: newTabUrl });
     }
   });
+  onMessage('authorizeGitlab', async () => {
+    launchOAuthFlow({
+      backendRedirectUri: import.meta.env.VITE_GITLAB_REDIRECT_URI,
+      callbackMessage: 'gitlabOAuthCallback',
+      provider: 'gitlab',
+    });
+  });
   onMessage('authorizeGoogleCalendar', async () => {
-    const extensionRedirect = `https://${browser.runtime.id}.chromiumapp.org/google-calendar-callback`;
-    const backendOAuthUrl = new URL(
-      import.meta.env.VITE_GOOGLE_CALENDAR_REDIRECT_URI,
-    );
-    backendOAuthUrl.search = new URLSearchParams({
-      client_redirect_uri: extensionRedirect,
-      state: crypto.randomUUID(),
-    }).toString();
-
-    browser.identity.launchWebAuthFlow(
-      {
-        url: backendOAuthUrl.toString(),
-        interactive: true,
-      },
-      async (redirectUrl) => {
-        if (browser.runtime.lastError) {
-          console.error(browser.runtime.lastError);
-          return;
-        }
-
-        const params = new URLSearchParams(new URL(redirectUrl!).search);
-        const status: OAuthStatus =
-          (params.get('status') as OAuthStatus) || 'error';
-
-        sendMessage('googleCalendarOAuthCallback', {
-          status,
-        });
-      },
-    );
+    launchOAuthFlow({
+      backendRedirectUri: import.meta.env.VITE_GOOGLE_CALENDAR_REDIRECT_URI,
+      callbackMessage: 'googleCalendarOAuthCallback',
+      provider: 'googleCalendar',
+    });
   });
 });
