@@ -1,4 +1,5 @@
 import { ClipboardListIcon, TargetIcon } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
 import JiraIcon from '@/components/misc/JiraIcon';
 import JiraItem from '@/components/newtab/jira/JiraItem';

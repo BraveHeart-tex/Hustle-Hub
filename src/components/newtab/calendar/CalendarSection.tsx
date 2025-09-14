@@ -1,5 +1,5 @@
 import { Calendar } from 'lucide-react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 
 import CalendarItem from '@/components/newtab/calendar/CalendarItem';
