@@ -1,4 +1,5 @@
-import { useCallback, useEffect } from 'react';
+import { EyeIcon, UserIcon } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import GitlabIcon from '@/components/misc/GitlabIcon';
@@ -7,11 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
+import { GITLAB_FILTERS, GitlabFilter } from '@/lib/constants';
 import { onMessage, sendMessage } from '@/messaging';
 
 export default function GitlabSection() {
+  const [filter, setFilter] = useState<GitlabFilter>(GITLAB_FILTERS.REVIEW);
   const { data, isError, isLoading, isUnauthorized, error, refetch } =
-    useGitlabMrs();
+    useGitlabMrs(filter);
   const handleAuthorize = () => {
     sendMessage('authorizeGitlab');
   };
@@ -62,28 +65,12 @@ export default function GitlabSection() {
       return <p className="text-destructive font-medium">{error?.message}</p>;
     }
 
-    if (data?.assigned.length === 0 && data?.review.length === 0) {
+    if (data?.data.length === 0) {
       return <p className="text-muted-foreground">No MRs found.</p>;
     }
 
-    return (
-      <>
-        {data?.assigned.map((mr) => (
-          <MRItem mr={mr} key={`assigned-${mr.id}`} />
-        ))}
-        {data?.review.map((mr) => (
-          <MRItem mr={mr} key={`review-${mr.id}`} />
-        ))}
-      </>
-    );
-  }, [
-    data?.assigned,
-    data?.review,
-    error?.message,
-    isError,
-    isLoading,
-    isUnauthorized,
-  ]);
+    return data?.data.map((mr) => <MRItem mr={mr} key={mr.id} />);
+  }, [data?.data, error?.message, isError, isLoading, isUnauthorized]);
 
   const handleTitleClick = () => {
     window.open(
@@ -93,15 +80,32 @@ export default function GitlabSection() {
     );
   };
 
+  const toggleFilterType = () => {
+    setFilter((prev) =>
+      prev === GITLAB_FILTERS.REVIEW
+        ? GITLAB_FILTERS.ASSIGNED
+        : GITLAB_FILTERS.REVIEW,
+    );
+  };
+
   return (
     <Card className="max-h-[calc(100vh-110px)] flex flex-col">
       <CardHeader className="pb-3 shrink-0">
-        <CardTitle
-          className="flex items-center gap-2 text-lg cursor-pointer"
-          onClick={handleTitleClick}
-        >
-          <GitlabIcon className="h-5 w-5" />
-          GitLab MRs
+        <CardTitle className="w-full flex items-center justify-between">
+          <div className="flex items-center gap-2 text-lg">
+            <GitlabIcon className="h-5 w-5" />
+            <span className="cursor-pointer" onClick={handleTitleClick}>
+              GitLab MRs
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleFilterType}
+            disabled={isLoading}
+          >
+            {filter === GITLAB_FILTERS.ASSIGNED ? <UserIcon /> : <EyeIcon />}
+          </Button>
         </CardTitle>
       </CardHeader>
 
