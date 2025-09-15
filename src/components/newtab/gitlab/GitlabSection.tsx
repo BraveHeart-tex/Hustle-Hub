@@ -85,10 +85,21 @@ export default function GitlabSection() {
     isUnauthorized,
   ]);
 
+  const handleTitleClick = () => {
+    window.open(
+      'https://gitlab.com/dashboard/merge_requests',
+      '_blank',
+      'noopener,noreferrer',
+    );
+  };
+
   return (
     <Card className="max-h-[calc(100vh-110px)] flex flex-col">
       <CardHeader className="pb-3 shrink-0">
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle
+          className="flex items-center gap-2 text-lg cursor-pointer"
+          onClick={handleTitleClick}
+        >
           <GitlabIcon className="h-5 w-5" />
           GitLab MRs
         </CardTitle>
