@@ -29,6 +29,12 @@ export interface GitLabTaskCompletionStatus {
   completed_count: number;
 }
 
+export interface GitLabApproval {
+  approvals_required: number;
+  approvals_left: number;
+  approved_by: { user: GitLabUser }[];
+}
+
 export interface GitLabMergeRequest {
   id: number;
   iid: number;
@@ -81,6 +87,9 @@ export interface GitLabMergeRequest {
   has_conflicts: boolean;
   blocking_discussions_resolved: boolean;
   approvals_before_merge: number | null;
+
+  approvals?: GitLabApproval | null;
+  approvedByCurrentUser?: boolean;
 }
 
 export type MergeStatus =

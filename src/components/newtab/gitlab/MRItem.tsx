@@ -125,7 +125,9 @@ const MRItem = ({ mr }: MRItemProps) => {
           <div className="flex items-center gap-1">
             <ThumbsUp className="h-3 w-3" />
             <span>
-              {mr.approvals_before_merge ?? 0}/{mr.approvals_before_merge ?? 0}
+              {mr.approvals
+                ? `${mr.approvals.approved_by.length}/${mr.approvals.approvals_required}`
+                : `${mr.approvals_before_merge ?? 0}/${mr.approvals_before_merge ?? 0}`}
             </span>
           </div>
           <div className="flex items-center gap-1">
