@@ -1,21 +1,10 @@
-interface NoteReference {
-  type: 'calendar' | 'gitlab' | 'jira' | 'custom';
-  id: string;
-  url?: string;
-  title?: string;
-}
+import { NotePriority } from '@/lib/constants';
 
-interface NoteItem {
+export interface Note {
   id: string;
-  timestamp: number;
+  title: string;
   content: string;
-  references?: NoteReference[];
+  priority: NotePriority;
+  createdAt?: string;
   completed?: boolean;
-  tags?: string[];
-  children?: NoteItem[];
-}
-
-interface DailyNotes {
-  date: string;
-  notes: NoteItem[];
 }

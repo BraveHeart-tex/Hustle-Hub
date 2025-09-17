@@ -22,3 +22,11 @@ export const GITLAB_FILTERS = {
   REVIEW: 'review',
 } as const;
 export type GitlabFilter = (typeof GITLAB_FILTERS)[keyof typeof GITLAB_FILTERS];
+
+export const NOTE_PRIORITIES = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+} as const;
+export type NotePriority =
+  (typeof NOTE_PRIORITIES)[keyof typeof NOTE_PRIORITIES];
