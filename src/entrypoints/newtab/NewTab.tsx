@@ -1,7 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import BookmarkDialog from '@/components/content/BookmarkDialog';
-import JiraShortcutDialog from '@/components/content/JiraShortcutDialog';
 import CalendarSection from '@/components/newtab/calendar/CalendarSection';
 import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
 import Header from '@/components/newtab/Header';
@@ -33,8 +31,6 @@ const NewTab = () => {
           </div>
         </main>
       </div>
-      <BookmarkDialog portalContainer={document.body} />
-      <JiraShortcutDialog portalContainer={document.body} />
       <Toaster />
     </QueryClientProvider>
   );
