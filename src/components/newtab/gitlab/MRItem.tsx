@@ -1,5 +1,4 @@
 import {
-  AlertCircle,
   AlertCircleIcon,
   CheckIcon,
   GitBranch,
@@ -8,13 +7,9 @@ import {
 } from 'lucide-react';
 
 import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
+import MRLabel from '@/components/newtab/gitlab/MRLabel';
 import { Badge } from '@/components/ui/badge';
-import {
-  cn,
-  formatDate,
-  formatGitLabLabel,
-  getForegroundColor,
-} from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 import { GitlabMergeRequest, MergeStatus } from '@/types/gitlab';
 
 interface MRItemProps {
@@ -95,7 +90,6 @@ const MRItem = ({ mr }: MRItemProps) => {
   const handleCardClick = () => {
     window.open(mr.webUrl, '_blank', 'noopener,noreferrer');
   };
-
   return (
     <div
       className={cn(
@@ -138,17 +132,7 @@ const MRItem = ({ mr }: MRItemProps) => {
       {mr.labels && mr.labels.length > 0 && (
         <div className="flex items-center gap-2 mb-2">
           {mr.labels.map((label) => (
-            <Badge
-              key={label.title}
-              variant="outline"
-              className="text-xs text-muted-foreground"
-              style={{
-                backgroundColor: label.color,
-                color: getForegroundColor(label.color),
-              }}
-            >
-              {formatGitLabLabel(label.title)}
-            </Badge>
+            <MRLabel key={label.title} label={label} />
           ))}
         </div>
       )}
