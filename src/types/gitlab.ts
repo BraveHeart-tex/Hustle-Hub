@@ -8,7 +8,7 @@ export interface GitlabMergeRequest {
   mergeStatus: MergeStatus;
   webUrl: string;
   userNotesCount: number;
-  author: { username: string };
+  author: { username: string; avatarUrl: string };
   approvedByCurrentUser?: boolean;
   approvedBy: number;
   approvalsRequired: number;

@@ -1,5 +1,6 @@
 import { CheckIcon, GitBranch, MessageSquare, ThumbsUp } from 'lucide-react';
 
+import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
 import { Badge } from '@/components/ui/badge';
 import { formatDate, formatGitLabLabel, getForegroundColor } from '@/lib/utils';
 import { GitlabMergeRequest, MergeStatus } from '@/types/gitlab';
@@ -148,25 +149,23 @@ const MRItem = ({ mr }: MRItemProps) => {
         </div>
       </div>
 
-      {mr.reviewers && mr.reviewers.length > 0 && (
-        <div className="flex items-center gap-2 mt-2">
-          {mr.reviewers.map((reviewer) => (
-            <div key={reviewer.id} className="relative inline-block">
-              <img
-                src={reviewer.avatarUrl}
-                width={32}
-                height={32}
-                loading="lazy"
-                fetchPriority="low"
-                className="rounded-full border-2 border-gray-300 object-cover"
-              />
-              {reviewer.hasApproved && (
-                <CheckIcon className="absolute -bottom-1 -right-1 w-4 h-4 text-white bg-green-500 dark:bg-green-700 rounded-full p-[1px] border border-gray-200" />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="flex items-center justify-between gap-4 mt-2">
+        <GitlabUserAvatar src={mr.author.avatarUrl} />
+
+        {mr.reviewers && mr.reviewers.length > 0 && (
+          <div className="flex items-center gap-2">
+            {mr.reviewers.map((reviewer) => (
+              <div key={reviewer.id} className="relative inline-block">
+                <GitlabUserAvatar src={reviewer.avatarUrl} />
+
+                {reviewer.hasApproved && (
+                  <CheckIcon className="absolute -bottom-1 -right-1 w-4 h-4 text-white bg-green-500 dark:bg-green-700 rounded-full p-[1px] border border-gray-200" />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
