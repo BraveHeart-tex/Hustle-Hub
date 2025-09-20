@@ -1,8 +1,20 @@
-import { CheckIcon, GitBranch, MessageSquare, ThumbsUp } from 'lucide-react';
+import {
+  AlertCircle,
+  AlertCircleIcon,
+  CheckIcon,
+  GitBranch,
+  MessageSquare,
+  ThumbsUp,
+} from 'lucide-react';
 
 import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
 import { Badge } from '@/components/ui/badge';
-import { formatDate, formatGitLabLabel, getForegroundColor } from '@/lib/utils';
+import {
+  cn,
+  formatDate,
+  formatGitLabLabel,
+  getForegroundColor,
+} from '@/lib/utils';
 import { GitlabMergeRequest, MergeStatus } from '@/types/gitlab';
 
 interface MRItemProps {
@@ -83,11 +95,24 @@ const MRItem = ({ mr }: MRItemProps) => {
   const handleCardClick = () => {
     window.open(mr.webUrl, '_blank', 'noopener,noreferrer');
   };
+
   return (
     <div
-      className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+      className={cn(
+        'p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer relative',
+        mr.needsCurrentUserAction &&
+          'border-yellow-500 dark:border-yellow-700 border-2',
+      )}
       onClick={handleCardClick}
     >
+      {mr.needsCurrentUserAction && (
+        <div
+          title="Action required"
+          className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-50 dark:bg-yellow-700 dark:text-yellow-100 rounded-full p-1 shadow-md"
+        >
+          <AlertCircleIcon className="w-4 h-4" />
+        </div>
+      )}
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-muted-foreground">

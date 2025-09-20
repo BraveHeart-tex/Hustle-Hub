@@ -14,6 +14,7 @@ export interface GitlabMergeRequest {
   approvalsRequired: number;
   labels: { color: string; title: string }[];
   reviewers: { id: number; avatarUrl: string; hasApproved: boolean }[];
+  needsCurrentUserAction: boolean;
 }
 
 export type MergeStatus =

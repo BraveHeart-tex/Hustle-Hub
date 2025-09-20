@@ -19,8 +19,6 @@ export default function GitlabSection() {
     sendMessage('authorizeGitlab');
   };
 
-  console.log('data', data);
-
   useEffect(() => {
     const unsubscribe = onMessage('gitlabOAuthCallback', (message) => {
       if (message.data.status === 'error') {
