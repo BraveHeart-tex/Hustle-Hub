@@ -1,11 +1,11 @@
 import { GitBranch, MessageSquare, ThumbsUp } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/utils';
-import { GitLabMergeRequest, MergeStatus } from '@/types/gitlab';
+import { formatDate, formatGitLabLabel, getForegroundColor } from '@/lib/utils';
+import { GitlabMergeRequest, MergeStatus } from '@/types/gitlab';
 
 interface MRItemProps {
-  mr: GitLabMergeRequest;
+  mr: GitlabMergeRequest;
 }
 
 const getStatusBadge = ({
@@ -81,7 +81,7 @@ const getStatusBadge = ({
 
 const MRItem = ({ mr }: MRItemProps) => {
   const handleCardClick = () => {
-    window.open(mr.web_url, '_blank', 'noopener,noreferrer');
+    window.open(mr.webUrl, '_blank', 'noopener,noreferrer');
   };
   return (
     <div
@@ -94,13 +94,12 @@ const MRItem = ({ mr }: MRItemProps) => {
             !{mr.iid}
           </span>
           {getStatusBadge({
-            status: mr.merge_status,
+            status: mr.mergeStatus,
             draft: mr.draft,
-            workInProgress: mr.work_in_progress,
           })}
         </div>
         <span className="text-xs text-muted-foreground">
-          {formatDate(mr.created_at, {
+          {formatDate(mr.createdAt, {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
@@ -111,12 +110,29 @@ const MRItem = ({ mr }: MRItemProps) => {
       <h3 className="font-medium text-sm text-foreground mb-2 text-balance">
         {mr.title}
       </h3>
+      {mr.labels && mr.labels.length > 0 && (
+        <div className="flex items-center gap-2 mb-2">
+          {mr.labels.map((label) => (
+            <Badge
+              key={label.title}
+              variant="outline"
+              className="text-xs text-muted-foreground"
+              style={{
+                backgroundColor: label.color,
+                color: getForegroundColor(label.color),
+              }}
+            >
+              {formatGitLabLabel(label.title)}
+            </Badge>
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
         <GitBranch className="h-3 w-3" />
-        <span>{mr.source_branch}</span>
+        <span>{mr.sourceBranch}</span>
         <span>→</span>
-        <span>{mr.target_branch}</span>
+        <span>{mr.targetBranch}</span>
       </div>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -124,15 +140,11 @@ const MRItem = ({ mr }: MRItemProps) => {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <ThumbsUp className="h-3 w-3" />
-            <span>
-              {mr.approvals
-                ? `${mr.approvals.approved_by.length}/${mr.approvals.approvals_required}`
-                : `${mr.approvals_before_merge ?? 0}/${mr.approvals_before_merge ?? 0}`}
-            </span>
+            <span>{`${mr.approvedBy}/${mr.approvalsRequired}`}</span>
           </div>
           <div className="flex items-center gap-1">
             <MessageSquare className="h-3 w-3" />
-            <span>{mr.user_notes_count}</span>
+            <span>{mr.userNotesCount}</span>
           </div>
         </div>
       </div>
