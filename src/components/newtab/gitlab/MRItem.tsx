@@ -17,7 +17,6 @@ const getStatusBadge = ({
   draft?: boolean;
   workInProgress?: boolean;
 }) => {
-  // Priority badge: draft or WIP
   if (draft) {
     return (
       <Badge variant="secondary" className="text-xs">
@@ -33,7 +32,7 @@ const getStatusBadge = ({
     );
   }
 
-  switch (status) {
+  switch (status.toLowerCase()) {
     case 'can_be_merged':
       return (
         <Badge variant="secondary" className="text-xs">
