@@ -13,6 +13,7 @@ export interface GitlabMergeRequest {
   approvedBy: number;
   approvalsRequired: number;
   labels: { color: string; title: string }[];
+  reviewers: { id: number; avatarUrl: string; hasApproved: boolean }[];
 }
 
 export type MergeStatus =
