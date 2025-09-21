@@ -1,7 +1,7 @@
-import { Calendar } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 
+import GoogleWorkspaceIcon from '@/components/misc/GoogleWorkspaceIcon';
 import CalendarItem from '@/components/newtab/calendar/CalendarItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -73,14 +73,24 @@ const CalendarSection = () => {
   }, [data?.items, error?.message, isError, isLoading, isUnauthorized]);
 
   return (
-    <Card className="h-fit">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Calendar className="h-5 w-5 text-primary" />
-          Today&apos;s Meetings
+    <Card className="max-h-[calc(100vh-110px)] flex flex-col">
+      <CardHeader className="pb-3 shrink-0">
+        <CardTitle className="w-full flex items-center">
+          <div className="flex items-center gap-2 text-lg">
+            <a
+              href="https://calendar.google.com/calendar/u/0/r?pli=1"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <GoogleWorkspaceIcon />
+            </a>
+            Today&apos;s Meetings
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">{renderContent()}</CardContent>
+      <CardContent className="flex-1 overflow-y-auto space-y-3">
+        {renderContent()}
+      </CardContent>
     </Card>
   );
 };

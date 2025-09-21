@@ -57,7 +57,13 @@ export default function JiraSection() {
       <CardHeader className="pb-3 shrink-0">
         <CardTitle className="w-full flex items-center justify-between">
           <div className="flex items-center gap-2 text-lg">
-            <JiraIcon className="h-5 w-5 text-blue-500" />
+            <a
+              href="https://letgotr.atlassian.net/jira/for-you"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <JiraIcon className="text-blue-500" />
+            </a>
             Jira Tickets
           </div>
           <Button

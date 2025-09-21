@@ -72,14 +72,6 @@ export default function GitlabSection() {
     return data?.data.map((mr) => <MRItem mr={mr} key={mr.iid} />);
   }, [data?.data, error?.message, isError, isLoading, isUnauthorized]);
 
-  const handleTitleClick = () => {
-    window.open(
-      'https://gitlab.com/dashboard/merge_requests',
-      '_blank',
-      'noopener,noreferrer',
-    );
-  };
-
   const toggleFilterType = () => {
     setFilter((prev) =>
       prev === GITLAB_FILTERS.REVIEW
@@ -93,10 +85,14 @@ export default function GitlabSection() {
       <CardHeader className="pb-1 shrink-0">
         <CardTitle className="w-full flex items-center justify-between">
           <div className="flex items-center gap-2 text-lg">
-            <GitlabIcon className="h-5 w-5" />
-            <span className="cursor-pointer" onClick={handleTitleClick}>
-              GitLab MRs
-            </span>
+            <a
+              href="https://gitlab.com/dashboard/merge_requests"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <GitlabIcon />
+            </a>
+            <span>GitLab MRs</span>
           </div>
           <Button
             variant="outline"

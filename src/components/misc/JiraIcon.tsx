@@ -6,8 +6,8 @@ interface JiraIconProps {
 
 const JiraIcon = ({
   className = 'text-blue-600',
-  width = 16,
-  height = 16,
+  width = 20,
+  height = 20,
 }: JiraIconProps) => (
   <svg
     width={width}
