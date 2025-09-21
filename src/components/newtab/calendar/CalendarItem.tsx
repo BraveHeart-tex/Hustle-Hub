@@ -59,7 +59,7 @@ const CalendarItem = ({ event }: CalendarItemProps) => {
   };
 
   return (
-    <div className="flex flex-col p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer">
+    <div className="flex flex-col p-3 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="font-medium text-sm text-foreground truncate">

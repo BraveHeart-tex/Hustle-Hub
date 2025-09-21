@@ -42,7 +42,7 @@ const JiraItem = ({ issue }: JiraItemProps) => {
   return (
     <div
       key={issue.id}
-      className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+      className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors dark:hover:bg-accent/50 cursor-pointer"
       onClick={handleIssueClick}
     >
       <div className="flex items-start justify-between mb-2">

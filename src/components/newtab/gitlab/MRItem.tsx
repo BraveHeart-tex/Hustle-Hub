@@ -25,7 +25,7 @@ const MRItem = ({ mr }: MRItemProps) => {
   return (
     <div
       className={cn(
-        'p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer relative',
+        'p-3 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer relative',
         mr.needsCurrentUserAction &&
           'border-yellow-500 dark:border-yellow-700 border-2',
         mr.conflicts && 'border-destructive border-2',
