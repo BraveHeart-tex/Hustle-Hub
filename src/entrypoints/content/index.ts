@@ -1,98 +1,63 @@
 import { defineContentScript } from '#imports';
 import { extractJiraId, waitForElement, waitForLabel } from '@/lib/utils';
 
+const clickIfExists = (selector: string) => {
+  const element = document.querySelector<HTMLElement>(selector);
+  if (element && typeof element.click === 'function') element.click();
+};
+
+const safeClick = async (selector: string, timeout = 5000) => {
+  try {
+    const element = await waitForElement<HTMLElement>(selector, timeout);
+    element.click();
+    return element;
+  } catch (error) {
+    console.error(`Element '${selector}' not found or clickable:`, error);
+    return null;
+  }
+};
+
 export default defineContentScript({
   matches: ['*://*.gitlab.com/*/merge_requests/*'],
   main: async () => {
-    const parsedUrl = new URL(document.location.toString());
-    const params = new URLSearchParams(parsedUrl.search);
-    const targetBranch = params.get('merge_request[target_branch]');
-
-    if (targetBranch !== 'main') return;
+    const params = new URLSearchParams(location.search);
+    if (params.get('merge_request[target_branch]') !== 'main') return;
 
     const sourceBranch = params.get('merge_request[source_branch]') || '';
-    const specificElement = document.querySelector('#merge_request_title');
-
-    if (!specificElement) {
-      console.log('Specific element not found!');
-      return;
-    }
-
-    if (specificElement instanceof HTMLInputElement) {
-      specificElement.value = `Production Release for ${extractJiraId(
-        sourceBranch,
-      )}`;
-    }
-
-    const assignToMeLink = document.querySelector(
-      '[data-testid="assign-to-me-link"]',
+    const titleInput = document.querySelector<HTMLInputElement>(
+      '#merge_request_title',
     );
-
-    if (assignToMeLink && assignToMeLink instanceof HTMLAnchorElement) {
-      assignToMeLink.click();
-    }
-
-    try {
-      const reviewersDropdownButton = await waitForElement<HTMLButtonElement>(
-        'button[data-field-name="merge_request[reviewer_ids][]"]',
-        5000,
-      );
-
-      reviewersDropdownButton.click();
-    } catch (err) {
-      console.error('Reviewers dropdown button not found:', err);
+    if (!titleInput) {
+      console.log('Merge request title input not found!');
       return;
     }
+    titleInput.value = `Production Release for ${extractJiraId(sourceBranch)}`;
 
-    try {
-      const reviewer = await waitForElement<HTMLAnchorElement>(
-        `li[data-user-id="${import.meta.env.VITE_RELEASE_REVIEWER_USER_ID}"] a`,
+    clickIfExists('[data-testid="assign-to-me-link"]');
+
+    await safeClick('button[data-field-name="merge_request[reviewer_ids][]"]');
+
+    const reviewerSelector = `li[data-user-id="${import.meta.env.VITE_RELEASE_REVIEWER_USER_ID}"] a`;
+    const reviewer = await safeClick(reviewerSelector);
+    if (reviewer) {
+      console.log(
+        `✅ Reviewer ${import.meta.env.VITE_RELEASE_REVIEWER_USER_ID} selected.`,
       );
-
-      if (reviewer) {
-        reviewer.click();
-        console.log(
-          `✅ Reviewer ${import.meta.env.VITE_RELEASE_REVIEWER_USER_ID} selected.`,
-        );
-
-        const closeIcon = document.querySelector('[data-testid="close-icon"]');
-
-        if (
-          closeIcon &&
-          'click' in closeIcon &&
-          typeof closeIcon.click === 'function'
-        ) {
-          closeIcon.click();
-        }
-      }
-    } catch (error) {
-      console.error('Reviewer selection failed:', error);
+      clickIfExists('[data-testid="close-icon"]');
     }
 
-    try {
-      const dropdownBtn = await waitForElement<HTMLButtonElement>(
-        '[data-testid="issuable-label-dropdown"]',
-        5000,
-      );
-
-      dropdownBtn.click();
-    } catch (err) {
-      console.error('Dropdown button not found:', err);
-      return;
-    }
+    const dropdownBtn = await safeClick(
+      '[data-testid="issuable-label-dropdown"]',
+    );
+    if (!dropdownBtn) return;
 
     try {
       const labelButton = await waitForLabel('target::production', 5000);
       labelButton.click();
       console.log(`✅ Label target::production selected.`);
+      console.log('refactor this seems good');
 
-      const closeButton = document.querySelector(
-        '[data-testid="close-labels-dropdown-button"]',
-      ) as HTMLButtonElement;
-
-      if (closeButton) {
-        closeButton.click();
-      }
+      clickIfExists('[data-testid="close-labels-dropdown-button"]');
     } catch (err) {
       console.error('Label selection failed:', err);
     }
