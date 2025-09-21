@@ -24,9 +24,53 @@ export default defineContentScript({
       )}`;
     }
 
-    let dropdownBtn;
+    const assignToMeLink = document.querySelector(
+      '[data-testid="assign-to-me-link"]',
+    );
+
+    if (assignToMeLink && assignToMeLink instanceof HTMLAnchorElement) {
+      assignToMeLink.click();
+    }
+
     try {
-      dropdownBtn = await waitForElement<HTMLButtonElement>(
+      const reviewersDropdownButton = await waitForElement<HTMLButtonElement>(
+        'button[data-field-name="merge_request[reviewer_ids][]"]',
+        5000,
+      );
+
+      reviewersDropdownButton.click();
+    } catch (err) {
+      console.error('Reviewers dropdown button not found:', err);
+      return;
+    }
+
+    try {
+      const reviewer = await waitForElement<HTMLAnchorElement>(
+        `li[data-user-id="${import.meta.env.VITE_RELEASE_REVIEWER_USER_ID}"] a`,
+      );
+
+      if (reviewer) {
+        reviewer.click();
+        console.log(
+          `✅ Reviewer ${import.meta.env.VITE_RELEASE_REVIEWER_USER_ID} selected.`,
+        );
+
+        const closeIcon = document.querySelector('[data-testid="close-icon"]');
+
+        if (
+          closeIcon &&
+          'click' in closeIcon &&
+          typeof closeIcon.click === 'function'
+        ) {
+          closeIcon.click();
+        }
+      }
+    } catch (error) {
+      console.error('Reviewer selection failed:', error);
+    }
+
+    try {
+      const dropdownBtn = await waitForElement<HTMLButtonElement>(
         '[data-testid="issuable-label-dropdown"]',
         5000,
       );
