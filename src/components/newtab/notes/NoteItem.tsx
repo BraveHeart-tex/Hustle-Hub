@@ -6,9 +6,10 @@ import { removeNote, updateNote } from '@/lib/storage/notes';
 import { Note } from '@/types/notes';
 
 const priorityColors = {
-  high: 'bg-red-100 text-red-800 border-red-200',
-  medium: 'bg-amber-100 text-amber-800 border-amber-200',
-  low: 'bg-green-100 text-green-800 border-green-200',
+  high: 'bg-destructive text-destructive-foreground border-destructive',
+  medium:
+    'bg-amber-200 text-amber-900 border-amber-200 dark:bg-amber-800 dark:text-amber-100 dark:border-amber-700',
+  low: 'bg-green-200 text-green-900 border-green-200 dark:bg-green-800 dark:text-green-100 dark:border-green-700',
 };
 
 interface NoteItemProps {
@@ -33,7 +34,7 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
   return (
     <div
       key={note.id}
-      className="group p-3 rounded-lg border bg-card hover:bg-accent/50 cursor-pointer"
+      className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors dark:hover:bg-accent/50"
       onClick={() => onNoteClick(note)}
     >
       <div className="flex-1 min-w-0">
