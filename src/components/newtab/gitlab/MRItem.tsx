@@ -8,114 +8,51 @@ import {
 
 import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
 import MRLabel from '@/components/newtab/gitlab/MRLabel';
-import { Badge } from '@/components/ui/badge';
+import MrStatusBadge from '@/components/newtab/gitlab/MrStatusBadge';
+import MRStatusIcon from '@/components/newtab/gitlab/MRStatusIcon';
 import { cn, formatDate } from '@/lib/utils';
-import { GitlabMergeRequest, MergeStatus } from '@/types/gitlab';
+import { GitlabMergeRequest } from '@/types/gitlab';
 
 interface MRItemProps {
   mr: GitlabMergeRequest;
 }
 
-const getStatusBadge = ({
-  status,
-  draft,
-  workInProgress,
-}: {
-  status: MergeStatus;
-  draft?: boolean;
-  workInProgress?: boolean;
-}) => {
-  if (draft) {
-    return (
-      <Badge variant="secondary" className="text-xs">
-        Draft
-      </Badge>
-    );
-  }
-  if (workInProgress) {
-    return (
-      <Badge variant="secondary" className="text-xs">
-        WIP
-      </Badge>
-    );
-  }
-
-  switch (status.toLowerCase()) {
-    case 'can_be_merged':
-      return (
-        <Badge variant="secondary" className="text-xs">
-          Ready to Merge
-        </Badge>
-      );
-    case 'cannot_be_merged':
-      return (
-        <Badge variant="destructive" className="text-xs">
-          Cannot Merge
-        </Badge>
-      );
-    case 'unchecked':
-      return (
-        <Badge variant="outline" className="text-xs">
-          Not Checked
-        </Badge>
-      );
-    case 'merged':
-      return (
-        <Badge variant="outline" className="text-xs">
-          Merged
-        </Badge>
-      );
-    case 'needs_review':
-      return (
-        <Badge variant="destructive" className="text-xs">
-          Needs Review
-        </Badge>
-      );
-    case 'approved':
-      return (
-        <Badge className="text-xs bg-green-500 hover:bg-green-600">
-          Approved
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="text-xs">
-          {status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-        </Badge>
-      );
-  }
-};
-
 const MRItem = ({ mr }: MRItemProps) => {
   const handleCardClick = () => {
     window.open(mr.webUrl, '_blank', 'noopener,noreferrer');
   };
+
   return (
     <div
       className={cn(
         'p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer relative',
         mr.needsCurrentUserAction &&
           'border-yellow-500 dark:border-yellow-700 border-2',
+        mr.conflicts && 'border-destructive border-2',
       )}
       onClick={handleCardClick}
     >
       {mr.needsCurrentUserAction && (
-        <div
+        <MRStatusIcon
           title="Action required"
-          className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-50 dark:bg-yellow-700 dark:text-yellow-100 rounded-full p-1 shadow-md"
-        >
-          <AlertCircleIcon className="w-4 h-4" />
-        </div>
+          variant="warning"
+          icon={<AlertCircleIcon className="w-4 h-4" />}
+        />
       )}
+      {mr.conflicts && (
+        <MRStatusIcon
+          title="This MR has conflicts"
+          variant="destructive"
+          icon={<AlertCircleIcon />}
+        />
+      )}
+
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-muted-foreground">
             !{mr.iid}
           </span>
-          {getStatusBadge({
-            status: mr.mergeStatus,
-            draft: mr.draft,
-          })}
+          <MrStatusBadge status={mr.mergeStatus} draft={mr.draft} />
         </div>
         <span className="text-xs text-muted-foreground">
           {formatDate(mr.createdAt, {

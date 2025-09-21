@@ -90,7 +90,7 @@ export default function GitlabSection() {
 
   return (
     <Card className="max-h-[calc(100vh-110px)] flex flex-col">
-      <CardHeader className="pb-3 shrink-0">
+      <CardHeader className="pb-1 shrink-0">
         <CardTitle className="w-full flex items-center justify-between">
           <div className="flex items-center gap-2 text-lg">
             <GitlabIcon className="h-5 w-5" />
@@ -109,7 +109,7 @@ export default function GitlabSection() {
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto space-y-3">
+      <CardContent className="flex-1 space-y-3 overflow-auto pt-2">
         {renderContent()}
       </CardContent>
     </Card>
