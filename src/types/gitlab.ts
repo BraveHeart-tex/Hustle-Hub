@@ -1,3 +1,5 @@
+import { ApiResponse } from '@/types/api';
+
 export interface GitlabMergeRequest {
   iid: string;
   title: string;
@@ -26,3 +28,5 @@ export type MergeStatus =
   | 'needs_review'
   | 'approved'
   | string;
+
+export type GitlabApiResponse = ApiResponse<{ data: GitlabMergeRequest[] }>;

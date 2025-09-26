@@ -1,17 +1,18 @@
+import { type ClassValue,clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
 import { OAuthCallbackKey, sendMessage } from '@/messaging';
 import { OAuthProvider, OAuthStatus } from '@/types/auth';
 import { BookmarkNode, FlatBookmark } from '@/types/bookmarks';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function flattenBookmarks(nodes: BookmarkNode[]): FlatBookmark[] {
-  let result: any[] = [];
+  let result: FlatBookmark[] = [];
   for (const node of nodes) {
-    if (node.url) result.push(node);
+    if (node.url) result.push(node as FlatBookmark);
     if (node.children) result = result.concat(flattenBookmarks(node.children));
   }
   return result;
@@ -190,4 +191,24 @@ export const waitForLabel = (
       reject(new Error(`Timeout: Label "${labelText}" not found`));
     }, timeout);
   });
+};
+
+export const safeKeys = <T extends object>(obj: T): Array<keyof T> => {
+  return Object.keys(obj) as Array<keyof T>;
+};
+
+const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+export const formatEventStartAndEnd = (
+  start?: string,
+  end?: string,
+): string => {
+  return start && end
+    ? `${timeFormatter.format(new Date(start))} – ${timeFormatter.format(
+        new Date(end),
+      )}`
+    : 'All day';
 };
