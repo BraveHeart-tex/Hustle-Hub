@@ -5,6 +5,7 @@ import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
 import Header from '@/components/newtab/Header';
 import JiraSection from '@/components/newtab/jira/JiraSection';
 import NotesSection from '@/components/newtab/NotesSection';
+import SearchDialog from '@/components/newtab/SearchDialog';
 import { Toaster } from '@/components/ui/sonner';
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const NewTab = () => {
         </main>
       </div>
       <Toaster />
+      <SearchDialog />
     </QueryClientProvider>
   );
 };

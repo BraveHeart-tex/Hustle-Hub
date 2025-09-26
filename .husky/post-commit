@@ -1,4 +1,12 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-sh ./deploy-local.sh
+# Get the current branch
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$branch" = "main" ]; then
+  echo "Running deploy-local.sh for main branch..."
+  sh ./deploy-local.sh
+else
+  echo "Skipping deploy-local.sh for branch $branch"
+fi
