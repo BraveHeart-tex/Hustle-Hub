@@ -66,29 +66,48 @@ const SearchDialog = () => {
       return queryClient.getQueryData<T>(key) || (fallback as T);
     };
 
+    // Calendar
     const calendarData = getSafeQueryData<GoogleCalendarEventsResponse>(
       QUERY_KEYS.CALENDAR_EVENTS,
       { items: [] },
     );
-    groupedData.calendar.push(...calendarData.items);
+    const calendarMap = new Map<string, GoogleCalendarEvent>();
+    calendarData.items.forEach((event) => {
+      calendarMap.set(event.id, event);
+    });
+    groupedData.calendar = Array.from(calendarMap.values());
 
+    // GitLab
     const gitlabKeys = ['assigned', 'review'] as const;
+    const gitlabMap = new Map<string, GitlabMergeRequest>();
+
     gitlabKeys.forEach((key) => {
       const data = getSafeQueryData<{ data: GitlabMergeRequest[] }>(
         QUERY_KEYS.GITLAB_MRS(key),
         { data: [] },
       );
-      groupedData.gitlab.push(...data.data);
+      data.data.forEach((mr) => {
+        gitlabMap.set(mr.iid, mr); // Use unique MR ID for deduplication
+      });
     });
 
+    groupedData.gitlab = Array.from(gitlabMap.values());
+
+    // Jira
     const jiraKeys = ['for_you', 'literally_working_on'] as const;
+    const jiraMap = new Map<string, JiraIssue>();
+
     jiraKeys.forEach((key) => {
       const data = getSafeQueryData<{ issues: JiraIssue[] }>(
         QUERY_KEYS.JIRA_ISSUES(key),
         { issues: [] },
       );
-      groupedData.jira.push(...data.issues);
+      data.issues.forEach((issue) => {
+        jiraMap.set(issue.key, issue); // Use Jira issue key for deduplication
+      });
     });
+
+    groupedData.jira = Array.from(jiraMap.values());
 
     setData(groupedData);
   }, [queryClient, isOpen]);
@@ -200,7 +219,7 @@ const SearchDialog = () => {
                           </span>
                         </div>
 
-                        <span className="ml-4 text-xs rounded-full px-2 py-0.5 bg-muted/50 text-muted-foreground font-semibold">
+                        <span className="ml-4 text-xs rounded-full px-2 py-0.5 font-semibold whitespace-nowrap bg-blue-600 dark:bg-blue-900 text-white">
                           {issue.fields.status.name}
                         </span>
                       </div>
