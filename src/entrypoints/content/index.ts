@@ -1,5 +1,10 @@
+import {
+  extractJiraId,
+  getJiraTaskUrl,
+  waitForElement,
+  waitForLabel,
+} from '@/lib/utils';
 import { defineContentScript } from '#imports';
-import { extractJiraId, waitForElement, waitForLabel } from '@/lib/utils';
 
 const clickIfExists = (selector: string) => {
   const element = document.querySelector<HTMLElement>(selector);
@@ -21,17 +26,37 @@ export default defineContentScript({
   matches: ['*://*.gitlab.com/*/merge_requests/*'],
   main: async () => {
     const params = new URLSearchParams(location.search);
-    if (params.get('merge_request[target_branch]') !== 'main') return;
+    const isProductionMr =
+      params.get('merge_request[target_branch]') === 'main';
+
+    if (!isProductionMr) {
+      return;
+    }
 
     const sourceBranch = params.get('merge_request[source_branch]') || '';
     const titleInput = document.querySelector<HTMLInputElement>(
       '#merge_request_title',
     );
+
     if (!titleInput) {
       console.log('Merge request title input not found!');
       return;
     }
-    titleInput.value = `Production Release for ${extractJiraId(sourceBranch)}`;
+
+    const jiraId = extractJiraId(sourceBranch) ?? '';
+
+    titleInput.value = `Production Release for ${jiraId}`;
+
+    const descriptionInput = document.querySelector<HTMLTextAreaElement>(
+      '#merge_request_description',
+    );
+
+    if (!descriptionInput) {
+      console.log('Merge request description input not found!');
+      return;
+    }
+
+    descriptionInput.value = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
 
     clickIfExists('[data-testid="assign-to-me-link"]');
 
