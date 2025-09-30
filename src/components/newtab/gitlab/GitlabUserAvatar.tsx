@@ -13,10 +13,7 @@ const GitlabUserAvatar = ({ src, className, ...props }: GitlabUserAvatar) => {
       height={32}
       loading="lazy"
       fetchPriority="low"
-      className={cn(
-        'rounded-full border-2 border-gray-300 object-cover',
-        className,
-      )}
+      className={cn('rounded-full object-cover', className)}
       {...props}
     />
   );
