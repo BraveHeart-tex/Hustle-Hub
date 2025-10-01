@@ -1,11 +1,62 @@
-import { Clock, Users } from 'lucide-react';
+import {
+  CheckCircle,
+  Clock,
+  HelpCircle,
+  LucideIcon,
+  Users,
+  XCircle,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GoogleCalendarEvent } from '@/types/google';
+import { cn } from '@/lib/utils.ts';
+import { GoogleCalendarAttendee, GoogleCalendarEvent } from '@/types/google';
 
 interface CalendarItemProps {
   event: GoogleCalendarEvent;
+}
+
+interface StatusDisplayData {
+  icon: LucideIcon;
+  label: string;
+  iconClass: string;
+  textClass: string;
+}
+
+function getStatusDisplayData(
+  status: GoogleCalendarAttendee['responseStatus'],
+): StatusDisplayData {
+  const map: Record<
+    GoogleCalendarAttendee['responseStatus'],
+    StatusDisplayData
+  > = {
+    needsAction: {
+      icon: Clock,
+      label: 'Needs Action',
+      iconClass: 'text-yellow-500',
+      textClass: 'text-yellow-700',
+    },
+    declined: {
+      icon: XCircle,
+      label: 'Declined',
+      iconClass: 'text-red-500',
+      textClass: 'text-red-700',
+    },
+    tentative: {
+      icon: HelpCircle,
+      label: 'Tentative',
+      iconClass: 'text-blue-500',
+      textClass: 'text-blue-700',
+    },
+    accepted: {
+      icon: CheckCircle,
+      label: 'Accepted',
+      iconClass: 'text-green-500',
+      textClass: 'text-green-700',
+    },
+  };
+
+  return map[status];
 }
 
 const CalendarItem = ({ event }: CalendarItemProps) => {
@@ -58,6 +109,13 @@ const CalendarItem = ({ event }: CalendarItemProps) => {
     if (joinUrl) window.open(joinUrl, '_blank');
   };
 
+  const {
+    icon: StatusIcon,
+    label,
+    iconClass,
+    textClass,
+  } = getStatusDisplayData(event?.currentUserResponse || 'needsAction');
+
   return (
     <div className="flex flex-col p-3 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer">
       <div className="flex-1 min-w-0">
@@ -100,6 +158,10 @@ const CalendarItem = ({ event }: CalendarItemProps) => {
             Join
           </Button>
         )}
+      </div>
+      <div className="flex items-center gap-1 mt-2">
+        <StatusIcon className={cn('size-4', iconClass)} />
+        <span className={cn('text-xs font-medium', textClass)}>{label}</span>
       </div>
     </div>
   );

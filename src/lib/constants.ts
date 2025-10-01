@@ -1,3 +1,5 @@
+import { GoogleCalendarAttendee } from '@/types/google.ts';
+
 export const TEAM_SLUGS = ['FE', 'ORD', 'DIS', 'PE', 'PRD', 'MEM', 'MOD'];
 
 export const AUTH_CALLBACK_STATUSES = {
@@ -30,3 +32,13 @@ export const NOTE_PRIORITIES = {
 } as const;
 export type NotePriority =
   (typeof NOTE_PRIORITIES)[keyof typeof NOTE_PRIORITIES];
+
+export const googleCalendarEventResponseStatusMap: Record<
+  GoogleCalendarAttendee['responseStatus'],
+  string
+> = {
+  needsAction: 'Needs Action',
+  declined: 'Declined',
+  tentative: 'Tentative',
+  accepted: 'Accepted',
+} as const;

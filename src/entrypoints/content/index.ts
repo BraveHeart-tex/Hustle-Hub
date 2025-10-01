@@ -56,6 +56,8 @@ export default defineContentScript({
       return;
     }
 
+    console.log('Writing to description input');
+
     descriptionInput.value = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
 
     clickIfExists('[data-testid="assign-to-me-link"]');

@@ -37,6 +37,7 @@ export interface GoogleCalendarEvent {
   iCalUID: string;
   sequence: number;
   attendees?: GoogleCalendarAttendee[];
+  currentUserResponse?: GoogleCalendarAttendee['responseStatus'];
   hangoutLink?: string;
   conferenceData?: GoogleCalendarConferenceData;
   reminders?: { useDefault: boolean; overrides?: GoogleCalendarReminder[] };
