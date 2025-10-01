@@ -94,7 +94,7 @@ const NoteFormDialog = ({
         <DialogHeader>
           <DialogTitle>{formState.id ? 'Edit Note' : 'New Note'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 overflow-auto">
           <div className="flex flex-col gap-2 group">
             <Label htmlFor="title">Title</Label>
             <Input

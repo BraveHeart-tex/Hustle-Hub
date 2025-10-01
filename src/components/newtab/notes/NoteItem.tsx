@@ -49,7 +49,7 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
             {note.priority}
           </Badge>
         </div>
-        <p className="text-xs text-muted-foreground text-pretty leading-relaxed mb-2">
+        <p className="text-xs text-muted-foreground text-pretty leading-relaxed mb-2 truncate">
           {note.content}
         </p>
         {note.createdAt !== undefined && (
