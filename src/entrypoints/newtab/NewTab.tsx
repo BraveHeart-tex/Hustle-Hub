@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import CalendarSection from '@/components/newtab/calendar/CalendarSection';
 import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
+import GlobalStatusIndicator from '@/components/newtab/GlobalStatusIndicator.tsx';
 import Header from '@/components/newtab/Header';
 import JiraSection from '@/components/newtab/jira/JiraSection';
 import NotesSection from '@/components/newtab/NotesSection';
@@ -34,6 +35,7 @@ const NewTab = () => {
       </div>
       <Toaster />
       <SearchDialog />
+      <GlobalStatusIndicator />
     </QueryClientProvider>
   );
 };
