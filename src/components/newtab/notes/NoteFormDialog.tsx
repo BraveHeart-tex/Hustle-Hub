@@ -36,18 +36,30 @@ const defaultFormState: Note = {
   priority: NOTE_PRIORITIES.LOW,
 };
 
+const RESET_DELAY_MS = 100;
+
 const NoteFormDialog = ({
   isOpen,
   onOpenChange,
   selectedItem,
 }: NoteFormDialogProps) => {
   const [formState, setFormState] = useState<Note>(defaultFormState);
+  const formResetTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   useEffect(() => {
     if (!isOpen) {
-      setFormState(defaultFormState);
+      formResetTimeoutRef.current = setTimeout(() => {
+        setFormState(defaultFormState);
+      }, RESET_DELAY_MS);
     }
-  }, [isOpen, selectedItem]);
+
+    return () => {
+      if (formResetTimeoutRef.current !== null) {
+        clearTimeout(formResetTimeoutRef.current);
+        formResetTimeoutRef.current = null;
+      }
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && selectedItem) {
