@@ -22,6 +22,82 @@ const safeClick = async (selector: string, timeout = 5000) => {
   }
 };
 
+const getContentEditorMode = () => {
+  try {
+    const mode = localStorage.getItem('gl-markdown-editor-mode') as
+      | 'contentEditor'
+      | 'markdownField'
+      | null;
+
+    if (!mode) return null;
+
+    return mode === 'contentEditor' ? 'markdown' : 'plainText';
+  } catch (error) {
+    console.error('getContentEditorMode error', error);
+    return null;
+  }
+};
+
+const handleDescriptionGeneration = async () => {
+  let editorMode = getContentEditorMode();
+
+  if (!editorMode) {
+    const toggleButton = await waitForElement('#switch-to-rich-text-editor');
+
+    if (!toggleButton) {
+      console.log('Cannot find toggle button on description group');
+      return;
+    }
+
+    const buttonText = toggleButton.textContent?.trim() ?? '';
+
+    const shouldSwitchToPlainText =
+      buttonText === 'Switch to plain text editing';
+
+    editorMode = shouldSwitchToPlainText ? 'markdown' : 'plainText';
+  }
+
+  if (editorMode === 'plainText') {
+    console.log('writing to textarea');
+    const descriptionInput = await waitForElement<HTMLTextAreaElement>(
+      '#merge_request_description',
+    );
+    if (descriptionInput) {
+      descriptionInput.value = getJiraTaskUrl('FEREL-NUMBER-HERE');
+    }
+  } else if (editorMode === 'markdown') {
+    console.log('writing to rich text editor');
+
+    const editableDescription = await waitForElement(
+      '[data-testid="content_editor_editablebox"] [contenteditable="true"]',
+    );
+
+    console.log(editableDescription);
+
+    if (editableDescription) {
+      console.log('writing to editable description');
+      editableDescription.dispatchEvent(
+        new FocusEvent('focus', { bubbles: true }),
+      );
+      const data = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
+
+      editableDescription.textContent = data;
+
+      editableDescription.dispatchEvent(
+        new InputEvent('input', {
+          bubbles: true,
+          inputType: 'insertText',
+          data,
+        }),
+      );
+
+      editableDescription.dispatchEvent(
+        new FocusEvent('blur', { bubbles: true }),
+      );
+    }
+  }
+};
+
 export default defineContentScript({
   matches: ['*://*.gitlab.com/*/merge_requests/*'],
   main: async () => {
@@ -72,30 +148,7 @@ export default defineContentScript({
 
       clickIfExists('[data-testid="close-labels-dropdown-button"]');
 
-      const editableDescription = document.querySelector(
-        '[data-testid="content_editor_editablebox"] [contenteditable="true"]',
-      );
-
-      if (editableDescription) {
-        editableDescription.dispatchEvent(
-          new FocusEvent('focus', { bubbles: true }),
-        );
-        const data = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
-
-        editableDescription.textContent = data;
-
-        editableDescription.dispatchEvent(
-          new InputEvent('input', {
-            bubbles: true,
-            inputType: 'insertText',
-            data,
-          }),
-        );
-
-        editableDescription.dispatchEvent(
-          new FocusEvent('blur', { bubbles: true }),
-        );
-      }
+      await handleDescriptionGeneration();
     } catch (err) {
       console.error('Label selection failed:', err);
     }
