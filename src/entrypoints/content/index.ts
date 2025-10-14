@@ -47,19 +47,6 @@ export default defineContentScript({
 
     titleInput.value = `Production Release for ${jiraId}`;
 
-    const descriptionInput = document.querySelector<HTMLTextAreaElement>(
-      '#merge_request_description',
-    );
-
-    if (!descriptionInput) {
-      console.log('Merge request description input not found!');
-      return;
-    }
-
-    console.log('Writing to description input');
-
-    descriptionInput.value = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
-
     clickIfExists('[data-testid="assign-to-me-link"]');
 
     await safeClick('button[data-field-name="merge_request[reviewer_ids][]"]');
@@ -82,9 +69,21 @@ export default defineContentScript({
       const labelButton = await waitForLabel('target::production', 5000);
       labelButton.click();
       console.log(`✅ Label target::production selected.`);
-      console.log('refactor this seems good');
 
       clickIfExists('[data-testid="close-labels-dropdown-button"]');
+
+      const descriptionInput = document.querySelector<HTMLTextAreaElement>(
+        '#merge_request_description',
+      );
+
+      if (!descriptionInput) {
+        console.log('Merge request description input not found!');
+        return;
+      }
+
+      console.log('Writing to description input');
+
+      descriptionInput.value = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
     } catch (err) {
       console.error('Label selection failed:', err);
     }
