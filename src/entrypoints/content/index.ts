@@ -72,18 +72,30 @@ export default defineContentScript({
 
       clickIfExists('[data-testid="close-labels-dropdown-button"]');
 
-      const descriptionInput = document.querySelector<HTMLTextAreaElement>(
-        '#merge_request_description',
+      const editableDescription = document.querySelector(
+        '[data-testid="content_editor_editablebox"] [contenteditable="true"]',
       );
 
-      if (!descriptionInput) {
-        console.log('Merge request description input not found!');
-        return;
+      if (editableDescription) {
+        editableDescription.dispatchEvent(
+          new FocusEvent('focus', { bubbles: true }),
+        );
+        const data = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
+
+        editableDescription.textContent = data;
+
+        editableDescription.dispatchEvent(
+          new InputEvent('input', {
+            bubbles: true,
+            inputType: 'insertText',
+            data,
+          }),
+        );
+
+        editableDescription.dispatchEvent(
+          new FocusEvent('blur', { bubbles: true }),
+        );
       }
-
-      console.log('Writing to description input');
-
-      descriptionInput.value = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
     } catch (err) {
       console.error('Label selection failed:', err);
     }
