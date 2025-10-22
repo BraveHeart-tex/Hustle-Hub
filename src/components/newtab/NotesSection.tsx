@@ -1,7 +1,7 @@
 import { PlusIcon, StickyNote } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
-import NoteFormDialog from '@/components/newtab/notes/NoteFormDialog';
+import NoteFormSheet from '@/components/newtab/notes/NoteFormSheet';
 import NoteItem from '@/components/newtab/notes/NoteItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,6 @@ import { useNotes } from '@/lib/storage/notes';
 import { Note } from '@/types/notes';
 
 export default function NotesSection() {
-  const [filter, setFilter] = useState<'pending' | 'completed'>('pending');
   const [dialogState, setDialogState] = useState<{
     selectedItem: Note | undefined;
     open: boolean;
@@ -18,18 +17,6 @@ export default function NotesSection() {
     open: false,
   });
   const { notes } = useNotes();
-
-  const completedCount = useMemo(
-    () => notes.filter((note) => note.completed).length,
-    [notes],
-  );
-
-  const filteredNotes = useMemo(() => {
-    if (filter === 'pending') {
-      return notes.filter((note) => !note.completed);
-    }
-    return notes.filter((note) => note.completed);
-  }, [filter, notes]);
 
   const handleItemClick = useCallback((selectedItem: Note) => {
     setDialogState({
@@ -47,7 +34,7 @@ export default function NotesSection() {
 
   return (
     <>
-      <NoteFormDialog
+      <NoteFormSheet
         selectedItem={dialogState.selectedItem}
         isOpen={dialogState.open}
         onOpenChange={handleDialogClose}
@@ -72,25 +59,9 @@ export default function NotesSection() {
               <PlusIcon />
             </Button>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <Button
-              variant={filter === 'pending' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('pending')}
-            >
-              {notes.length - completedCount} pending
-            </Button>
-            <Button
-              variant={filter === 'completed' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('completed')}
-            >
-              {completedCount} completed
-            </Button>
-          </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {filteredNotes.map((note) => (
+          {notes.map((note) => (
             <NoteItem key={note.id} note={note} onNoteClick={handleItemClick} />
           ))}
         </CardContent>

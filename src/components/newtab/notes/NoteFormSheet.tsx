@@ -1,16 +1,9 @@
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import {
   Select,
   SelectContent,
@@ -18,7 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { NOTE_PRIORITIES, NotePriority } from '@/lib/constants';
 import { addNote, updateNote } from '@/lib/storage/notes';
 import { Note } from '@/types/notes';
@@ -38,7 +39,7 @@ const defaultFormState: Note = {
 
 const RESET_DELAY_MS = 100;
 
-const NoteFormDialog = ({
+const NoteFormSheet = ({
   isOpen,
   onOpenChange,
   selectedItem,
@@ -88,13 +89,15 @@ const NoteFormDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild></DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{formState.id ? 'Edit Note' : 'New Note'}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 overflow-auto">
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-2xl">
+        <SheetHeader>
+          <SheetTitle>{formState.id ? 'Edit Note' : 'New Note'}</SheetTitle>
+          <SheetDescription>
+            {formState.id ? 'Edit an existing note' : 'Create a new note'}
+          </SheetDescription>
+        </SheetHeader>
+        <form onSubmit={handleSubmit} className="space-y-6 overflow-auto px-4">
           <div className="flex flex-col gap-2 group">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -109,13 +112,11 @@ const NoteFormDialog = ({
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
-              placeholder="Content"
-              value={formState.content}
-              onChange={(e) =>
-                setFormState({ ...formState, content: e.target.value })
-              }
+            <RichTextEditor
+              content={formState.content}
+              onChange={(content) => {
+                setFormState({ ...formState, content });
+              }}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -146,24 +147,24 @@ const NoteFormDialog = ({
               </SelectContent>
             </Select>
           </div>
-          {formState.id !== '' && (
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="completed"
-                checked={formState.completed}
-                onCheckedChange={(state) => {
-                  setFormState({ ...formState, completed: Boolean(state) });
-                }}
-              />
-              <Label htmlFor="completed">Completed</Label>
-            </div>
-          )}
-          <Button type="submit" className="w-full" disabled={!formState.title}>
+        </form>
+        <SheetFooter>
+          <Button
+            type="button"
+            className="w-full"
+            disabled={!formState.title}
+            onClick={handleSubmit}
+          >
             Save
           </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <SheetClose asChild>
+            <Button type="button" variant="secondary">
+              Cancel
+            </Button>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
-export default NoteFormDialog;
+export default NoteFormSheet;

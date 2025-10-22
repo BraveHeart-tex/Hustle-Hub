@@ -1,8 +1,8 @@
-import { CheckIcon, TrashIcon, UndoIcon } from 'lucide-react';
+import { TrashIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { removeNote, updateNote } from '@/lib/storage/notes';
+import { removeNote } from '@/lib/storage/notes';
 import { Note } from '@/types/notes';
 
 const priorityColors = {
@@ -18,12 +18,6 @@ interface NoteItemProps {
 }
 
 const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
-  const toggleNoteStatus = async (completed: boolean) => {
-    await updateNote(note.id, {
-      completed,
-    });
-  };
-
   const handleDelete = async (noteId: string) => {
     const shouldDelete = confirm('Are you sure you want to delete this note?');
     if (shouldDelete) {
@@ -49,9 +43,6 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
             {note.priority}
           </Badge>
         </div>
-        <p className="text-xs text-muted-foreground text-pretty leading-relaxed mb-2 truncate">
-          {note.content}
-        </p>
         {note.createdAt !== undefined && (
           <time className="text-xs text-muted-foreground">
             {new Date(note.createdAt).toLocaleDateString('en-US', {
@@ -73,16 +64,6 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
           }}
         >
           <TrashIcon />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={(event) => {
-            event.stopPropagation();
-            toggleNoteStatus(!note.completed);
-          }}
-        >
-          {note.completed ? <UndoIcon /> : <CheckIcon />}
         </Button>
       </div>
     </div>
