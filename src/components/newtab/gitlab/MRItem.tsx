@@ -10,6 +10,7 @@ import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
 import MRLabel from '@/components/newtab/gitlab/MRLabel';
 import MrStatusBadge from '@/components/newtab/gitlab/MrStatusBadge';
 import MRStatusIcon from '@/components/newtab/gitlab/MRStatusIcon';
+import { Badge } from '@/components/ui/badge';
 import { cn, formatDate } from '@/lib/utils';
 import { GitlabMergeRequest } from '@/types/gitlab';
 
@@ -28,7 +29,8 @@ const MRItem = ({ mr }: MRItemProps) => {
         'p-3 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer relative',
         mr.needsCurrentUserAction &&
           'border-yellow-500 dark:border-yellow-700 border-2',
-        mr.conflicts && 'border-destructive border-2',
+        (mr.conflicts || mr.headPipelineStatus === 'FAILED') &&
+          'border-destructive border-2',
       )}
       onClick={handleCardClick}
     >
@@ -53,6 +55,11 @@ const MRItem = ({ mr }: MRItemProps) => {
             !{mr.iid}
           </span>
           <MrStatusBadge status={mr.mergeStatus} draft={mr.draft} />
+          {mr.headPipelineStatus === 'FAILED' && (
+            <Badge variant="destructive" className="text-xs">
+              Pipeline Failed
+            </Badge>
+          )}
         </div>
         <span className="text-xs text-muted-foreground">
           {formatDate(mr.createdAt, {

@@ -18,7 +18,36 @@ export interface GitlabMergeRequest {
   reviewers: { id: number; avatarUrl: string; hasApproved: boolean }[];
   needsCurrentUserAction: boolean;
   conflicts: boolean;
+  headPipelineStatus?: PipelineStatus;
 }
+
+export type PipelineStatus =
+  /** Pipeline was canceled before completion. */
+  | 'CANCELED'
+  /** Pipeline is in the process of canceling. */
+  | 'CANCELING'
+  /** Pipeline has been created. */
+  | 'CREATED'
+  /** At least one stage of the pipeline failed. */
+  | 'FAILED'
+  /** Pipeline needs to be manually started. */
+  | 'MANUAL'
+  /** Pipeline has not started running yet. */
+  | 'PENDING'
+  /** Pipeline is preparing to run. */
+  | 'PREPARING'
+  /** Pipeline is running. */
+  | 'RUNNING'
+  /** Pipeline is scheduled to run. */
+  | 'SCHEDULED'
+  /** Pipeline was skipped. */
+  | 'SKIPPED'
+  /** Pipeline completed successfully. */
+  | 'SUCCESS'
+  /** Pipeline is waiting for an external action. */
+  | 'WAITING_FOR_CALLBACK'
+  /** A resource (for example, a runner) that the pipeline requires to run is unavailable. */
+  | 'WAITING_FOR_RESOURCE';
 
 export type MergeStatus =
   | 'can_be_merged'
