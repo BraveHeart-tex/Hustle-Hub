@@ -8,12 +8,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
 import { JIRA_FILTERS, JiraFilter } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
 export default function JiraSection() {
   const [filter, setFilter] = useState<JiraFilter>(
     JIRA_FILTERS.LITERALLY_WORKING_ON,
   );
   const { data, isLoading, isError, error } = useJiraTickets(filter);
+  const [selectedTaskStatus, setSelectedTaskStatus] = useState('');
+
+  const taskStatuses = useMemo(() => {
+    if (!data?.issues) return [];
+
+    return data.issues.reduce<string[]>((acc, curr) => {
+      if (!acc.includes(curr.fields.status.name)) {
+        acc.push(curr.fields.status.name);
+      }
+
+      return acc;
+    }, []);
+  }, [data?.issues]);
 
   const renderContent = useCallback(() => {
     if (isLoading) {
@@ -39,10 +53,14 @@ export default function JiraSection() {
       return <p className="text-muted-foreground">No issues found.</p>;
     }
 
-    return data?.issues.map((issue) => (
-      <JiraItem key={issue.id} issue={issue} />
-    ));
-  }, [data?.issues, error?.message, isError, isLoading]);
+    return data?.issues
+      .filter((issue) =>
+        selectedTaskStatus
+          ? issue.fields.status.name === selectedTaskStatus
+          : true,
+      )
+      .map((issue) => <JiraItem key={issue.id} issue={issue} />);
+  }, [data?.issues, error?.message, isError, isLoading, selectedTaskStatus]);
 
   const toggleFilterType = () => {
     setFilter((prev) =>
@@ -50,6 +68,7 @@ export default function JiraSection() {
         ? JIRA_FILTERS.FOR_YOU
         : JIRA_FILTERS.LITERALLY_WORKING_ON,
     );
+    setSelectedTaskStatus('');
   };
 
   return (
@@ -79,6 +98,28 @@ export default function JiraSection() {
             )}
           </Button>
         </CardTitle>
+        {isLoading && <Skeleton className="h-4 w-1/3" />}
+        {!isLoading && taskStatuses.length > 0 && (
+          <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
+            {taskStatuses.map((status) => (
+              <Button
+                key={status}
+                size={'sm'}
+                variant={selectedTaskStatus === status ? 'default' : 'outline'}
+                className={cn(
+                  selectedTaskStatus === status && 'border dark:border-input',
+                )}
+                onClick={() =>
+                  setSelectedTaskStatus((prev) =>
+                    prev === status ? '' : status,
+                  )
+                }
+              >
+                {status}
+              </Button>
+            ))}
+          </div>
+        )}
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto space-y-3">
         {renderContent()}
