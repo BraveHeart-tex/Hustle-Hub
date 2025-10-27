@@ -26,6 +26,10 @@ const filterOptions = [
     label: 'Literally Working On',
     value: JIRA_FILTERS.LITERALLY_WORKING_ON,
   },
+  {
+    label: 'Frontend Releases',
+    value: JIRA_FILTERS.FRONTEND_RELEASES,
+  },
 ];
 
 export default function JiraSection() {
