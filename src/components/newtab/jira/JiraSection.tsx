@@ -1,14 +1,32 @@
-import { ClipboardListIcon, TargetIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import JiraIcon from '@/components/misc/JiraIcon';
 import JiraItem from '@/components/newtab/jira/JiraItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
 import { JIRA_FILTERS, JiraFilter } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+
+const filterOptions = [
+  {
+    label: 'For You',
+    value: JIRA_FILTERS.FOR_YOU,
+  },
+  {
+    label: 'Literally Working On',
+    value: JIRA_FILTERS.LITERALLY_WORKING_ON,
+  },
+];
 
 export default function JiraSection() {
   const [filter, setFilter] = useState<JiraFilter>(
@@ -62,12 +80,12 @@ export default function JiraSection() {
       .map((issue) => <JiraItem key={issue.id} issue={issue} />);
   }, [data?.issues, error?.message, isError, isLoading, selectedTaskStatus]);
 
-  const toggleFilterType = () => {
-    setFilter((prev) =>
-      prev === JIRA_FILTERS.LITERALLY_WORKING_ON
-        ? JIRA_FILTERS.FOR_YOU
-        : JIRA_FILTERS.LITERALLY_WORKING_ON,
+  const handleFilterValueChange = (filterValue: string) => {
+    const isValidFilter = Object.values(JIRA_FILTERS).includes(
+      filterValue as JiraFilter,
     );
+    if (!isValidFilter) return;
+    setFilter(filterValue as JiraFilter);
     setSelectedTaskStatus('');
   };
 
@@ -85,18 +103,25 @@ export default function JiraSection() {
             </a>
             Jira Tickets
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleFilterType}
+          <Select
+            value={filter}
+            onValueChange={handleFilterValueChange}
+            defaultValue={filter}
             disabled={isLoading}
           >
-            {filter === JIRA_FILTERS.LITERALLY_WORKING_ON ? (
-              <ClipboardListIcon />
-            ) : (
-              <TargetIcon />
-            )}
-          </Button>
+            <SelectTrigger size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {filterOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
         {!isLoading && taskStatuses.length > 0 && (
