@@ -19,6 +19,7 @@ export interface GitlabMergeRequest {
   needsCurrentUserAction: boolean;
   conflicts: boolean;
   headPipelineStatus?: PipelineStatus;
+  projectName: string;
 }
 
 export type PipelineStatus =
