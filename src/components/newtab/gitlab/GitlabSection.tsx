@@ -1,4 +1,3 @@
-import { EyeIcon, UserIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -6,10 +5,23 @@ import GitlabIcon from '@/components/misc/GitlabIcon';
 import MRItem from '@/components/newtab/gitlab/MRItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { GITLAB_FILTERS, GitlabFilter } from '@/lib/constants';
 import { onMessage, sendMessage } from '@/messaging';
+
+const filterOptions = [
+  { label: 'Review Requested', value: GITLAB_FILTERS.REVIEW },
+  { label: 'Assigned to me', value: GITLAB_FILTERS.ASSIGNED },
+];
 
 export default function GitlabSection() {
   const [filter, setFilter] = useState<GitlabFilter>(GITLAB_FILTERS.REVIEW);
@@ -72,12 +84,11 @@ export default function GitlabSection() {
     return data?.data.map((mr) => <MRItem mr={mr} key={mr.iid} />);
   }, [data?.data, error?.message, isError, isLoading, isUnauthorized]);
 
-  const toggleFilterType = () => {
-    setFilter((prev) =>
-      prev === GITLAB_FILTERS.REVIEW
-        ? GITLAB_FILTERS.ASSIGNED
-        : GITLAB_FILTERS.REVIEW,
-    );
+  const handleFilterValueChange = (value: string) => {
+    if (!Object.values(GITLAB_FILTERS).includes(value as GitlabFilter)) {
+      return;
+    }
+    setFilter(value as GitlabFilter);
   };
 
   return (
@@ -94,14 +105,25 @@ export default function GitlabSection() {
             </a>
             <span>GitLab MRs</span>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleFilterType}
+          <Select
+            value={filter}
+            onValueChange={handleFilterValueChange}
+            defaultValue={filter}
             disabled={isLoading}
           >
-            {filter === GITLAB_FILTERS.ASSIGNED ? <UserIcon /> : <EyeIcon />}
-          </Button>
+            <SelectTrigger size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {filterOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </CardTitle>
       </CardHeader>
 
