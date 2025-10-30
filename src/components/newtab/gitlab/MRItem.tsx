@@ -1,6 +1,7 @@
 import {
   AlertCircleIcon,
   CheckIcon,
+  FolderGit2,
   GitBranch,
   MessageSquare,
   ThumbsUp,
@@ -54,9 +55,6 @@ const MRItem = ({ mr }: MRItemProps) => {
           <span className="text-xs font-mono text-muted-foreground">
             !{mr.iid}
           </span>
-          <Badge title={mr.projectName} variant="outline">
-            {mr.projectName}
-          </Badge>
           <MrStatusBadge status={mr.mergeStatus} draft={mr.draft} />
           {mr.headPipelineStatus === 'FAILED' && (
             <Badge variant="destructive" className="text-xs">
@@ -84,6 +82,10 @@ const MRItem = ({ mr }: MRItemProps) => {
         </div>
       )}
 
+      <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+        <FolderGit2 className="h-3 w-3" />
+        <span>{mr.projectName}</span>
+      </div>
       <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
         <GitBranch className="h-3 w-3" />
         <span>{mr.sourceBranch}</span>
