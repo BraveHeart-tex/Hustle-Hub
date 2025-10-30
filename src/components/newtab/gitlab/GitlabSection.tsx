@@ -16,6 +16,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { GITLAB_FILTERS, GitlabFilter } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 import { onMessage, sendMessage } from '@/messaging';
 
 const filterOptions = [
@@ -27,6 +28,7 @@ export default function GitlabSection() {
   const [filter, setFilter] = useState<GitlabFilter>(GITLAB_FILTERS.REVIEW);
   const { data, isError, isLoading, isUnauthorized, error, refetch } =
     useGitlabMrs(filter);
+  const [selectedProjectName, setSelectedProjectName] = useState('');
   const handleAuthorize = () => {
     sendMessage('authorizeGitlab');
   };
@@ -46,6 +48,25 @@ export default function GitlabSection() {
       unsubscribe();
     };
   }, [refetch]);
+
+  const handleFilterValueChange = (value: string) => {
+    if (!Object.values(GITLAB_FILTERS).includes(value as GitlabFilter)) {
+      return;
+    }
+    setSelectedProjectName('');
+    setFilter(value as GitlabFilter);
+  };
+
+  const avilableProjectNames: string[] = useMemo(() => {
+    if (!data) return [];
+    return data.data.reduce<string[]>((acc, curr) => {
+      const projectName = curr.projectName;
+      if (projectName && !acc.includes(projectName)) {
+        acc.push(projectName);
+      }
+      return acc;
+    }, []);
+  }, [data]);
 
   const renderContent = useCallback(() => {
     if (isLoading) {
@@ -81,15 +102,19 @@ export default function GitlabSection() {
       return <p className="text-muted-foreground">No MRs found.</p>;
     }
 
-    return data?.data.map((mr) => <MRItem mr={mr} key={mr.iid} />);
-  }, [data?.data, error?.message, isError, isLoading, isUnauthorized]);
-
-  const handleFilterValueChange = (value: string) => {
-    if (!Object.values(GITLAB_FILTERS).includes(value as GitlabFilter)) {
-      return;
-    }
-    setFilter(value as GitlabFilter);
-  };
+    return data?.data
+      .filter((mr) =>
+        selectedProjectName ? mr.projectName === selectedProjectName : true,
+      )
+      .map((mr) => <MRItem mr={mr} key={mr.iid} />);
+  }, [
+    data?.data,
+    error?.message,
+    isError,
+    isLoading,
+    isUnauthorized,
+    selectedProjectName,
+  ]);
 
   return (
     <Card className="max-h-[calc(100vh-110px)] flex flex-col">
@@ -125,6 +150,31 @@ export default function GitlabSection() {
             </SelectContent>
           </Select>
         </CardTitle>
+        {isLoading && <Skeleton className="h-4 w-1/3" />}
+        {!isLoading && avilableProjectNames.length > 1 && (
+          <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
+            {avilableProjectNames.map((projectName) => (
+              <Button
+                key={projectName}
+                size={'sm'}
+                variant={
+                  selectedProjectName === projectName ? 'default' : 'outline'
+                }
+                className={cn(
+                  selectedProjectName === projectName &&
+                    'border dark:border-input',
+                )}
+                onClick={() =>
+                  setSelectedProjectName((prev) =>
+                    prev === projectName ? '' : projectName,
+                  )
+                }
+              >
+                {projectName}
+              </Button>
+            ))}
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="flex-1 space-y-3 overflow-auto pt-2">
