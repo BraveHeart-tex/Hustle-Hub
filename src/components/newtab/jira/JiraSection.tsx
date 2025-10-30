@@ -15,7 +15,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
 import { JIRA_FILTERS, JiraFilter } from '@/lib/constants';
-import { cn } from '@/lib/utils';
+import { cn, isValueOf } from '@/lib/utils';
 
 const filterOptions = [
   {
@@ -85,12 +85,10 @@ export default function JiraSection() {
   }, [data?.issues, error?.message, isError, isLoading, selectedTaskStatus]);
 
   const handleFilterValueChange = (filterValue: string) => {
-    const isValidFilter = Object.values(JIRA_FILTERS).includes(
-      filterValue as JiraFilter,
-    );
-    if (!isValidFilter) return;
-    setFilter(filterValue as JiraFilter);
-    setSelectedTaskStatus('');
+    if (isValueOf(JIRA_FILTERS, filterValue)) {
+      setFilter(filterValue);
+      setSelectedTaskStatus('');
+    }
   };
 
   return (
@@ -128,7 +126,7 @@ export default function JiraSection() {
           </Select>
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
-        {!isLoading && taskStatuses.length > 0 && (
+        {!isLoading && taskStatuses.length > 1 && (
           <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
             {taskStatuses.map((status) => (
               <Button

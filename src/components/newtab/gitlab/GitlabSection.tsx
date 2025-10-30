@@ -16,7 +16,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { GITLAB_FILTERS, GitlabFilter } from '@/lib/constants';
-import { cn } from '@/lib/utils';
+import { cn, isValueOf } from '@/lib/utils';
 import { onMessage, sendMessage } from '@/messaging';
 
 const filterOptions = [
@@ -50,11 +50,10 @@ export default function GitlabSection() {
   }, [refetch]);
 
   const handleFilterValueChange = (value: string) => {
-    if (!Object.values(GITLAB_FILTERS).includes(value as GitlabFilter)) {
-      return;
+    if (isValueOf(GITLAB_FILTERS, value)) {
+      setSelectedProjectName('');
+      setFilter(value);
     }
-    setSelectedProjectName('');
-    setFilter(value as GitlabFilter);
   };
 
   const avilableProjectNames: string[] = useMemo(() => {
