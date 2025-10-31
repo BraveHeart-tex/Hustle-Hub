@@ -1,10 +1,8 @@
 import { useTheme } from '@/components/newtab/ThemeProvider';
 import { Badge } from '@/components/ui/badge';
-import {
-  darkenHexColor,
-  formatGitLabLabel,
-  getForegroundColor,
-} from '@/lib/utils';
+import { darkenHexColor } from '@/lib/utils/colors/darkenHexColor';
+import { getForegroundColor } from '@/lib/utils/colors/getForegroundColor';
+import { formatGitLabLabel } from '@/lib/utils/formatters/formatGitLabel';
 import { GitlabMergeRequest } from '@/types/gitlab';
 
 const MRLabel = ({

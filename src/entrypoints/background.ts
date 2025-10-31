@@ -1,13 +1,7 @@
-import { launchOAuthFlow } from '@/lib/utils';
+import { launchOAuthFlow } from '@/lib/utils/auth/launchOAuthflow';
 import { onMessage } from '@/messaging';
 
 export default defineBackground(() => {
-  onMessage('getBookmarks', async () => {
-    return await browser.bookmarks.getTree();
-  });
-  onMessage('openBookmark', async (message) => {
-    await browser.tabs.create({ url: message.data });
-  });
   onMessage('goHome', async () => {
     const newTabEntryName = 'newtab';
     const newTabUrl = browser.runtime.getURL(`/${newTabEntryName}.html`);

@@ -12,7 +12,8 @@ import MRLabel from '@/components/newtab/gitlab/MRLabel';
 import MrStatusBadge from '@/components/newtab/gitlab/MrStatusBadge';
 import MRStatusIcon from '@/components/newtab/gitlab/MRStatusIcon';
 import { Badge } from '@/components/ui/badge';
-import { cn, formatDate } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { GitlabMergeRequest } from '@/types/gitlab';
 
 interface MRItemProps {

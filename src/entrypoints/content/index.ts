@@ -1,9 +1,7 @@
-import {
-  extractJiraId,
-  getJiraTaskUrl,
-  waitForElement,
-  waitForLabel,
-} from '@/lib/utils';
+import { waitForElement } from '@/lib/utils/dom/waitForElement';
+import { extractJiraId } from '@/lib/utils/misc/extractJiraId';
+import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
+import { waitForLabel } from '@/lib/utils/misc/waitForLabel';
 import { defineContentScript } from '#imports';
 
 const clickIfExists = (selector: string) => {

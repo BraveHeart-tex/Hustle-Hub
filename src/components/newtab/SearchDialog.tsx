@@ -14,7 +14,9 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { QUERY_KEYS } from '@/lib/constants';
-import { formatEventStartAndEnd, getJiraTaskUrl, safeKeys } from '@/lib/utils';
+import { formatEventStartAndEnd } from '@/lib/utils/formatters/formatEventStartAndEnd';
+import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
+import { safeKeys } from '@/lib/utils/misc/safeKeys';
 import { GitlabMergeRequest } from '@/types/gitlab';
 import {
   GoogleCalendarEvent,

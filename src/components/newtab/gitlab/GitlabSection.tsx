@@ -16,7 +16,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { GITLAB_FILTERS, GitlabFilter } from '@/lib/constants';
-import { cn, isValueOf } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { onMessage, sendMessage } from '@/messaging';
 
 const filterOptions = [

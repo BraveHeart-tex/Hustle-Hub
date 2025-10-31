@@ -1,6 +1,6 @@
 import { AlertCircle, CheckSquare, Clock } from 'lucide-react';
 
-import { getJiraTaskUrl } from '@/lib/utils';
+import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { JiraIssue } from '@/types/jira';
 
 const getPriorityIcon = (priority: string) => {

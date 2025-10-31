@@ -15,7 +15,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
 import { JIRA_FILTERS, JiraFilter } from '@/lib/constants';
-import { cn, isValueOf } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
 const filterOptions = [
   {
