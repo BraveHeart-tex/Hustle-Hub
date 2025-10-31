@@ -1,9 +1,10 @@
+import { lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import EditorSkeleton from '@/components/ui/editor-skeleton';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import RichTextEditor from '@/components/ui/rich-text-editor';
 import {
   Select,
   SelectContent,
@@ -23,6 +24,8 @@ import {
 import { NOTE_PRIORITIES, NotePriority } from '@/lib/constants';
 import { addNote, updateNote } from '@/lib/storage/notes';
 import { Note } from '@/types/notes';
+
+const RichTextEditor = lazy(() => import('@/components/ui/rich-text-editor'));
 
 interface NoteFormDialogProps {
   isOpen: boolean;
@@ -112,12 +115,14 @@ const NoteFormSheet = ({
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="content">Content</Label>
-            <RichTextEditor
-              content={formState.content}
-              onChange={(content) => {
-                setFormState({ ...formState, content });
-              }}
-            />
+            <Suspense fallback={<EditorSkeleton />}>
+              <RichTextEditor
+                content={formState.content}
+                onChange={(content) => {
+                  setFormState({ ...formState, content });
+                }}
+              />
+            </Suspense>
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="priority">Priority</Label>
