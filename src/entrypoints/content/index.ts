@@ -1,39 +1,90 @@
 import { waitForElement } from '@/lib/utils/dom/waitForElement';
 import { extractJiraId } from '@/lib/utils/misc/extractJiraId';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
-import { waitForLabel } from '@/lib/utils/misc/waitForLabel';
 import { defineContentScript } from '#imports';
 
-const clickIfExists = (selector: string) => {
-  const element = document.querySelector<HTMLElement>(selector);
-  if (element && typeof element.click === 'function') element.click();
+const waitForLabel = (
+  labelText: string,
+  timeout = 5000,
+): Promise<HTMLElement> => {
+  return new Promise((resolve, reject) => {
+    const observer = new MutationObserver(() => {
+      const labels = document.querySelectorAll('[data-testid="labels-list"]');
+      for (const label of labels) {
+        let span = label.querySelector('span');
+        if (span?.hasAttribute('data-testid')) {
+          const sibling = span.nextElementSibling as HTMLElement;
+          if (sibling && sibling.tagName === 'SPAN') {
+            span = sibling;
+          }
+        }
+
+        if (span && span.textContent.trim() === labelText) {
+          observer.disconnect();
+          resolve(label as HTMLElement);
+          return;
+        }
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    setTimeout(() => {
+      observer.disconnect();
+      reject(new Error(`Timeout: Label "${labelText}" not found`));
+    }, timeout);
+  });
 };
 
-const safeClick = async (selector: string, timeout = 5000) => {
+const clickElement = async (
+  selector: string,
+  { timeout = 5000, logError = true } = {},
+): Promise<HTMLElement | null> => {
   try {
-    const element = await waitForElement<HTMLElement>(selector, timeout);
-    element.click();
-    return element;
-  } catch (error) {
-    console.error(`Element '${selector}' not found or clickable:`, error);
+    const el = await waitForElement<HTMLElement>(selector, timeout);
+    el.click();
+    return el;
+  } catch (err) {
+    if (logError)
+      console.error(`Element '${selector}' not found or clickable:`, err);
     return null;
   }
 };
 
-const getContentEditorMode = () => {
+const getContentEditorMode = (): 'markdown' | 'plainText' | null => {
   try {
-    const mode = localStorage.getItem('gl-markdown-editor-mode') as
-      | 'contentEditor'
-      | 'markdownField'
-      | null;
-
+    const mode = localStorage.getItem('gl-markdown-editor-mode');
     if (!mode) return null;
-
     return mode === 'contentEditor' ? 'markdown' : 'plainText';
-  } catch (error) {
-    console.error('getContentEditorMode error', error);
+  } catch (err) {
+    console.error('Error reading content editor mode:', err);
     return null;
   }
+};
+
+const writeToPlainText = async (value: string) => {
+  const textarea = await waitForElement<HTMLTextAreaElement>(
+    '#merge_request_description',
+  );
+  if (textarea) textarea.value = value;
+};
+
+const writeToRichText = async (value: string) => {
+  const editable = await waitForElement<HTMLElement>(
+    '[data-testid="content_editor_editablebox"] [contenteditable="true"]',
+  );
+  if (!editable) return;
+
+  editable.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+  editable.textContent = value;
+  editable.dispatchEvent(
+    new InputEvent('input', {
+      bubbles: true,
+      inputType: 'insertText',
+      data: value,
+    }),
+  );
+  editable.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
 };
 
 const handleDescriptionGeneration = async () => {
@@ -41,100 +92,54 @@ const handleDescriptionGeneration = async () => {
 
   if (!editorMode) {
     const toggleButton = await waitForElement('#switch-to-rich-text-editor');
+    if (!toggleButton)
+      return console.log('Cannot find toggle button on description group');
 
-    if (!toggleButton) {
-      console.log('Cannot find toggle button on description group');
-      return;
-    }
-
-    const buttonText = toggleButton.textContent?.trim() ?? '';
-
-    const shouldSwitchToPlainText =
-      buttonText === 'Switch to plain text editing';
-
-    editorMode = shouldSwitchToPlainText ? 'markdown' : 'plainText';
+    editorMode =
+      toggleButton.textContent?.trim() === 'Switch to plain text editing'
+        ? 'markdown'
+        : 'plainText';
   }
 
-  if (editorMode === 'plainText') {
-    console.log('writing to textarea');
-    const descriptionInput = await waitForElement<HTMLTextAreaElement>(
-      '#merge_request_description',
-    );
-    if (descriptionInput) {
-      descriptionInput.value = getJiraTaskUrl('FEREL-NUMBER-HERE');
-    }
-  } else if (editorMode === 'markdown') {
-    console.log('writing to rich text editor');
+  const data = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
 
-    const editableDescription = await waitForElement(
-      '[data-testid="content_editor_editablebox"] [contenteditable="true"]',
-    );
-
-    console.log(editableDescription);
-
-    if (editableDescription) {
-      console.log('writing to editable description');
-      editableDescription.dispatchEvent(
-        new FocusEvent('focus', { bubbles: true }),
-      );
-      const data = getJiraTaskUrl('FEREL-TASK_NUMBER_HERE');
-
-      editableDescription.textContent = data;
-
-      editableDescription.dispatchEvent(
-        new InputEvent('input', {
-          bubbles: true,
-          inputType: 'insertText',
-          data,
-        }),
-      );
-
-      editableDescription.dispatchEvent(
-        new FocusEvent('blur', { bubbles: true }),
-      );
-    }
-  }
+  if (editorMode === 'plainText') await writeToPlainText(data);
+  else if (editorMode === 'markdown') await writeToRichText(data);
 };
 
 export default defineContentScript({
   matches: ['*://*.gitlab.com/*/merge_requests/*'],
   main: async () => {
     const params = new URLSearchParams(location.search);
-    const isProductionMr =
-      params.get('merge_request[target_branch]') === 'main';
+    if (params.get('merge_request[target_branch]') !== 'main') return;
 
-    if (!isProductionMr) {
-      return;
-    }
-
-    const sourceBranch = params.get('merge_request[source_branch]') || '';
+    const sourceBranch = params.get('merge_request[source_branch]') ?? '';
     const titleInput = document.querySelector<HTMLInputElement>(
       '#merge_request_title',
     );
-
-    if (!titleInput) {
-      console.log('Merge request title input not found!');
-      return;
-    }
+    if (!titleInput) return console.log('Merge request title input not found!');
 
     const jiraId = extractJiraId(sourceBranch) ?? '';
-
     titleInput.value = `Production Release for ${jiraId}`;
 
-    clickIfExists('[data-testid="assign-to-me-link"]');
-
-    await safeClick('button[data-field-name="merge_request[reviewer_ids][]"]');
+    await clickElement('[data-testid="assign-to-me-link"]', {
+      logError: false,
+    });
+    await clickElement(
+      'button[data-field-name="merge_request[reviewer_ids][]"]',
+      { logError: false },
+    );
 
     const reviewerSelector = `li[data-user-id="${import.meta.env.VITE_RELEASE_REVIEWER_USER_ID}"] a`;
-    const reviewer = await safeClick(reviewerSelector);
+    const reviewer = await clickElement(reviewerSelector);
     if (reviewer) {
       console.log(
         `✅ Reviewer ${import.meta.env.VITE_RELEASE_REVIEWER_USER_ID} selected.`,
       );
-      clickIfExists('[data-testid="close-icon"]');
+      clickElement('[data-testid="close-icon"]', { logError: false });
     }
 
-    const dropdownBtn = await safeClick(
+    const dropdownBtn = await clickElement(
       '[data-testid="issuable-label-dropdown"]',
     );
     if (!dropdownBtn) return;
@@ -142,10 +147,10 @@ export default defineContentScript({
     try {
       const labelButton = await waitForLabel('target::production', 5000);
       labelButton.click();
-      console.log(`✅ Label target::production selected.`);
-
-      clickIfExists('[data-testid="close-labels-dropdown-button"]');
-
+      console.log('✅ Label target::production selected.');
+      clickElement('[data-testid="close-labels-dropdown-button"]', {
+        logError: false,
+      });
       await handleDescriptionGeneration();
     } catch (err) {
       console.error('Label selection failed:', err);
