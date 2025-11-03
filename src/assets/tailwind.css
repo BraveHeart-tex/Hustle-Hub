@@ -44,7 +44,7 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 1rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -141,12 +141,12 @@
 
   ::-webkit-scrollbar-track {
     background: hsl(0 0% 97%);
-    border-radius: 0.625rem;
+    border-radius: 1rem;
   }
 
   ::-webkit-scrollbar-thumb {
     background: hsl(0 0% 20% / 0.7);
-    border-radius: 0.625rem;
+    border-radius: 1rem;
   }
 
   ::-webkit-scrollbar-thumb:hover {

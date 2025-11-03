@@ -116,6 +116,16 @@ export default function GitlabSection() {
     selectedProjectName,
   ]);
 
+  const projectNameCounts = useMemo(() => {
+    if (!data?.data) return {};
+
+    return data?.data.reduce<Record<string, number>>((acc, curr) => {
+      const projectName = curr.projectName;
+      acc[projectName] = (acc[projectName] || 0) + 1;
+      return acc;
+    }, {});
+  }, [data?.data]);
+
   return (
     <Card className="max-h-[calc(100vh-110px)] flex flex-col">
       <CardHeader className="pb-1 shrink-0">
@@ -143,7 +153,9 @@ export default function GitlabSection() {
               <SelectGroup>
                 {filterOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                    {option.label}{' '}
+                    {projectNameCounts[option.value] &&
+                      `(${projectNameCounts[option.value]})`}
                   </SelectItem>
                 ))}
               </SelectGroup>
