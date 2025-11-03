@@ -1,4 +1,3 @@
-import Link from '@tiptap/extension-link';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Placeholder } from '@tiptap/extensions';
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -61,15 +60,15 @@ const RichTextEditor = ({
               'list-decimal list-outside space-y-1 marker:text-primary/50 marker:font-medium',
           },
         },
+        link: {
+          HTMLAttributes: {
+            class:
+              'text-primary underline decoration-primary/20 underline-offset-2 transition-colors hover:text-primary/80 hover:decoration-primary/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm',
+          },
+        },
       }),
       Placeholder.configure({
         placeholder,
-      }),
-      Link.configure({
-        HTMLAttributes: {
-          class:
-            'text-primary underline decoration-primary/20 underline-offset-2 transition-colors hover:text-primary/80 hover:decoration-primary/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm',
-        },
       }),
       TaskList.configure({
         itemTypeName: 'taskItem',
