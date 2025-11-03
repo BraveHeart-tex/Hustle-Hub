@@ -116,16 +116,6 @@ export default function GitlabSection() {
     selectedProjectName,
   ]);
 
-  const projectNameCounts = useMemo(() => {
-    if (!data?.data) return {};
-
-    return data?.data.reduce<Record<string, number>>((acc, curr) => {
-      const projectName = curr.projectName;
-      acc[projectName] = (acc[projectName] || 0) + 1;
-      return acc;
-    }, {});
-  }, [data?.data]);
-
   return (
     <Card className="max-h-[calc(100vh-110px)] flex flex-col">
       <CardHeader className="pb-1 shrink-0">
@@ -153,9 +143,7 @@ export default function GitlabSection() {
               <SelectGroup>
                 {filterOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}{' '}
-                    {projectNameCounts[option.value] &&
-                      `(${projectNameCounts[option.value]})`}
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectGroup>
@@ -164,7 +152,7 @@ export default function GitlabSection() {
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
         {!isLoading && avilableProjectNames.length > 1 && (
-          <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
+          <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
             {avilableProjectNames.map((projectName) => (
               <Button
                 key={projectName}

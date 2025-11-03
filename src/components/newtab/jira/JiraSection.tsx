@@ -85,16 +85,6 @@ export default function JiraSection() {
       .map((issue) => <JiraItem key={issue.id} issue={issue} />);
   }, [data?.issues, error?.message, isError, isLoading, selectedTaskStatus]);
 
-  const statusCounts = useMemo(() => {
-    if (!data?.issues) return {};
-
-    return data?.issues.reduce<Record<string, number>>((acc, curr) => {
-      const status = curr.fields.status.name;
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {});
-  }, [data?.issues]);
-
   const handleFilterValueChange = (filterValue: string) => {
     if (isValueOf(JIRA_FILTERS, filterValue)) {
       setFilter(filterValue);
@@ -129,9 +119,7 @@ export default function JiraSection() {
               <SelectGroup>
                 {filterOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}{' '}
-                    {statusCounts[option.label] &&
-                      `(${statusCounts[option.label]})`}
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectGroup>
@@ -140,7 +128,7 @@ export default function JiraSection() {
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
         {!isLoading && taskStatuses.length > 1 && (
-          <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
+          <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap  overflow-x-auto">
             {taskStatuses.map((status) => (
               <Button
                 key={status}
