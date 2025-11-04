@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import GitlabIcon from '@/components/misc/GitlabIcon';
+import FilterButton from '@/components/newtab/FilterButton';
 import MRItem from '@/components/newtab/gitlab/MRItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { GITLAB_FILTERS, GitlabFilter } from '@/lib/constants';
-import { cn } from '@/lib/utils';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { onMessage, sendMessage } from '@/messaging';
 
@@ -154,16 +154,9 @@ export default function GitlabSection() {
         {!isLoading && avilableProjectNames.length > 1 && (
           <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
             {avilableProjectNames.map((projectName) => (
-              <Button
+              <FilterButton
                 key={projectName}
-                size={'sm'}
-                variant={
-                  selectedProjectName === projectName ? 'default' : 'outline'
-                }
-                className={cn(
-                  selectedProjectName === projectName &&
-                    'border dark:border-input',
-                )}
+                active={selectedProjectName === projectName}
                 onClick={() =>
                   setSelectedProjectName((prev) =>
                     prev === projectName ? '' : projectName,
@@ -171,7 +164,7 @@ export default function GitlabSection() {
                 }
               >
                 {projectName}
-              </Button>
+              </FilterButton>
             ))}
           </div>
         )}

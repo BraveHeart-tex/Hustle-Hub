@@ -1,12 +1,12 @@
 import { PlusIcon, StickyNote } from 'lucide-react';
 import { useState } from 'react';
 
+import FilterButton from '@/components/newtab/FilterButton';
 import NoteFormSheet from '@/components/newtab/notes/NoteFormSheet';
 import NoteItem from '@/components/newtab/notes/NoteItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotes } from '@/lib/storage/notes';
-import { cn } from '@/lib/utils';
 import { Note } from '@/types/notes';
 
 export default function NotesSection() {
@@ -92,16 +92,9 @@ export default function NotesSection() {
           {priorityOptions.length > 1 && (
             <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
               {priorityOptions.map((priority) => (
-                <Button
+                <FilterButton
                   key={priority}
-                  size={'sm'}
-                  variant={
-                    selectedPriority === priority ? 'default' : 'outline'
-                  }
-                  className={cn(
-                    selectedPriority === priority && 'border dark:border-input',
-                    'capitalize',
-                  )}
+                  active={selectedPriority === priority}
                   onClick={() =>
                     setSelectedPriority((prev) =>
                       prev === priority ? '' : priority,
@@ -111,7 +104,7 @@ export default function NotesSection() {
                   {priority}{' '}
                   {priorityCount[priority] > 0 &&
                     `(${priorityCount[priority]})`}
-                </Button>
+                </FilterButton>
               ))}
             </div>
           )}

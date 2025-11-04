@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import JiraIcon from '@/components/misc/JiraIcon';
+import FilterButton from '@/components/newtab/FilterButton';
 import JiraItem from '@/components/newtab/jira/JiraItem';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -15,7 +15,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
 import { JIRA_FILTERS, JiraFilter } from '@/lib/constants';
-import { cn } from '@/lib/utils';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
 const filterOptions = [
@@ -130,13 +129,9 @@ export default function JiraSection() {
         {!isLoading && taskStatuses.length > 1 && (
           <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap  overflow-x-auto">
             {taskStatuses.map((status) => (
-              <Button
+              <FilterButton
                 key={status}
-                size={'sm'}
-                variant={selectedTaskStatus === status ? 'default' : 'outline'}
-                className={cn(
-                  selectedTaskStatus === status && 'border dark:border-input',
-                )}
+                active={status === selectedTaskStatus}
                 onClick={() =>
                   setSelectedTaskStatus((prev) =>
                     prev === status ? '' : status,
@@ -144,7 +139,7 @@ export default function JiraSection() {
                 }
               >
                 {status}
-              </Button>
+              </FilterButton>
             ))}
           </div>
         )}
