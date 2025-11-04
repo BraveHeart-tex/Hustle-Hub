@@ -53,6 +53,15 @@ export default function NotesSection() {
     return notes.filter((note) => note.priority === selectedPriority);
   }, [notes, selectedPriority]);
 
+  const priorityCount = useMemo(() => {
+    if (!notes) return {};
+
+    return notes.reduce<Record<string, number>>((countMap, note) => {
+      countMap[note.priority] = (countMap[note.priority] || 0) + 1;
+      return countMap;
+    }, {});
+  }, [notes]);
+
   return (
     <>
       <NoteFormSheet
@@ -99,7 +108,9 @@ export default function NotesSection() {
                     )
                   }
                 >
-                  {priority}
+                  {priority}{' '}
+                  {priorityCount[priority] > 0 &&
+                    `(${priorityCount[priority]})`}
                 </Button>
               ))}
             </div>
