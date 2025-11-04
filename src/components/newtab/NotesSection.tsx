@@ -39,7 +39,7 @@ export default function NotesSection() {
         isOpen={dialogState.open}
         onOpenChange={handleDialogClose}
       />
-      <Card className="h-fit">
+      <Card className="max-h-[calc(100vh-110px)] flex flex-col">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -60,7 +60,7 @@ export default function NotesSection() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="flex-1 space-y-3 overflow-auto pt-2">
           {notes.map((note) => (
             <NoteItem key={note.id} note={note} onNoteClick={handleItemClick} />
           ))}
