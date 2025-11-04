@@ -5,17 +5,17 @@ import { Button } from '@/components/ui/button';
 import { removeNote } from '@/lib/storage/notes';
 import { Note } from '@/types/notes';
 
-const priorityColors = {
+interface NoteItemProps {
+  note: Note;
+  onNoteClick: (note: Note) => void;
+}
+
+const notePriorityColors = {
   high: 'bg-destructive text-destructive-foreground border-destructive',
   medium:
     'bg-amber-200 text-amber-900 border-amber-200 dark:bg-amber-800 dark:text-amber-100 dark:border-amber-700',
   low: 'bg-green-200 text-green-900 border-green-200 dark:bg-green-800 dark:text-green-100 dark:border-green-700',
 };
-
-interface NoteItemProps {
-  note: Note;
-  onNoteClick: (note: Note) => void;
-}
 
 const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
   const handleDelete = async (noteId: string) => {
@@ -38,7 +38,7 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
           </h4>
           <Badge
             variant="outline"
-            className={`text-xs px-1.5 py-0.5 ${priorityColors[note.priority as keyof typeof priorityColors]}`}
+            className={`text-xs px-1.5 py-0.5 ${notePriorityColors[note.priority as keyof typeof notePriorityColors]}`}
           >
             {note.priority}
           </Badge>

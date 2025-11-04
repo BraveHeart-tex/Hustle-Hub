@@ -6,6 +6,7 @@ import NoteItem from '@/components/newtab/notes/NoteItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotes } from '@/lib/storage/notes';
+import { cn } from '@/lib/utils';
 import { Note } from '@/types/notes';
 
 export default function NotesSection() {
@@ -16,7 +17,21 @@ export default function NotesSection() {
     selectedItem: undefined,
     open: false,
   });
+  const [selectedPriority, setSelectedPriority] = useState('');
+
   const { notes } = useNotes();
+
+  const priorityOptions = useMemo(() => {
+    if (!notes || notes.length === 0) return [];
+
+    return notes.reduce<string[]>((priorities, note) => {
+      if (!priorities.includes(note.priority)) {
+        priorities.push(note.priority);
+      }
+
+      return priorities;
+    }, []);
+  }, [notes]);
 
   const handleItemClick = useCallback((selectedItem: Note) => {
     setDialogState({
@@ -31,6 +46,12 @@ export default function NotesSection() {
       open: false,
     });
   }, []);
+
+  const filteredNotes = useMemo(() => {
+    if (!selectedPriority) return notes;
+
+    return notes.filter((note) => note.priority === selectedPriority);
+  }, [notes, selectedPriority]);
 
   return (
     <>
@@ -59,9 +80,33 @@ export default function NotesSection() {
               <PlusIcon />
             </Button>
           </div>
+          {priorityOptions.length > 1 && (
+            <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
+              {priorityOptions.map((priority) => (
+                <Button
+                  key={priority}
+                  size={'sm'}
+                  variant={
+                    selectedPriority === priority ? 'default' : 'outline'
+                  }
+                  className={cn(
+                    selectedPriority === priority && 'border dark:border-input',
+                    'capitalize',
+                  )}
+                  onClick={() =>
+                    setSelectedPriority((prev) =>
+                      prev === priority ? '' : priority,
+                    )
+                  }
+                >
+                  {priority}
+                </Button>
+              ))}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="flex-1 space-y-3 overflow-auto pt-2">
-          {notes.map((note) => (
+          {filteredNotes.map((note) => (
             <NoteItem key={note.id} note={note} onNoteClick={handleItemClick} />
           ))}
         </CardContent>
