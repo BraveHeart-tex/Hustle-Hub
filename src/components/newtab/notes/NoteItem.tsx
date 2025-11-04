@@ -28,7 +28,7 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
   return (
     <div
       key={note.id}
-      className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors dark:hover:bg-accent/50"
+      className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors dark:hover:bg-accent/50 flex flex-col justify-between"
       onClick={() => onNoteClick(note)}
     >
       <div className="flex-1 min-w-0">
@@ -54,19 +54,22 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
           </time>
         )}
       </div>
-      <div className="w-full flex items-center justify-end gap-2">
+
+      <div className="w-full flex items-center justify-end mt-2">
         <Button
-          variant="destructive"
+          variant="ghost"
           size="icon"
+          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
           onClick={(event) => {
             event.stopPropagation();
             handleDelete(note.id);
           }}
         >
-          <TrashIcon />
+          <TrashIcon className="h-4 w-4" />
         </Button>
       </div>
     </div>
   );
 };
+
 export default NoteItem;
