@@ -1,6 +1,18 @@
-import { defineConfig } from 'wxt';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
+import { defineConfig } from 'wxt';
+import { z } from 'zod';
+
+export const viteEnvSchema = z.object({
+  VITE_GITLAB_REDIRECT_URI: z.url().describe('OAuth redirect URI for GitLab'),
+  VITE_GOOGLE_CALENDAR_REDIRECT_URI: z
+    .url()
+    .describe('OAuth redirect URI for Google Calendar'),
+  VITE_RELEASE_REVIEWER_USER_ID: z
+    .string()
+    .regex(/^\d+$/, 'Must be a numeric user ID'),
+  VITE_BASE_API_URL: z.url().describe('Base API endpoint URL'),
+});
 
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
@@ -9,12 +21,15 @@ export default defineConfig({
     permissions: ['tabs', 'scripting', 'bookmarks', 'identity', 'storage'],
     action: {},
   },
-  vite: () => ({
-    plugins: [tailwindcss()],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, './src'),
+  vite: () => {
+    viteEnvSchema.parse(import.meta.env);
+    return {
+      plugins: [tailwindcss()],
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, './src'),
+        },
       },
-    },
-  }),
+    };
+  },
 });
