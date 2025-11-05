@@ -20,6 +20,7 @@ export interface GitlabMergeRequest {
   conflicts: boolean;
   headPipelineStatus?: PipelineStatus;
   projectName: string;
+  autoMergeEnabled: boolean;
 }
 
 export type PipelineStatus =

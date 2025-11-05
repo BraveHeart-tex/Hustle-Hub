@@ -5,6 +5,7 @@ import {
   GitBranch,
   MessageSquare,
   ThumbsUp,
+  WorkflowIcon,
 } from 'lucide-react';
 
 import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
@@ -83,15 +84,23 @@ const MRItem = ({ mr }: MRItemProps) => {
         </div>
       )}
 
-      <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
-        <FolderGit2 className="h-3 w-3" />
-        <span>{mr.projectName}</span>
-      </div>
-      <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
-        <GitBranch className="h-3 w-3" />
-        <span>{mr.sourceBranch}</span>
-        <span>→</span>
-        <span>{mr.targetBranch}</span>
+      <div className="mb-2 space-y-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <FolderGit2 className="h-3 w-3" />
+          <span>{mr.projectName}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <GitBranch className="h-3 w-3" />
+          <span>{mr.sourceBranch}</span>
+          <span>→</span>
+          <span>{mr.targetBranch}</span>
+        </div>
+        {mr.autoMergeEnabled && (
+          <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400 font-medium">
+            <WorkflowIcon className="h-3 w-3" />
+            <span>Auto-merge</span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
