@@ -1,4 +1,4 @@
-import { TrashIcon } from 'lucide-react';
+import { TextAlignStart, TrashIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,18 +31,10 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
       className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors dark:hover:bg-accent/50 flex flex-col justify-between"
       onClick={() => onNoteClick(note)}
     >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <h4 className="font-medium text-sm text-balance leading-tight">
-            {note.title}
-          </h4>
-          <Badge
-            variant="outline"
-            className={`text-xs px-1.5 py-0.5 ${notePriorityColors[note.priority as keyof typeof notePriorityColors]}`}
-          >
-            {note.priority}
-          </Badge>
-        </div>
+      <div className="flex-1 min-w-0 mb-1">
+        <h4 className="font-medium text-sm text-balance leading-tight">
+          {note.title}
+        </h4>
         {note.createdAt !== undefined && (
           <time className="text-xs text-muted-foreground">
             {new Date(note.createdAt).toLocaleDateString('en-US', {
@@ -55,7 +47,18 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
         )}
       </div>
 
-      <div className="w-full flex items-center justify-end mt-2">
+      <div className="w-full flex items-center justify-between mt-2">
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="outline"
+            className={`text-xs px-1.5 py-0.5 ${notePriorityColors[note.priority as keyof typeof notePriorityColors]} capitalize`}
+          >
+            {note.priority}
+          </Badge>
+          {!!note.content && note.content.trim().length > 0 && (
+            <TextAlignStart className="w-4 h-4" />
+          )}
+        </div>
         <Button
           variant="ghost"
           size="icon"
