@@ -1,22 +1,16 @@
 import { TextAlignStart, TrashIcon } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { removeNote } from '@/lib/storage/notes';
+import { removeNote, updateNote } from '@/lib/storage/notes';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { Note } from '@/types/notes';
+
+import { NotePriorityDropdown } from './NotePriorityDropdown';
 
 interface NoteItemProps {
   note: Note;
   onNoteClick: (note: Note) => void;
 }
-
-const notePriorityColors = {
-  high: 'bg-destructive text-destructive-foreground border-destructive',
-  medium:
-    'bg-amber-200 text-amber-900 border-amber-200 dark:bg-amber-800 dark:text-amber-100 dark:border-amber-700',
-  low: 'bg-green-200 text-green-900 border-green-200 dark:bg-green-800 dark:text-green-100 dark:border-green-700',
-};
 
 const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
   const handleDelete = async (noteId: string) => {
@@ -45,12 +39,12 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
 
       <div className="w-full flex items-center justify-between mt-2">
         <div className="flex items-center gap-2">
-          <Badge
-            variant="outline"
-            className={`text-xs px-1.5 py-0.5 ${notePriorityColors[note.priority as keyof typeof notePriorityColors]} capitalize`}
-          >
-            {note.priority}
-          </Badge>
+          <NotePriorityDropdown
+            value={note.priority}
+            onChange={(priority) => {
+              updateNote(note.id, { priority });
+            }}
+          />
           {!!note.content && note.content.trim().length > 0 && (
             <TextAlignStart className="w-4 h-4" />
           )}
