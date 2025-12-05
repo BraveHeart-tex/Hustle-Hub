@@ -17,9 +17,15 @@ const NewTab = () => {
         <Header />
         <main className="container mx-auto px-4 py-6 min-w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            <JiraSection />
-            <GitlabSection />
-            <NotesSection />
+            <div>
+              <JiraSection />
+            </div>
+            <div>
+              <GitlabSection />
+            </div>
+            <div>
+              <NotesSection />
+            </div>
           </div>
         </main>
       </div>
