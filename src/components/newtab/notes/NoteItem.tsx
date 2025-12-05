@@ -10,6 +10,13 @@ interface NoteItemProps {
   onNoteClick: (note: Note) => void;
 }
 
+const noteDateFormatter = new Intl.DateTimeFormat('tr-TR', {
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 const notePriorityColors = {
   high: 'bg-destructive text-destructive-foreground border-destructive',
   medium:
@@ -37,12 +44,7 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
         </h4>
         {note.createdAt !== undefined && (
           <time className="text-xs text-muted-foreground">
-            {new Date(note.createdAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {noteDateFormatter.format(new Date(note.createdAt))}
           </time>
         )}
       </div>
