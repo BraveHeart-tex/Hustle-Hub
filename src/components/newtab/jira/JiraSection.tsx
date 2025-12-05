@@ -42,13 +42,21 @@ export default function JiraSection() {
   const taskStatuses = useMemo(() => {
     if (!data?.issues) return [];
 
-    return data.issues.reduce<string[]>((acc, curr) => {
-      if (!acc.includes(curr.fields.status.name)) {
-        acc.push(curr.fields.status.name);
-      }
+    const counts: Record<string, number> = {};
+    const result: string[] = [];
 
-      return acc;
-    }, []);
+    for (const issue of data.issues) {
+      const status = issue.fields.status.name;
+
+      const next = (counts[status] ?? 0) + 1;
+      counts[status] = next;
+
+      if (next === 2) {
+        result.push(status);
+      }
+    }
+
+    return result;
   }, [data?.issues]);
 
   const renderContent = useCallback(() => {
