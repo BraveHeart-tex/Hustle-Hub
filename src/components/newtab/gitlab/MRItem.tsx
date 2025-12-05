@@ -65,11 +65,7 @@ const MRItem = ({ mr }: MRItemProps) => {
           )}
         </div>
         <span className="text-xs text-muted-foreground">
-          {formatDate(mr.createdAt, {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          })}
+          {formatDate(mr.createdAt)}
         </span>
       </div>
 

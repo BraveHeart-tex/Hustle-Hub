@@ -1,10 +1,10 @@
 const defaultDateFormatOptions: Intl.DateTimeFormatOptions = {
   day: 'numeric',
-  month: 'long',
-  year: 'numeric',
+  month: 'short',
   hour: '2-digit',
   minute: '2-digit',
   hour12: false,
+  year: 'numeric',
 };
 
 export function formatDate(
@@ -18,5 +18,5 @@ export function formatDate(
     ...options,
   })
     .format(date)
-    .replace(',', ''); // remove comma for cleaner output
+    .replace(',', '');
 }

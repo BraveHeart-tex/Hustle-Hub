@@ -3,19 +3,13 @@ import { TextAlignStart, TrashIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { removeNote } from '@/lib/storage/notes';
+import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { Note } from '@/types/notes';
 
 interface NoteItemProps {
   note: Note;
   onNoteClick: (note: Note) => void;
 }
-
-const noteDateFormatter = new Intl.DateTimeFormat('tr-TR', {
-  day: 'numeric',
-  month: 'short',
-  hour: '2-digit',
-  minute: '2-digit',
-});
 
 const notePriorityColors = {
   high: 'bg-destructive text-destructive-foreground border-destructive',
@@ -44,7 +38,7 @@ const NoteItem = ({ note, onNoteClick }: NoteItemProps) => {
         </h4>
         {note.createdAt !== undefined && (
           <time className="text-xs text-muted-foreground">
-            {noteDateFormatter.format(new Date(note.createdAt))}
+            {formatDate(note.createdAt)}
           </time>
         )}
       </div>
