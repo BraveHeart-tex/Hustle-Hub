@@ -16,16 +16,10 @@ const NewTab = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container mx-auto px-4 py-6 min-w-full">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-1">
-              <JiraSection />
-            </div>
-            <div className="md:col-span-1">
-              <GitlabSection />
-            </div>
-            <div className="md:col-span-1">
-              <NotesSection />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <JiraSection />
+            <GitlabSection />
+            <NotesSection />
           </div>
         </main>
       </div>
