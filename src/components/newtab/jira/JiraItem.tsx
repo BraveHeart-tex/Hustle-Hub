@@ -1,5 +1,13 @@
-import { AlertCircle, CheckSquare, Clock } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckSquare,
+  ClipboardCopyIcon,
+  Clock,
+} from 'lucide-react';
+import { MouseEvent } from 'react';
+import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { JiraIssue } from '@/types/jira';
 
@@ -32,11 +40,26 @@ interface JiraItemProps {
 }
 
 const JiraItem = ({ issue }: JiraItemProps) => {
+  const [isCopied, setIsCopied] = useState(false);
   const { fields } = issue;
   const statusColor = getStatusColor(fields.status.statusCategory.colorName);
 
   const handleIssueClick = () => {
     window.open(getJiraTaskUrl(issue.key), '_blank');
+  };
+
+  const copyTaskLinkToClipboard = async (
+    event: MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(getJiraTaskUrl(issue.key));
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to copy task link to clipboard');
+    }
   };
 
   return (
@@ -66,6 +89,14 @@ const JiraItem = ({ issue }: JiraItemProps) => {
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>@{fields.assignee.displayName}</span>
+        <Button
+          size={'icon'}
+          variant={'ghost'}
+          className="size-4 z-10"
+          onClick={copyTaskLinkToClipboard}
+        >
+          {isCopied ? <CheckSquare /> : <ClipboardCopyIcon />}
+        </Button>
       </div>
     </div>
   );
