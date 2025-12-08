@@ -170,7 +170,7 @@ export default function GitlabSection() {
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 space-y-3 overflow-auto pt-2">
+      <CardContent className="flex-1 grid gap-3 overflow-auto pt-2">
         {renderContent()}
       </CardContent>
     </Card>
