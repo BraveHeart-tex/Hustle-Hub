@@ -129,7 +129,7 @@ const MRItem = ({ mr }: MRItemProps) => {
                   <GitlabUserAvatar src={reviewer.avatarUrl} />
 
                   {reviewer.hasApproved && (
-                    <CheckIcon className="absolute -bottom-1 -right-1 w-4 h-4 text-white bg-green-500 dark:bg-green-700 rounded-full p-[1px] border border-gray-200" />
+                    <CheckIcon className="absolute -bottom-1 -right-1 w-4 h-4 text-white bg-green-500 dark:bg-green-700 rounded-full p-px border border-gray-200" />
                   )}
                 </div>
               ))}

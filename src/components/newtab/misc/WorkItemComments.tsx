@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { TiptapRef } from '@/components/ui/rich-text-editor';
 import { addComment, removeComment, useComments } from '@/lib/storage/comments';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { CommentItemType } from '@/types/comments';
@@ -34,6 +35,7 @@ const WorkItemComments = ({
     itemMeta.itemId,
     itemMeta.itemType,
   );
+  const tiptapRef = useRef<TiptapRef>(null);
   const [draft, setDraft] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -52,6 +54,8 @@ const WorkItemComments = ({
         content: draft,
       });
       setDraft('');
+      tiptapRef.current?.editor?.commands.setContent('');
+      focusEditor();
     } finally {
       setIsSubmitting(false);
     }
@@ -59,8 +63,12 @@ const WorkItemComments = ({
 
   const handleResolveComment = async (commentId: string) => {
     try {
+      const shouldFocusAfterResolve = comments.length === 1;
       setIsSubmitting(true);
       await removeComment(commentId);
+      if (shouldFocusAfterResolve) {
+        focusEditor();
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -73,6 +81,12 @@ const WorkItemComments = ({
 
     event.stopPropagation();
     setIsPopoverOpen((prev) => !prev);
+  };
+
+  const focusEditor = () => {
+    if (tiptapRef.current && tiptapRef.current?.editor) {
+      tiptapRef.current.editor.commands.focus();
+    }
   };
 
   return (
@@ -148,6 +162,8 @@ const WorkItemComments = ({
               placeholder="Add a comment..."
               className="border-muted h-24"
               showToolbar={false}
+              ref={tiptapRef}
+              onReady={focusEditor}
             />
           </Suspense>
           <div className="flex justify-end gap-2">
