@@ -4,9 +4,10 @@ import {
   ClipboardCopyIcon,
   Clock,
 } from 'lucide-react';
-import { MouseEvent } from 'react';
+import { MouseEvent, useState } from 'react';
 import { toast } from 'sonner';
 
+import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
 import { Button } from '@/components/ui/button';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { JiraIssue } from '@/types/jira';
@@ -89,14 +90,17 @@ const JiraItem = ({ issue }: JiraItemProps) => {
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>@{fields.assignee.displayName}</span>
-        <Button
-          size={'icon'}
-          variant={'ghost'}
-          className="size-4 z-10"
-          onClick={copyTaskLinkToClipboard}
-        >
-          {isCopied ? <CheckSquare /> : <ClipboardCopyIcon />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <WorkItemComments itemId={issue.id} itemType="jira" />
+          <Button
+            size={'icon'}
+            variant={'ghost'}
+            className="size-4 z-10"
+            onClick={copyTaskLinkToClipboard}
+          >
+            {isCopied ? <CheckSquare /> : <ClipboardCopyIcon />}
+          </Button>
+        </div>
       </div>
     </div>
   );

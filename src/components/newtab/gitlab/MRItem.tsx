@@ -11,7 +11,8 @@ import {
 import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
 import MRLabel from '@/components/newtab/gitlab/MRLabel';
 import MrStatusBadge from '@/components/newtab/gitlab/MrStatusBadge';
-import MRStatusIcon from '@/components/newtab/gitlab/MRStatusIcon';
+import MRStatusIcon from '@/components/newtab/gitlab/MrStatusIcon';
+import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
@@ -78,18 +79,18 @@ const MRItem = ({ mr }: MRItemProps) => {
 
         <div className="mb-2 space-y-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <FolderGit2 className="h-3 w-3" />
+            <FolderGit2 className="size-3" />
             <span>{mr.projectName}</span>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <GitBranch className="h-3 w-3" />
+            <GitBranch className="size-3" />
             <span>{mr.sourceBranch}</span>
             <span>→</span>
             <span>{mr.targetBranch}</span>
           </div>
           {mr.autoMergeEnabled && (
             <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400 font-medium">
-              <WorkflowIcon className="h-3 w-3" />
+              <WorkflowIcon className="size-3" />
               <span>Auto-merge</span>
             </div>
           )}
@@ -99,13 +100,18 @@ const MRItem = ({ mr }: MRItemProps) => {
           <span>by @{mr.author.username}</span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <ThumbsUp className="h-3 w-3" />
+              <ThumbsUp className="size-3" />
               <span>{`${mr.approvedBy}/${mr.approvalsRequired}`}</span>
             </div>
             <div className="flex items-center gap-1">
-              <MessageSquare className="h-3 w-3" />
+              <MessageSquare className="size-3" />
               <span>{mr.userNotesCount}</span>
             </div>
+            <WorkItemComments
+              itemId={mr.iid}
+              itemType="gitlab"
+              preventDefaultOnClick
+            />
           </div>
         </div>
 

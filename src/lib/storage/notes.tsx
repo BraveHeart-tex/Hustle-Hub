@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import { Note } from '@/types/notes';
 
 const noteList = storage.defineItem<Note[]>('local:taskList', {
