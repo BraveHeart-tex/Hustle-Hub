@@ -15,19 +15,25 @@ import { CommentItemType } from '@/types/comments';
 const RichTextEditor = lazy(() => import('@/components/ui/rich-text-editor'));
 
 interface WorkItemCommentsProps {
-  itemId: string;
-  itemType: CommentItemType;
   preventDefaultOnClick?: boolean;
+  itemMeta: {
+    itemId: string;
+    itemType: CommentItemType;
+    title: string;
+    url: string;
+  };
 }
 
 const WorkItemComments = ({
-  itemId,
-  itemType,
+  itemMeta,
   preventDefaultOnClick = false,
 }: WorkItemCommentsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { getCommentsByItemIdAndType } = useComments();
-  const comments = getCommentsByItemIdAndType(itemId, itemType);
+  const comments = getCommentsByItemIdAndType(
+    itemMeta.itemId,
+    itemMeta.itemType,
+  );
   const [draft, setDraft] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,7 +42,15 @@ const WorkItemComments = ({
 
     try {
       setIsSubmitting(true);
-      await addComment(itemId, draft, itemType);
+      await addComment({
+        item: {
+          id: itemMeta.itemId,
+          type: itemMeta.itemType,
+          title: itemMeta.title,
+          url: itemMeta.url,
+        },
+        content: draft,
+      });
       setDraft('');
     } finally {
       setIsSubmitting(false);

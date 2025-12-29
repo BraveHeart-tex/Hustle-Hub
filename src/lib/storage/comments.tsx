@@ -6,25 +6,24 @@ import {
   useState,
 } from 'react';
 
-import { Comment, CommentItemType } from '@/types/comments';
+import {
+  Comment,
+  CommentItemType,
+  CreateCommentPayload,
+  UpdateCommentPayload,
+} from '@/types/comments';
 
 const commentList = storage.defineItem<Comment[]>('local:comments', {
   fallback: [],
 });
 
-export const addComment = async (
-  itemId: string,
-  comment: string,
-  itemType: CommentItemType,
-) => {
+export const addComment = async (payload: CreateCommentPayload) => {
   const currentComments = await commentList.getValue();
   await commentList.setValue([
     ...currentComments,
     {
+      ...payload,
       id: crypto.randomUUID(),
-      itemId,
-      itemType,
-      content: comment,
       createdAt: new Date().toISOString(),
     },
   ]);
@@ -37,11 +36,9 @@ export const removeComment = async (commentId: string) => {
   );
 };
 
-type CommentUpdate = Pick<Comment, 'content'>;
-
 export const updateComment = async (
   commentId: string,
-  changes: CommentUpdate,
+  changes: UpdateCommentPayload,
 ) => {
   const currentComments = await commentList.getValue();
   await commentList.setValue(
@@ -56,6 +53,7 @@ interface CommentsContextType {
     itemId: string,
     itemType: CommentItemType,
   ) => Comment[];
+  comments: Comment[];
 }
 
 export const CommentsContext = createContext<CommentsContextType | null>(null);
@@ -87,14 +85,15 @@ export const CommentsProvider = ({
   const getCommentsByItemIdAndType = useCallback(
     (itemId: string, itemType: CommentItemType) => {
       return comments.filter(
-        (comment) => comment.itemType === itemType && comment.itemId === itemId,
+        (comment) =>
+          comment.item.type === itemType && comment.item.id === itemId,
       );
     },
     [comments],
   );
 
   return (
-    <CommentsContext.Provider value={{ getCommentsByItemIdAndType }}>
+    <CommentsContext.Provider value={{ comments, getCommentsByItemIdAndType }}>
       {children}
     </CommentsContext.Provider>
   );

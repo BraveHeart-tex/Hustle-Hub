@@ -91,7 +91,14 @@ const JiraItem = ({ issue }: JiraItemProps) => {
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>@{fields.assignee.displayName}</span>
         <div className="flex items-center gap-2">
-          <WorkItemComments itemId={issue.id} itemType="jira" />
+          <WorkItemComments
+            itemMeta={{
+              itemId: issue.id,
+              itemType: 'jira',
+              title: fields.summary,
+              url: getJiraTaskUrl(issue.key),
+            }}
+          />
           <Button
             size={'icon'}
             variant={'ghost'}

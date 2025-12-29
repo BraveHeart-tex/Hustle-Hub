@@ -108,8 +108,12 @@ const MRItem = ({ mr }: MRItemProps) => {
               <span>{mr.userNotesCount}</span>
             </div>
             <WorkItemComments
-              itemId={mr.iid}
-              itemType="gitlab"
+              itemMeta={{
+                itemId: mr.iid,
+                itemType: 'gitlab',
+                title: mr.title,
+                url: mr.webUrl,
+              }}
               preventDefaultOnClick
             />
           </div>

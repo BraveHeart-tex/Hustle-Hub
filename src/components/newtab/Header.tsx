@@ -6,6 +6,8 @@ import { ModeToggle } from '@/components/newtab/ModeToggle';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+import AllCommentsWidget from './misc/AllCommentsWidget';
+
 export default function Header() {
   const [isPending, setIsPending] = useState(false);
   const queryClient = useQueryClient();
@@ -33,6 +35,7 @@ export default function Header() {
           </div>
 
           <div className="flex items-center space-x-3">
+            <AllCommentsWidget />
             <ModeToggle />
             <Button
               variant="ghost"
