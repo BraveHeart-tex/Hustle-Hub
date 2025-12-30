@@ -40,7 +40,13 @@ const WorkItemComments = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (!draft.trim()) return;
+    const editor = tiptapRef.current?.editor;
+    if (!editor) return;
+
+    if (editor.isEmpty || !draft.trim()) {
+      focusEditor();
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -54,7 +60,7 @@ const WorkItemComments = ({
         content: draft,
       });
       setDraft('');
-      tiptapRef.current?.editor?.commands.setContent('');
+      editor.commands.setContent('');
       focusEditor();
     } finally {
       setIsSubmitting(false);
@@ -173,7 +179,11 @@ const WorkItemComments = ({
               variant="secondary"
               className="h-7 px-2 text-xs"
               onClick={() => setDraft('')}
-              disabled={!draft.trim() || isSubmitting}
+              disabled={
+                !draft.trim() ||
+                isSubmitting ||
+                tiptapRef.current?.editor?.isEmpty
+              }
             >
               Clear
             </Button>
@@ -182,7 +192,11 @@ const WorkItemComments = ({
               size="sm"
               className="h-7 px-3 text-xs"
               onClick={handleSubmit}
-              disabled={!draft.trim() || isSubmitting}
+              disabled={
+                !draft.trim() ||
+                isSubmitting ||
+                tiptapRef.current?.editor?.isEmpty
+              }
             >
               Add comment
             </Button>
