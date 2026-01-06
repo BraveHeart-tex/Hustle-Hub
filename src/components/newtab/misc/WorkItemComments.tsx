@@ -101,10 +101,10 @@ const WorkItemComments = ({
         <Button
           size="icon"
           variant="ghost"
-          className="size-4 relative"
+          className="size-4 relative text-muted-foreground"
           onClick={handlePopoverClick}
         >
-          <MessageSquareTextIcon className="h-3 w-3 text-muted-foreground" />
+          <MessageSquareTextIcon />
           {comments.length > 0 && (
             <span className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full px-1 py-0.5 text-[8px] leading-none">
               {comments.length}
