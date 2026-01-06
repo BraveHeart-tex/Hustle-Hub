@@ -110,9 +110,17 @@ export default function NotesSection() {
           )}
         </CardHeader>
         <CardContent className="flex-1 space-y-3 overflow-auto pt-2">
-          {filteredNotes.map((note) => (
-            <NoteItem key={note.id} note={note} onNoteClick={handleItemClick} />
-          ))}
+          {filteredNotes.length > 0 ? (
+            filteredNotes.map((note) => (
+              <NoteItem
+                key={note.id}
+                note={note}
+                onNoteClick={handleItemClick}
+              />
+            ))
+          ) : (
+            <p className="text-muted-foreground">No notes found.</p>
+          )}
         </CardContent>
       </Card>
     </>
