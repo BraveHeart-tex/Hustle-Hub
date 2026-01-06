@@ -1,4 +1,8 @@
-import { CheckIcon, MessageSquareTextIcon } from 'lucide-react';
+import {
+  CheckIcon,
+  MessageSquareIcon,
+  MessageSquareTextIcon,
+} from 'lucide-react';
 
 import GitlabIcon from '@/components/misc/GitlabIcon';
 import JiraIcon from '@/components/misc/JiraIcon';
@@ -15,13 +19,18 @@ import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { Comment } from '@/types/comments';
 
 const AllCommentsWidget = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const { comments } = useComments();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleResolveComment = async (commentId: string) => {
     try {
+      const nextCommentCount = comments.length - 1;
       setIsSubmitting(true);
       await removeComment(commentId);
+      if (nextCommentCount === 0) {
+        setIsOpen(false);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -41,10 +50,14 @@ const AllCommentsWidget = () => {
   }, [comments]);
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button size="icon" variant="outline">
-          <MessageSquareTextIcon className="size-4" />
+        <Button size="icon" variant="outline" className="relative">
+          {comments.length > 0 ? (
+            <MessageSquareTextIcon className="size-4" />
+          ) : (
+            <MessageSquareIcon className="size-4" />
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent className="sm:max-w-2xl">
