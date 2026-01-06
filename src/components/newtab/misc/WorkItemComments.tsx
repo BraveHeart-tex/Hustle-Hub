@@ -132,7 +132,7 @@ const WorkItemComments = ({
             comments.map((comment) => (
               <div
                 key={comment.id}
-                className="rounded-md border px-2.5 py-2 space-y-1 break-all"
+                className="rounded-md border px-2.5 py-2 space-y-1 wrap-break-word"
               >
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                   <span>You</span>
@@ -151,7 +151,7 @@ const WorkItemComments = ({
                   </div>
                 </div>
                 <div
-                  className="prose prose-xs dark:prose-invert max-w-none text-foreground text-sm"
+                  className="prose prose-xs dark:prose-invert max-w-none text-foreground text-sm whitespace-pre-wrap hyphens-auto"
                   // Content is produced by our own editor, so it's safe to render as HTML here.
                   dangerouslySetInnerHTML={{ __html: comment.content }}
                 />
