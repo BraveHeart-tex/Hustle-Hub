@@ -132,7 +132,7 @@ const WorkItemComments = ({
             comments.map((comment) => (
               <div
                 key={comment.id}
-                className="rounded-md border px-2.5 py-2 space-y-1"
+                className="rounded-md border px-2.5 py-2 space-y-1 break-all"
               >
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                   <span>You</span>
