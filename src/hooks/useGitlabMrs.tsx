@@ -7,7 +7,6 @@ import { GitlabMergeRequest } from '@/types/gitlab';
 export const useGitlabMrs = (filter: GitlabFilter) =>
   useApi(QUERY_KEYS.GITLAB_MRS(filter), async () => {
     const response = await fetch(ENDPOINTS.GITLAB_MRS(filter));
-    return (await response.json()) as ApiResponse<{
-      data: GitlabMergeRequest[];
-    }>;
+
+    return (await response.json()) as ApiResponse<GitlabMergeRequest[]>;
   });

@@ -59,7 +59,7 @@ export default function GitlabSection() {
 
   const avilableProjectNames: string[] = useMemo(() => {
     if (!data) return [];
-    return data.data.reduce<string[]>((acc, curr) => {
+    return data.reduce<string[]>((acc, curr) => {
       const projectName = curr.projectName;
       if (projectName && !acc.includes(projectName)) {
         acc.push(projectName);
@@ -98,17 +98,17 @@ export default function GitlabSection() {
       return <p className="text-destructive font-medium">{error?.message}</p>;
     }
 
-    if (data?.data.length === 0) {
+    if (data?.length === 0) {
       return <p className="text-muted-foreground">No MRs found.</p>;
     }
 
-    return data?.data
-      .filter((mr) =>
+    return data
+      ?.filter((mr) =>
         selectedProjectName ? mr.projectName === selectedProjectName : true,
       )
       .map((mr) => <MRItem mr={mr} key={mr.iid} />);
   }, [
-    data?.data,
+    data,
     error?.message,
     isError,
     isLoading,
