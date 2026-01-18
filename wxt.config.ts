@@ -4,10 +4,6 @@ import { defineConfig } from 'wxt';
 import { z } from 'zod';
 
 export const viteEnvSchema = z.object({
-  VITE_GITLAB_REDIRECT_URI: z.url().describe('OAuth redirect URI for GitLab'),
-  VITE_GOOGLE_CALENDAR_REDIRECT_URI: z
-    .url()
-    .describe('OAuth redirect URI for Google Calendar'),
   VITE_RELEASE_REVIEWER_USER_ID: z
     .string()
     .regex(/^\d+$/, 'Must be a numeric user ID'),
