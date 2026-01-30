@@ -102,11 +102,11 @@ export default function GitlabSection() {
       return <p className="text-muted-foreground">No MRs found.</p>;
     }
 
-    return data
-      ?.filter((mr) =>
-        selectedProjectName ? mr.projectName === selectedProjectName : true,
-      )
-      .map((mr) => <MRItem mr={mr} key={mr.iid} />);
+    return (
+      selectedProjectName
+        ? data?.filter((mr) => mr.projectName === selectedProjectName)
+        : data
+    )?.map((mr) => <MRItem mr={mr} key={mr.iid} />);
   }, [
     data,
     error?.message,

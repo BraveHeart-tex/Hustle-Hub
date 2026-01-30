@@ -21,6 +21,10 @@ export interface GitlabMergeRequest {
   headPipelineStatus?: PipelineStatus;
   projectName: string;
   autoMergeEnabled: boolean;
+  diffStatsSummary: {
+    additions: number;
+    deletions: number;
+  };
 }
 
 export type PipelineStatus =

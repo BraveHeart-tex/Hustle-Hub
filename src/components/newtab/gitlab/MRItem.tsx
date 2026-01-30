@@ -1,6 +1,7 @@
 import {
   AlertCircleIcon,
   CheckIcon,
+  FileDiffIcon,
   FolderGit2,
   GitBranch,
   MessageSquare,
@@ -48,7 +49,6 @@ const MRItem = ({ mr }: MRItemProps) => {
             icon={<AlertCircleIcon />}
           />
         )}
-
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono text-muted-foreground">
@@ -88,6 +88,19 @@ const MRItem = ({ mr }: MRItemProps) => {
             <span>→</span>
             <span>{mr.targetBranch}</span>
           </div>
+          {mr.diffStatsSummary && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <FileDiffIcon className="size-3" />
+              <span className="flex items-center gap-2 font-mono">
+                <span className="text-green-600 dark:text-green-400">
+                  +{mr.diffStatsSummary.additions}
+                </span>
+                <span className="text-destructive">
+                  -{mr.diffStatsSummary.deletions}
+                </span>
+              </span>
+            </div>
+          )}
           {mr.autoMergeEnabled && (
             <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400 font-medium">
               <WorkflowIcon className="size-3" />
