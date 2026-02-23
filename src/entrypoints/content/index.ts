@@ -94,15 +94,21 @@ export default defineContentScript({
     const isNewMR = location.pathname.endsWith('/-/merge_requests/new');
 
     if (isNewMR) await handleBranchRedirection();
-    if (params.get('merge_request[target_branch]') !== 'main') return;
+
+    await click(SELECTORS.assignMe);
+
+    if (params.get('merge_request[target_branch]') !== 'main') {
+      return;
+    }
 
     const jiraId =
       extractJiraId(params.get('merge_request[source_branch]') ?? '') ?? '';
     const titleInput = document.querySelector<HTMLInputElement>(
       SELECTORS.title,
     );
-    if (titleInput)
+    if (titleInput) {
       setInputValue(titleInput, `Production Release for ${jiraId}`);
+    }
 
     await click(SELECTORS.assignMe);
     await click(SELECTORS.reviewerDropdown);
