@@ -111,6 +111,41 @@ export default defineContentScript({
   matches: ['*://*.gitlab.com/*/merge_requests/*'],
   main: async () => {
     const params = new URLSearchParams(location.search);
+
+    if (location.pathname.endsWith('/-/merge_requests/new')) {
+      console.log('Listening for release branch selection...');
+
+      const input = await waitForElement<HTMLInputElement>(
+        'input#merge_request_source_branch',
+      );
+
+      let lastValue = input.value;
+
+      const observer = new MutationObserver(async () => {
+        const currentValue = input.value;
+
+        if (currentValue !== lastValue) {
+          lastValue = currentValue;
+
+          const url = new URL(location.href);
+          const target = url.searchParams.get('merge_request[target_branch]');
+
+          if (currentValue.startsWith('release/') && target !== 'main') {
+            url.searchParams.set('merge_request[source_branch]', currentValue);
+            url.searchParams.set('merge_request[target_branch]', 'main');
+            window.location.href = url.toString();
+          }
+        }
+      });
+
+      observer.observe(input, {
+        attributes: true,
+        attributeFilter: ['value'],
+      });
+
+      return;
+    }
+
     if (params.get('merge_request[target_branch]') !== 'main') return;
 
     const sourceBranch = params.get('merge_request[source_branch]') ?? '';
