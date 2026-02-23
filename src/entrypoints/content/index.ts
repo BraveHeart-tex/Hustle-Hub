@@ -72,9 +72,10 @@ const handleBranchRedirection = async () => {
 
   const checkAndRedirect = () => {
     const url = new URL(location.href);
-    const target = url.searchParams.get('merge_request[target_branch]');
-    if (input.value.startsWith('release/') && target !== 'main') {
-      url.searchParams.set('merge_request[source_branch]', input.value);
+    const prevSource = url.searchParams.get('merge_request[source_branch]');
+    const newSource = input.value;
+    if (input.value.startsWith('release/') && prevSource !== newSource) {
+      url.searchParams.set('merge_request[source_branch]', newSource);
       url.searchParams.set('merge_request[target_branch]', 'main');
       window.location.href = url.toString();
     }
