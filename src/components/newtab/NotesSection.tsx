@@ -21,16 +21,19 @@ export default function NotesSection() {
 
   const { notes } = useNotes();
 
-  const priorityOptions = useMemo(() => {
+  const priorityStats = useMemo(() => {
     if (!notes || notes.length === 0) return [];
 
-    return notes.reduce<string[]>((priorities, note) => {
-      if (!priorities.includes(note.priority)) {
-        priorities.push(note.priority);
-      }
+    const map: Record<string, number> = {};
 
-      return priorities;
-    }, []);
+    for (const note of notes) {
+      map[note.priority] = (map[note.priority] ?? 0) + 1;
+    }
+
+    return Object.entries(map).map(([label, count]) => ({
+      label,
+      count,
+    }));
   }, [notes]);
 
   const handleItemClick = useCallback((selectedItem: Note) => {
@@ -53,14 +56,7 @@ export default function NotesSection() {
     return notes.filter((note) => note.priority === selectedPriority);
   }, [notes, selectedPriority]);
 
-  const priorityCount = useMemo(() => {
-    if (!notes) return {};
-
-    return notes.reduce<Record<string, number>>((countMap, note) => {
-      countMap[note.priority] = (countMap[note.priority] || 0) + 1;
-      return countMap;
-    }, {});
-  }, [notes]);
+  const shouldShowPriorityFilters = priorityStats.some((p) => p.count > 1);
 
   return (
     <>
@@ -89,21 +85,19 @@ export default function NotesSection() {
               <PlusIcon />
             </Button>
           </div>
-          {priorityOptions.length > 1 && (
+          {shouldShowPriorityFilters && (
             <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
-              {priorityOptions.map((priority) => (
+              {priorityStats.map((priority) => (
                 <FilterButton
-                  key={priority}
-                  active={selectedPriority === priority}
+                  key={priority.label}
+                  active={selectedPriority === priority.label}
                   onClick={() =>
                     setSelectedPriority((prev) =>
-                      prev === priority ? '' : priority,
+                      prev === priority.label ? '' : priority.label,
                     )
                   }
                 >
-                  {priority}{' '}
-                  {priorityCount[priority] > 0 &&
-                    `(${priorityCount[priority]})`}
+                  {priority.label} {priority.count > 1 && `(${priority.count})`}
                 </FilterButton>
               ))}
             </div>
