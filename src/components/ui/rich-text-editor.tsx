@@ -1,3 +1,4 @@
+import { Extension } from '@tiptap/core';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Placeholder } from '@tiptap/extensions';
 import { Editor, EditorContent, useEditor } from '@tiptap/react';
@@ -27,6 +28,7 @@ import { cn } from '@/lib/utils';
 interface RichTextEditorProps {
   content?: string;
   onChange?: (content: string) => void;
+  onCmdEnter?: () => void;
   onReady?: () => void;
   placeholder?: string;
   className?: string;
@@ -46,6 +48,7 @@ const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
       className,
       showToolbar = true,
       onReady,
+      onCmdEnter,
     }: RichTextEditorProps,
     ref,
   ) => {
@@ -78,6 +81,17 @@ const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
               class:
                 'text-primary underline decoration-primary/20 underline-offset-2 transition-colors hover:text-primary/80 hover:decoration-primary/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm',
             },
+          },
+        }),
+        Extension.create({
+          name: 'cmdEnterHandler',
+          addKeyboardShortcuts() {
+            return {
+              'Mod-Enter': () => {
+                onCmdEnter?.();
+                return true;
+              },
+            };
           },
         }),
         Placeholder.configure({

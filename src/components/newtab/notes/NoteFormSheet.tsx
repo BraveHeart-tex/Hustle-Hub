@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,8 @@ const NoteFormSheet = ({
 }: NoteFormDialogProps) => {
   const [formState, setFormState] = useState<Note>(defaultFormState);
   const formResetTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const lastToastId = useRef<string | number | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -75,6 +77,14 @@ const NoteFormSheet = ({
     event.preventDefault();
 
     if (!formState.title) {
+      if (lastToastId.current) {
+        toast.error('Please enter a title', {
+          id: lastToastId.current,
+        });
+        return;
+      }
+
+      lastToastId.current = toast.error('Please enter a title');
       return;
     }
 
@@ -100,7 +110,11 @@ const NoteFormSheet = ({
             {formState.id ? 'Edit an existing note' : 'Create a new note'}
           </SheetDescription>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 overflow-auto px-4">
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit}
+          className="space-y-6 overflow-auto px-4"
+        >
           <div className="flex flex-col gap-2 group">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -120,6 +134,9 @@ const NoteFormSheet = ({
                 content={formState.content}
                 onChange={(content) => {
                   setFormState({ ...formState, content });
+                }}
+                onCmdEnter={() => {
+                  formRef.current?.requestSubmit();
                 }}
               />
             </Suspense>
