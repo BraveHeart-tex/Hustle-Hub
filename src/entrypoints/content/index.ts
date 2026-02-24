@@ -15,12 +15,20 @@ const SELECTORS = {
     '[data-testid="content_editor_editablebox"] [contenteditable="true"]',
   plainTextEditor: '#merge_request_description',
   editorToggle: '#switch-to-rich-text-editor',
+  reviewerDropdownCloseIcon: '[data-testid="close-icon"]',
+  reviewerDropdownOption: (reviewerId: string) =>
+    `li[data-user-id="${reviewerId}"] a`,
 };
 
 const click = async (sel: string) => {
-  const el = await waitForElement<HTMLElement>(sel).catch(() => null);
-  el?.click();
-  return el;
+  try {
+    const el = await waitForElement<HTMLElement>(sel).catch(() => null);
+    el?.click();
+    return el;
+  } catch (error) {
+    console.error(`click on selector: ${sel} failed with error: ${error}`);
+    return null;
+  }
 };
 
 const setInputValue = (
@@ -113,8 +121,9 @@ export default defineContentScript({
     await click(SELECTORS.assignMe);
     await click(SELECTORS.reviewerDropdown);
     const reviewerId = import.meta.env.VITE_RELEASE_REVIEWER_USER_ID;
-    if (await click(`li[data-user-id="${reviewerId}"] a`)) {
-      await click('[data-testid="close-icon"]');
+    if (await click(SELECTORS.reviewerDropdownOption(reviewerId))) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      await click(SELECTORS.reviewerDropdownCloseIcon);
     }
 
     if (await click(SELECTORS.labelDropdown)) {
