@@ -39,25 +39,24 @@ export default function JiraSection() {
   const { data, isLoading, isError, error } = useJiraTickets(filter);
   const [selectedTaskStatus, setSelectedTaskStatus] = useState('');
 
-  const taskStatuses = useMemo(() => {
+  const taskStatuses: { label: string; count: number }[] = useMemo(() => {
     if (!data?.issues) return [];
 
     const counts: Record<string, number> = {};
-    const result: string[] = [];
 
     for (const issue of data.issues) {
       const status = issue.fields.status.name;
-
-      const next = (counts[status] ?? 0) + 1;
-      counts[status] = next;
-
-      if (next === 2) {
-        result.push(status);
-      }
+      counts[status] = (counts[status] ?? 0) + 1;
     }
 
-    return result;
+    return Object.entries(counts).map(([label, count]) => ({
+      label,
+      count,
+    }));
   }, [data?.issues]);
+
+  const shouldShowStatusFilters =
+    !isLoading && taskStatuses.some((s) => s.count > 1);
 
   const renderContent = useCallback(() => {
     if (isLoading) {
@@ -134,19 +133,19 @@ export default function JiraSection() {
           </Select>
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
-        {!isLoading && taskStatuses.length > 1 && (
+        {shouldShowStatusFilters && (
           <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap  overflow-x-auto">
             {taskStatuses.map((status) => (
               <FilterButton
-                key={status}
-                active={status === selectedTaskStatus}
+                key={status.label}
+                active={status.label === selectedTaskStatus}
                 onClick={() =>
                   setSelectedTaskStatus((prev) =>
-                    prev === status ? '' : status,
+                    prev === status.label ? '' : status.label,
                   )
                 }
               >
-                {status}
+                {status.label} {status.count > 1 && `(${status.count})`}
               </FilterButton>
             ))}
           </div>
