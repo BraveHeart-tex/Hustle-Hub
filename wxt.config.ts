@@ -8,6 +8,7 @@ export const viteEnvSchema = z.object({
     .string()
     .regex(/^\d+$/, 'Must be a numeric user ID'),
   VITE_BASE_API_URL: z.url().describe('Base API endpoint URL'),
+  VITE_GITLAB_USER_ID: z.string().regex(/^\d+$/, 'Must be a numeric user ID'),
 });
 
 export default defineConfig({
