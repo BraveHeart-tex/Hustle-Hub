@@ -23,41 +23,60 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  useEffect(() => {
-    const collectThreads = () => {
-      const discussions = Array.from(
-        document.querySelectorAll(
-          `.discussion[data-testid="discussion-content"]`,
-        ),
-      ) as HTMLElement[];
+  const threadsRef = useRef<Thread[]>([]);
 
-      const userThreads = discussions
-        .filter((discussion) =>
-          discussion.querySelector(
-            `a.author-name-link[data-user-id="${userId}"]`,
-          ),
-        )
-        .map((discussion) => ({
-          id: discussion.dataset.discussionId!,
+  const collectThreads = useCallback(() => {
+    const discussions = document.querySelectorAll(
+      `.discussion[data-testid="discussion-content"]`,
+    );
+
+    const newUserThreads: Thread[] = [];
+
+    discussions.forEach((el) => {
+      const discussion = el as HTMLElement;
+      const author = discussion.querySelector(
+        `a.author-name-link[data-user-id="${userId}"]`,
+      );
+
+      if (author) {
+        newUserThreads.push({
+          id: discussion.dataset.discussionId || '',
           resolved: discussion.dataset.discussionResolved === 'true',
-        }));
+        });
+      }
+    });
 
-      setThreads(userThreads);
-    };
+    const isDifferent =
+      JSON.stringify(newUserThreads) !== JSON.stringify(threadsRef.current);
+    if (isDifferent) {
+      threadsRef.current = newUserThreads;
+      setThreads(newUserThreads);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
 
     collectThreads();
 
+    let debounceTimer: NodeJS.Timeout;
     const observer = new MutationObserver(() => {
-      collectThreads();
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(collectThreads, 300);
     });
 
-    observer.observe(document.body, {
+    const targetNode = document.querySelector('#notes-list') || document.body;
+
+    observer.observe(targetNode, {
       childList: true,
       subtree: true,
     });
 
-    return () => observer.disconnect();
-  }, [userId]);
+    return () => {
+      observer.disconnect();
+      clearTimeout(debounceTimer);
+    };
+  }, [userId, collectThreads]);
 
   const scrollToDiscussion = (id: string) => {
     const el = document.querySelector(
@@ -73,14 +92,16 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
 
     const originalTransition = el.style.transition;
     const originalBoxShadow = el.style.boxShadow;
+    const originalRadius = el.style.borderRadius;
 
     el.style.transition = 'box-shadow 0.3s ease, transform 0.3s ease';
     el.style.boxShadow = '0 0 0 3px #1f75cb';
+    el.style.borderRadius = '8px';
 
     setTimeout(() => {
       el.style.boxShadow = originalBoxShadow;
-
       el.style.transition = originalTransition;
+      el.style.borderRadius = originalRadius;
     }, 1500);
   };
 
@@ -88,9 +109,7 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="fixed bottom-6 right-6 z-999999" asChild>
         <Button size="sm" className="rounded-full shadow-md">
-          {!userId
-            ? 'Please provide VITE_GITLAB_USER_ID in .env'
-            : `🧵 ${threads.length}`}
+          {!userId ? 'Missing User ID' : `🧵 ${threads.length}`}
         </Button>
       </PopoverTrigger>
 
