@@ -6,6 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 interface Thread {
@@ -90,20 +91,16 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
       block: 'center',
     });
 
-    const originalTransition = el.style.transition;
-    const originalBoxShadow = el.style.boxShadow;
-    const originalRadius = el.style.borderRadius;
-
-    el.style.transition = 'box-shadow 0.3s ease, transform 0.3s ease';
-    el.style.boxShadow = '0 0 0 3px #1f75cb';
-    el.style.borderRadius = '8px';
+    el.classList.add(GITLAB_HIGHLIGHTED_THREAD_CLASS);
 
     setTimeout(() => {
-      el.style.boxShadow = originalBoxShadow;
-      el.style.transition = originalTransition;
-      el.style.borderRadius = originalRadius;
+      el.classList.remove(GITLAB_HIGHLIGHTED_THREAD_CLASS);
     }, 1500);
   };
+
+  if (threads.length === 0) {
+    return null;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

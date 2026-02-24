@@ -1,12 +1,3 @@
-import { GoogleCalendarAttendee } from '@/types/google.ts';
-
-export const TEAM_SLUGS = ['FE', 'ORD', 'DIS', 'PE', 'PRD', 'MEM', 'MOD'];
-
-export const AUTH_CALLBACK_STATUSES = {
-  SUCCESS: 'success',
-  FAILURE: 'failure',
-} as const;
-
 export const JIRA_FILTERS = {
   LITERALLY_WORKING_ON: 'literally_working_on',
   FOR_YOU: 'for_you',
@@ -34,12 +25,4 @@ export const NOTE_PRIORITIES = {
 export type NotePriority =
   (typeof NOTE_PRIORITIES)[keyof typeof NOTE_PRIORITIES];
 
-export const googleCalendarEventResponseStatusMap: Record<
-  GoogleCalendarAttendee['responseStatus'],
-  string
-> = {
-  needsAction: 'Needs Action',
-  declined: 'Declined',
-  tentative: 'Tentative',
-  accepted: 'Accepted',
-} as const;
+export const GITLAB_HIGHLIGHTED_THREAD_CLASS = '__hb-gitlab-highlighted-thread';

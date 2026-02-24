@@ -4,16 +4,24 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { ThreadList } from '@/components/mr-thread-ui/ThreadList';
+import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';
 import { defineContentScript } from '#imports';
 
 export default defineContentScript({
   matches: ['*://*.gitlab.com/*/-/merge_requests/*'],
+  excludeMatches: ['*://*.gitlab.com/*/-/merge_requests/*/new'],
   cssInjectionMode: 'ui',
   async main(ctx) {
-    console.log('running content script for thread ui');
+    document.styleSheets[0].insertRule(
+      `.${GITLAB_HIGHLIGHTED_THREAD_CLASS} {
+        transition: box-shadow 0.3s ease, transform 0.3s ease !important;
+        box-shadow: 0 0 0 3px #1f75cb !important;
+        border-radius: 8px !important;
+      }`,
+      0,
+    );
 
     const gitlabUserId = import.meta.env.VITE_GITLAB_USER_ID;
-
     if (!gitlabUserId) {
       console.error('Please provide VITE_GITLAB_USER_ID in .env');
       return;
@@ -26,6 +34,7 @@ export default defineContentScript({
       append: 'last',
       onMount: (container) => {
         const app = document.createElement('div');
+
         container.append(app);
 
         const root = createRoot(app);
@@ -34,6 +43,7 @@ export default defineContentScript({
             <ThreadList container={container} userId={gitlabUserId} />
           </StrictMode>,
         );
+
         return root;
       },
       onRemove: (root) => {
