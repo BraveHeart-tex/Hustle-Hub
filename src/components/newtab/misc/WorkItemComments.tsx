@@ -170,6 +170,7 @@ const WorkItemComments = ({
               showToolbar={false}
               ref={tiptapRef}
               onReady={focusEditor}
+              onCmdEnter={handleSubmit}
             />
           </Suspense>
           <div className="flex justify-end gap-2">
