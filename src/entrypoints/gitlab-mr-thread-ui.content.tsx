@@ -3,6 +3,8 @@ import '@/assets/tailwind.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { BottomRightPanel } from '@/components/mr-thread-ui/BottomRightPanel';
+import { JiraQuickLink } from '@/components/mr-thread-ui/JiraQuickLink';
 import { ThreadList } from '@/components/mr-thread-ui/ThreadList';
 import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';
 import { defineContentScript } from '#imports';
@@ -20,6 +22,10 @@ export default defineContentScript({
       }`,
       0,
     );
+
+    const mrTitle =
+      document.querySelector("[data-testid='title-content']")?.textContent ||
+      '';
 
     const gitlabUserId = import.meta.env.VITE_GITLAB_USER_ID;
     if (!gitlabUserId) {
@@ -40,7 +46,10 @@ export default defineContentScript({
         const root = createRoot(app);
         root.render(
           <StrictMode>
-            <ThreadList container={container} userId={gitlabUserId} />
+            <BottomRightPanel>
+              <ThreadList container={container} userId={gitlabUserId} />
+              <JiraQuickLink mrTitle={mrTitle} />
+            </BottomRightPanel>
           </StrictMode>,
         );
 

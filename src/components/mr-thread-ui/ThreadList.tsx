@@ -104,7 +104,7 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="fixed bottom-6 right-6 z-999999" asChild>
+      <PopoverTrigger asChild>
         <Button size="sm" className="rounded-full shadow-md">
           {!userId ? 'Missing User ID' : `🧵 ${threads.length}`}
         </Button>
