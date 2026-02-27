@@ -1,5 +1,17 @@
-import { PropsWithChildren } from 'react';
+import { ReactNode } from 'react';
 
-export const BottomRightPanel = ({ children }: PropsWithChildren) => {
-  return <div className="fixed bottom-6 right-6 z-999999">{children}</div>;
+import { cn } from '@/lib/utils';
+
+export const BottomRightPanel = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div className={cn('fixed bottom-6 right-6 z-999999', className)}>
+      {children}
+    </div>
+  );
 };

@@ -46,9 +46,9 @@ export default defineContentScript({
         const root = createRoot(app);
         root.render(
           <StrictMode>
-            <BottomRightPanel>
-              <ThreadList container={container} userId={gitlabUserId} />
+            <BottomRightPanel className="flex items-center gap-2">
               <JiraQuickLink mrTitle={mrTitle} />
+              <ThreadList container={container} userId={gitlabUserId} />
             </BottomRightPanel>
           </StrictMode>,
         );
