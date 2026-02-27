@@ -7,6 +7,7 @@ import { BottomRightPanel } from '@/components/mr-thread-ui/BottomRightPanel';
 import { JiraQuickLink } from '@/components/mr-thread-ui/JiraQuickLink';
 import { ThreadList } from '@/components/mr-thread-ui/ThreadList';
 import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';
+import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { defineContentScript } from '#imports';
 
 export default defineContentScript({
@@ -26,11 +27,11 @@ export default defineContentScript({
     const mrTitle =
       document.querySelector("[data-testid='title-content']")?.textContent ||
       '';
+    const jiraId = mrTitle.match(/([A-Z][A-Z0-9]+-\d+)/)?.[1];
 
     const gitlabUserId = import.meta.env.VITE_GITLAB_USER_ID;
     if (!gitlabUserId) {
-      console.error('Please provide VITE_GITLAB_USER_ID in .env');
-      return;
+      console.warn('No VITE_GITLAB_USER_ID found in .env');
     }
 
     const ui = await createShadowRootUi(ctx, {
@@ -47,7 +48,7 @@ export default defineContentScript({
         root.render(
           <StrictMode>
             <BottomRightPanel className="flex items-center gap-2">
-              <JiraQuickLink mrTitle={mrTitle} />
+              <JiraQuickLink jiraLink={jiraId ? getJiraTaskUrl(jiraId) : ''} />
               <ThreadList container={container} userId={gitlabUserId} />
             </BottomRightPanel>
           </StrictMode>,
