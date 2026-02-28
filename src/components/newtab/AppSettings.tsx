@@ -50,7 +50,7 @@ export const AppSettings = () => {
         </DropdownMenuContent>
       </DropdownMenu>
       <GitlabReviewersDialog
-        open={dialog.isOpen}
+        open={dialog.type === 'reviewers' && dialog.isOpen}
         onOpenChange={(isOpen) => {
           setDialog({ type: isOpen ? 'reviewers' : null, isOpen });
         }}
