@@ -1,7 +1,9 @@
-import { Loader2 } from 'lucide-react';
-import { FormEvent } from 'react';
+import { Loader2, Pencil } from 'lucide-react';
+import { FormEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -11,16 +13,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   addGitlabReviewer,
+  updateGitlabReviewer,
   useReviewers,
 } from '@/lib/storage/reviewer-presets';
+import { cn } from '@/lib/utils';
 
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 import { ReviewerActions } from './ReviewerActions';
+
+type FormMode = 'add' | 'edit';
+
+const EMPTY_FORM = { gitlabId: '', name: '' };
 
 export const GitlabReviewersDialog = ({
   open,
@@ -30,50 +36,82 @@ export const GitlabReviewersDialog = ({
   onOpenChange: (open: boolean) => void;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    gitlabId: '',
-    name: '',
-  });
+  const [mode, setMode] = useState<FormMode>('add');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const gitlabIdInputRef = useRef<HTMLInputElement>(null);
-
   const { reviewers } = useReviewers();
+
+  const resetForm = () => {
+    setMode('add');
+    setEditingId(null);
+    setFormData(EMPTY_FORM);
+  };
+
+  const handleEditClick = (reviewer: { gitlabId: string; name: string }) => {
+    setMode('edit');
+    setEditingId(reviewer.gitlabId);
+    setFormData({ gitlabId: reviewer.gitlabId, name: reviewer.name });
+    gitlabIdInputRef.current?.focus();
+  };
 
   const handleReviewerSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (reviewers.find((reviewer) => reviewer.gitlabId === formData.gitlabId)) {
-      toast.error('Reviewer already exists.');
-      return;
-    }
+    if (mode === 'add') {
+      const duplicate = reviewers.find((r) => r.gitlabId === formData.gitlabId);
+      if (duplicate) {
+        toast.error('A reviewer with this Gitlab ID already exists.');
+        return;
+      }
 
-    setIsLoading(true);
-    try {
-      await addGitlabReviewer({
-        gitlabId: formData.gitlabId,
-        name: formData.name,
-      });
-      toast.success('Reviewer added successfully');
-      setFormData({
-        gitlabId: '',
-        name: '',
-      });
-      gitlabIdInputRef.current?.focus();
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to add reviewer');
-    } finally {
-      setIsLoading(false);
+      setIsLoading(true);
+      try {
+        await addGitlabReviewer({
+          gitlabId: formData.gitlabId,
+          name: formData.name,
+        });
+        toast.success('Reviewer added successfully');
+        resetForm();
+        gitlabIdInputRef.current?.focus();
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to add reviewer');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Edit mode — check for duplicate gitlabId only if it changed
+      const idChanged = formData.gitlabId !== editingId;
+      if (idChanged) {
+        const duplicate = reviewers.find(
+          (r) => r.gitlabId === formData.gitlabId,
+        );
+        if (duplicate) {
+          toast.error('A reviewer with this Gitlab ID already exists.');
+          return;
+        }
+      }
+
+      setIsLoading(true);
+      try {
+        await updateGitlabReviewer(editingId!, {
+          gitlabId: formData.gitlabId,
+          name: formData.name,
+        });
+        toast.success('Reviewer updated successfully');
+        resetForm();
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to update reviewer');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      setFormData({
-        gitlabId: '',
-        name: '',
-      });
-    }
-
+    if (!nextOpen) resetForm();
     onOpenChange(nextOpen);
   };
 
@@ -96,7 +134,12 @@ export const GitlabReviewersDialog = ({
             {reviewers.map((reviewer) => (
               <div
                 key={reviewer.gitlabId}
-                className="flex items-center justify-between rounded-lg border p-3 bg-muted/40"
+                className={cn(
+                  'flex items-center justify-between rounded-lg border p-3 bg-muted/40 transition-colors',
+                  editingId === reviewer.gitlabId
+                    ? 'border-primary bg-primary/5'
+                    : '',
+                )}
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="size-8">
@@ -111,7 +154,6 @@ export const GitlabReviewersDialog = ({
                         .slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
-
                   <div className="flex flex-col">
                     <span className="text-sm font-medium">{reviewer.name}</span>
                     <span className="text-xs text-muted-foreground">
@@ -119,13 +161,42 @@ export const GitlabReviewersDialog = ({
                     </span>
                   </div>
                 </div>
-                <ReviewerActions gitlabId={reviewer.gitlabId} />
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-muted-foreground hover:text-foreground"
+                    onClick={() => handleEditClick(reviewer)}
+                    disabled={isLoading}
+                  >
+                    <Pencil className="size-4" />
+                  </Button>
+                  <ReviewerActions gitlabId={reviewer.gitlabId} />
+                </div>
               </div>
             ))}
           </div>
         )}
 
         <form onSubmit={handleReviewerSubmit} className="space-y-4 mt-4">
+          {mode === 'edit' && (
+            <p className="text-xs text-muted-foreground bg-muted rounded-md px-3 py-2">
+              Editing reviewer{' '}
+              <span className="font-medium text-foreground">
+                {reviewers.find((r) => r.gitlabId === editingId)?.name}
+              </span>
+              .{' '}
+              <button
+                type="button"
+                className="underline hover:text-foreground"
+                onClick={resetForm}
+              >
+                Cancel edit
+              </button>
+            </p>
+          )}
+
           <div className="space-y-1">
             <Label htmlFor="gitlabId">Gitlab ID</Label>
             <Input
@@ -153,18 +224,35 @@ export const GitlabReviewersDialog = ({
               required
             />
           </div>
+
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={isLoading}>
-                Cancel
+                Close
               </Button>
             </DialogClose>
+            {mode === 'edit' && (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={isLoading}
+                onClick={resetForm}
+              >
+                Cancel Edit
+              </Button>
+            )}
             <Button
               type="submit"
               disabled={!formData.gitlabId || !formData.name || isLoading}
             >
               {isLoading && <Loader2 className="animate-spin" />}
-              {isLoading ? 'Adding Reviewer...' : 'Add Reviewer'}
+              {isLoading
+                ? mode === 'add'
+                  ? 'Adding...'
+                  : 'Saving...'
+                : mode === 'add'
+                  ? 'Add Reviewer'
+                  : 'Save Changes'}
             </Button>
           </DialogFooter>
         </form>
