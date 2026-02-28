@@ -99,3 +99,35 @@ export const useReviewers = () => {
 
   return { reviewers };
 };
+
+// Add to reviewer-presets storage
+
+export const updateReviewerPreset = async (
+  id: string,
+  updatedPreset: ReviewerPreset,
+) => {
+  const currentPresets = await reviewerPresets.getValue();
+  await reviewerPresets.setValue(
+    currentPresets.map((p) => (p.id === id ? updatedPreset : p)),
+  );
+};
+
+export const usePresets = () => {
+  const [presets, setPresets] = useState<
+    (ReviewerPreset & { reviewers: GitlabReviewer[] })[]
+  >([]);
+
+  useEffect(() => {
+    const fetchPresets = async () => {
+      setPresets(await getReviewerPresets());
+    };
+    fetchPresets();
+
+    const unwatch = reviewerPresets.watch(() => {
+      fetchPresets();
+    });
+    return () => unwatch();
+  }, []);
+
+  return { presets };
+};
