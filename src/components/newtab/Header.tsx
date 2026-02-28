@@ -6,6 +6,7 @@ import { ModeToggle } from '@/components/newtab/ModeToggle';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+import { AppSettings } from './AppSettings';
 import AllCommentsWidget from './misc/AllCommentsWidget';
 
 export default function Header() {
@@ -38,7 +39,7 @@ export default function Header() {
             <AllCommentsWidget />
             <ModeToggle />
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={handleRefreshData}
               disabled={isPending}
@@ -47,6 +48,7 @@ export default function Header() {
                 className={cn('h-5 w-5', isPending && 'animate-spin')}
               />
             </Button>
+            <AppSettings />
           </div>
         </div>
       </div>
