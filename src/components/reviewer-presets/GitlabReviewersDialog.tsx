@@ -22,6 +22,7 @@ import {
 } from '@/lib/storage/reviewer-presets';
 import { cn } from '@/lib/utils';
 
+import GitlabIcon from '../misc/GitlabIcon';
 import { ReviewerActions } from './ReviewerActions';
 
 type FormMode = 'add' | 'edit';
@@ -119,7 +120,12 @@ export const GitlabReviewersDialog = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Gitlab Reviewers</DialogTitle>
+          <DialogTitle>
+            <div className="flex items-center gap-2">
+              <GitlabIcon />
+              Gitlab Reviewers
+            </div>
+          </DialogTitle>
           <DialogDescription>
             Select reviewers for your Gitlab project.
           </DialogDescription>

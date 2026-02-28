@@ -12,6 +12,7 @@ import {
 
 import GitlabIcon from '../misc/GitlabIcon';
 import { GitlabReviewersDialog } from '../reviewer-presets/GitlabReviewersDialog';
+import { ReviewerPresetsDialog } from '../reviewer-presets/ReviewerPresetsDialog';
 
 export const AppSettings = () => {
   const [dialog, setDialog] = useState<{
@@ -53,6 +54,12 @@ export const AppSettings = () => {
         open={dialog.type === 'reviewers' && dialog.isOpen}
         onOpenChange={(isOpen) => {
           setDialog({ type: isOpen ? 'reviewers' : null, isOpen });
+        }}
+      />
+      <ReviewerPresetsDialog
+        open={dialog.type === 'presets' && dialog.isOpen}
+        onOpenChange={(isOpen) => {
+          setDialog({ type: isOpen ? 'presets' : null, isOpen });
         }}
       />
     </>
