@@ -22,7 +22,9 @@ export const MrThreadApp = ({
     <StrictMode>
       <BottomRightPanel className="flex items-center gap-2">
         <MrWarnings container={container} />
-        <JiraQuickLink jiraLink={jiraId ? getJiraTaskUrl(jiraId) : ''} />
+        <JiraQuickLink
+          jiraLink={jiraId && jiraId !== 'FE-1' ? getJiraTaskUrl(jiraId) : ''}
+        />
         <ThreadList container={container} userId={gitlabUserId} />
       </BottomRightPanel>
     </StrictMode>
