@@ -21,6 +21,7 @@ import {
   useReviewers,
 } from '@/lib/storage/reviewer-presets';
 import { cn } from '@/lib/utils';
+import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
 
 import GitlabIcon from '../misc/GitlabIcon';
 import { ReviewerActions } from './ReviewerActions';
@@ -149,15 +150,9 @@ export const GitlabReviewersDialog = ({
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="size-8">
-                    <AvatarImage
-                      src={`https://gitlab.com/uploads/-/system/user/avatar/${reviewer.gitlabId}/avatar.png`}
-                    />
+                    <AvatarImage src={getGitlabUserAvatar(reviewer.gitlabId)} />
                     <AvatarFallback>
-                      {reviewer.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')
-                        .slice(0, 2)}
+                      {reviewer.name.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">

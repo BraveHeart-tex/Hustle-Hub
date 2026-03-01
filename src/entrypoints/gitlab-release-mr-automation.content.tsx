@@ -1,3 +1,6 @@
+import { createRoot } from 'react-dom/client';
+
+import { ReviewerControlsApp } from '@/components/reviewer-presets/ReviewerControlsApp';
 import { waitForElement } from '@/lib/utils/dom/waitForElement';
 import { extractJiraId } from '@/lib/utils/misc/extractJiraId';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
@@ -97,11 +100,37 @@ const handleBranchRedirection = async () => {
 
 export default defineContentScript({
   matches: ['*://*.gitlab.com/*/merge_requests/*'],
-  main: async () => {
+  cssInjectionMode: 'ui',
+  async main(ctx) {
     const params = new URLSearchParams(location.search);
     const isNewMR = location.pathname.endsWith('/-/merge_requests/new');
+    const isEditMode = /\/-\/merge_requests\/\d+\/edit$/.test(
+      location.pathname,
+    );
 
-    if (isNewMR) await handleBranchRedirection();
+    if (isNewMR || isEditMode) {
+      const ui = await createShadowRootUi(ctx, {
+        name: 'gitlab-reviewers-popover-ui',
+        position: 'inline',
+        anchor: 'body',
+        append: 'last',
+        onMount: (container) => {
+          const app = document.createElement('div');
+          container.append(app);
+          const root = createRoot(app);
+          root.render(<ReviewerControlsApp container={container} />);
+          return root;
+        },
+        onRemove: (root) => {
+          root?.unmount();
+        },
+      });
+      ui.mount();
+    }
+
+    if (isNewMR) {
+      await handleBranchRedirection();
+    }
 
     await click(SELECTORS.assignMe);
 

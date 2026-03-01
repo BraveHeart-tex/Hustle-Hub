@@ -18,6 +18,7 @@ import {
   usePresets,
   useReviewers,
 } from '@/lib/storage/reviewer-presets';
+import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
 import { GitlabReviewer, ReviewerPreset } from '@/types/reviewer-presets';
 
 import GitlabIcon from '../misc/GitlabIcon';
@@ -32,15 +33,9 @@ const EMPTY_FORM = { name: '', users: [] as string[] };
 
 const ReviewerAvatar = ({ reviewer }: { reviewer: GitlabReviewer }) => (
   <Avatar className="size-4">
-    <AvatarImage
-      src={`https://gitlab.com/uploads/-/system/user/avatar/${reviewer.gitlabId}/avatar.png`}
-    />
+    <AvatarImage src={getGitlabUserAvatar(reviewer.gitlabId)} />
     <AvatarFallback className="text-[8px]">
-      {reviewer.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)}
+      {reviewer.name.slice(0, 2).toUpperCase()}
     </AvatarFallback>
   </Avatar>
 );
