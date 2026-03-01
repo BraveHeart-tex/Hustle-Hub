@@ -6,7 +6,10 @@ import { defineContentScript } from '#imports';
 
 export default defineContentScript({
   matches: ['*://*.gitlab.com/*/-/merge_requests/*'],
-  excludeMatches: ['*://*.gitlab.com/*/-/merge_requests/*/new'],
+  excludeMatches: [
+    '*://*.gitlab.com/*/-/merge_requests/*/new',
+    '*://*.gitlab.com/*/-/merge_requests/*/edit',
+  ],
   cssInjectionMode: 'ui',
   async main(ctx) {
     document.styleSheets[0].insertRule(

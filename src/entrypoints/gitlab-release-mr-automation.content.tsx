@@ -104,7 +104,7 @@ export default defineContentScript({
   async main(ctx) {
     const params = new URLSearchParams(location.search);
     const isNewMR = location.pathname.endsWith('/-/merge_requests/new');
-    const isEditMode = /\/-\/merge_requests\/\d+\/edit$/.test(
+    const isEditMode = /\/.+\/-\/merge_requests\/\d+\/edit$/.test(
       location.pathname,
     );
 

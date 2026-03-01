@@ -7,6 +7,8 @@ import { JiraQuickLink } from '@/components/mr-thread-ui/JiraQuickLink';
 import { ThreadList } from '@/components/mr-thread-ui/ThreadList';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 
+import { MrWarnings } from '../mr-warnings/MrWarnings';
+
 export const MrThreadApp = ({
   container,
   gitlabUserId,
@@ -19,6 +21,7 @@ export const MrThreadApp = ({
   return (
     <StrictMode>
       <BottomRightPanel className="flex items-center gap-2">
+        <MrWarnings container={container} />
         <JiraQuickLink jiraLink={jiraId ? getJiraTaskUrl(jiraId) : ''} />
         <ThreadList container={container} userId={gitlabUserId} />
       </BottomRightPanel>

@@ -260,7 +260,9 @@ export const ReviewerControlsApp = ({
                   <div
                     key={reviewer.gitlabId}
                     className="flex items-center gap-2 group cursor-pointer rounded px-1 hover:bg-muted transition-colors"
-                    onClick={() => handleAddReviewer(reviewer)}
+                    onClick={() =>
+                      handleAddReviewer({ ...reviewer, username: '@undefined' })
+                    }
                   >
                     <Avatar className="h-6 w-6">
                       <AvatarImage
