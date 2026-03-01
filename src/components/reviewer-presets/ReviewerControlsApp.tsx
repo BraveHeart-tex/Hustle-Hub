@@ -3,7 +3,7 @@ import '@/assets/tailwind.css';
 import { UsersIcon, XIcon } from 'lucide-react';
 import { StrictMode } from 'react';
 
-import { usePresets } from '@/lib/storage/reviewer-presets';
+import { usePresets, useReviewers } from '@/lib/storage/reviewer-presets';
 import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
 import { GitlabReviewer } from '@/types/reviewer-presets';
 
@@ -122,6 +122,7 @@ export const ReviewerControlsApp = ({
     (GitlabReviewer & { username: string })[]
   >([]);
   const { presets } = usePresets();
+  const { reviewers: allAvailableReviewers } = useReviewers();
 
   useEffect(() => {
     const reviewersContainer = document.querySelector<HTMLDivElement>(
@@ -140,6 +141,34 @@ export const ReviewerControlsApp = ({
 
     return () => observer.disconnect();
   }, [container]);
+
+  const selectedIds = useMemo(
+    () => new Set(selectedReviewers.map((r) => r.gitlabId)),
+    [selectedReviewers],
+  );
+
+  const availableReviewers = useMemo(
+    () => allAvailableReviewers.filter((r) => !selectedIds.has(r.gitlabId)),
+    [allAvailableReviewers, selectedIds],
+  );
+
+  const handleAddReviewer = (
+    reviewer: GitlabReviewer & { username: string },
+  ) => {
+    const updated = [...selectedReviewers, reviewer];
+    setSelectedReviewers(updated);
+    injectReviewers(updated);
+  };
+
+  const handleRemoveReviewer = (
+    reviewer: GitlabReviewer & { username: string },
+  ) => {
+    const updated = selectedReviewers.filter(
+      (r) => r.gitlabId !== reviewer.gitlabId,
+    );
+    setSelectedReviewers(updated);
+    injectReviewers(updated);
+  };
 
   const matchingPreset = useMemo(() => {
     if (selectedReviewers.length === 0) {
@@ -166,15 +195,9 @@ export const ReviewerControlsApp = ({
     injectReviewers(reviewers);
   };
 
-  const handleRemoveReviewer = (
-    reviewer: GitlabReviewer & { username: string },
-  ) => {
-    const updated = selectedReviewers.filter(
-      (r) => r.gitlabId !== reviewer.gitlabId,
-    );
-    setSelectedReviewers(updated);
-    injectReviewers(updated);
-  };
+  const hasNoPresets = presets.length === 0;
+  const allReviewersSelected =
+    availableReviewers.length === 0 && allAvailableReviewers.length > 0;
 
   return (
     <StrictMode>
@@ -203,50 +226,96 @@ export const ReviewerControlsApp = ({
             align="end"
             className="w-auto max-w-2xl p-2 space-y-4"
           >
-            <div className="flex items-center gap-2 flex-nowrap overflow-x-auto w-full">
-              {presets.map((preset) => (
-                <ReviewerChipWithPreview
-                  key={preset.id}
-                  preset={preset}
-                  container={container}
-                  isMatchingPreset={matchingPreset?.id === preset.id}
-                  onSelect={handlePresetSelect}
-                />
-              ))}
-            </div>
-            <div className="grid gap-1.5">
-              <div className="mb-4">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Selected Reviewers
-                </span>
-                {selectedReviewers.length === 0 && (
-                  <p className="text-xs text-muted-foreground">None selected</p>
-                )}
+            {/* Presets row */}
+            {presets.length > 0 && (
+              <div className="flex items-center gap-2 flex-nowrap overflow-x-auto w-full">
+                {presets.map((preset) => (
+                  <ReviewerChipWithPreview
+                    key={preset.id}
+                    preset={preset}
+                    container={container}
+                    isMatchingPreset={matchingPreset?.id === preset.id}
+                    onSelect={handlePresetSelect}
+                  />
+                ))}
               </div>
-              {selectedReviewers.map((selectedReviewer) => (
-                <div
-                  key={selectedReviewer.gitlabId}
-                  className="flex items-center gap-2 group"
-                >
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage
-                      src={getGitlabUserAvatar(selectedReviewer.gitlabId)}
-                    />
-                    <AvatarFallback className="text-[10px]">
-                      {selectedReviewer.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm flex-1">
-                    {selectedReviewer.name}
-                  </span>
-                  <button
-                    onClick={() => handleRemoveReviewer(selectedReviewer)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5 hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+            )}
+
+            {/* Available Reviewers */}
+            <div className="grid gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Available Reviewers
+              </span>
+              {hasNoPresets ? (
+                <p className="text-xs text-muted-foreground">
+                  No reviewer presets defined yet. Add some in the extension
+                  settings.
+                </p>
+              ) : allReviewersSelected ? (
+                <p className="text-xs text-muted-foreground">
+                  All available reviewers have been selected.
+                </p>
+              ) : (
+                availableReviewers.map((reviewer) => (
+                  <div
+                    key={reviewer.gitlabId}
+                    className="flex items-center gap-2 group cursor-pointer rounded px-1 hover:bg-muted transition-colors"
+                    onClick={() => handleAddReviewer(reviewer)}
                   >
-                    <XIcon className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage
+                        src={getGitlabUserAvatar(reviewer.gitlabId)}
+                      />
+                      <AvatarFallback className="text-[10px]">
+                        {reviewer.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm flex-1">{reviewer.name}</span>
+                    <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                      + add
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Selected Reviewers */}
+            <div className="grid gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Selected Reviewers
+              </span>
+              {selectedReviewers.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  {hasNoPresets
+                    ? 'No reviewers available to select.'
+                    : 'None selected. Click a reviewer above or pick a preset.'}
+                </p>
+              ) : (
+                selectedReviewers.map((selectedReviewer) => (
+                  <div
+                    key={selectedReviewer.gitlabId}
+                    className="flex items-center gap-2 group"
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage
+                        src={getGitlabUserAvatar(selectedReviewer.gitlabId)}
+                      />
+                      <AvatarFallback className="text-[10px]">
+                        {selectedReviewer.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm flex-1">
+                      {selectedReviewer.name}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveReviewer(selectedReviewer)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5 hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+                    >
+                      <XIcon className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </PopoverContent>
         </Popover>
