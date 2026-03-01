@@ -14,7 +14,7 @@ interface ReviewerChipWithPreviewProps {
   preset: ReturnType<typeof usePresets>['presets'][number];
   container: HTMLElement | null;
   isMatchingPreset: boolean;
-  onSelect: (reviewers: GitlabReviewer[]) => void;
+  onSelect: (reviewers: (GitlabReviewer & { username: string })[]) => void;
 }
 
 export const ReviewerChipWithPreview = ({
@@ -24,7 +24,7 @@ export const ReviewerChipWithPreview = ({
   onSelect,
 }: ReviewerChipWithPreviewProps) => {
   const onPresetClick = () => {
-    onSelect(preset.reviewers);
+    onSelect(preset.reviewers as (GitlabReviewer & { username: string })[]);
   };
 
   return (

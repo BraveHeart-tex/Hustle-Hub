@@ -15,16 +15,102 @@ import { ReviewerChipWithPreview } from './ReviewerChipWithPreview';
 
 const getCurrentReviewers = (
   reviewersContainer: HTMLElement | null,
-): GitlabReviewer[] => {
+): (GitlabReviewer & { username: string })[] => {
   if (!reviewersContainer) return [];
   const inputs = reviewersContainer?.querySelectorAll<HTMLInputElement>(
     'input[name="merge_request[reviewer_ids][]"]',
   );
   if (!inputs) return [];
-  return Array.from(inputs).map((input) => ({
-    gitlabId: input.value || '',
-    name: input.dataset.name || '',
-  }));
+  return Array.from(inputs)
+    .map((input) => ({
+      gitlabId: input.value || '',
+      name: input.dataset.name || '',
+      username: input.dataset.username || '',
+    }))
+    .filter((r) => r.gitlabId !== '' || +r.gitlabId !== 0);
+};
+
+const injectReviewers = (
+  reviewers: (GitlabReviewer & { username: string })[],
+) => {
+  const form =
+    document.querySelector<HTMLFormElement>('form.new_merge_request') ||
+    document.querySelector<HTMLFormElement>(
+      'form.merge-request-form.js-quick-submit',
+    );
+
+  if (!form) return;
+
+  // 1. Clear existing hidden inputs
+  form
+    .querySelectorAll<HTMLInputElement>(
+      'input[name="merge_request[reviewer_ids][]"]',
+    )
+    .forEach((el) => el.remove());
+
+  // 2. Find the dropdown container (the parent of the toggle button)
+  const dropdownToggle = document.querySelector<HTMLElement>(
+    '.js-reviewer-search.js-multiselect',
+  );
+  const dropdownContainer = dropdownToggle?.closest('.dropdown');
+
+  // 3. Clear all is-active states in the reviewer dropdown
+  dropdownContainer
+    ?.querySelectorAll<HTMLElement>('.dropdown-content a.is-active')
+    .forEach((el) => el.classList.remove('is-active'));
+
+  reviewers.forEach((r) => {
+    // 4. Add hidden input (same as GitLab's addInput method)
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'merge_request[reviewer_ids][]';
+    input.value = r.gitlabId;
+    // GitLab's addInput sets data attributes from the selectedObject keys
+    input.dataset.name = r.name;
+    input.dataset.username = r.username;
+    input.dataset.avatarUrl = getGitlabUserAvatar(r.gitlabId);
+
+    // Must be inserted BEFORE the dropdown (see: this.dropdown.before($input))
+    if (!dropdownToggle?.parentElement?.insertBefore(input, dropdownToggle)) {
+      form.appendChild(input);
+    }
+
+    // 5. Mark the corresponding list item as active
+    // GitLab renders list items with data-user-id or matches by value
+    const listItems = dropdownContainer?.querySelectorAll<HTMLElement>(
+      '.dropdown-content li a',
+    );
+    listItems?.forEach((anchor) => {
+      const li = anchor.parentElement;
+      // GitLab stores the id in the input it would create, accessible via data-value or similar
+      const itemValue =
+        li?.dataset.value || li?.dataset.userId || anchor.dataset.value;
+      if (
+        itemValue === r.gitlabId ||
+        itemValue === String(parseInt(r.gitlabId))
+      ) {
+        anchor.classList.add('is-active');
+      }
+    });
+  });
+
+  // 6. Trigger change on the form so GitLab's listeners pick it up
+  dropdownToggle?.parentElement
+    ?.querySelectorAll<HTMLInputElement>(
+      'input[name="merge_request[reviewer_ids][]"]',
+    )
+    .forEach((input) =>
+      input.dispatchEvent(new Event('change', { bubbles: true })),
+    );
+
+  // 7. Update the toggle label — GitLab calls updateLabel after rowClicked
+  const labelEl = dropdownToggle?.querySelector('.dropdown-toggle-text');
+  if (labelEl) {
+    labelEl.textContent =
+      reviewers.length > 0
+        ? reviewers.map((r) => r.name).join(', ')
+        : 'Select reviewers';
+  }
 };
 
 export const ReviewerControlsApp = ({
@@ -32,9 +118,9 @@ export const ReviewerControlsApp = ({
 }: {
   container: HTMLElement;
 }) => {
-  const [selectedReviewers, setSelectedReviewers] = useState<GitlabReviewer[]>(
-    [],
-  );
+  const [selectedReviewers, setSelectedReviewers] = useState<
+    (GitlabReviewer & { username: string })[]
+  >([]);
   const { presets } = usePresets();
 
   useEffect(() => {
@@ -73,8 +159,11 @@ export const ReviewerControlsApp = ({
     );
   }, [presets, selectedReviewers]);
 
-  const handlePresetSelect = (reviewers: GitlabReviewer[]) => {
+  const handlePresetSelect = (
+    reviewers: (GitlabReviewer & { username: string })[],
+  ) => {
     setSelectedReviewers(reviewers);
+    injectReviewers(reviewers);
   };
 
   return (
