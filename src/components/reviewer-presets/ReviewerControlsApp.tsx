@@ -166,6 +166,16 @@ export const ReviewerControlsApp = ({
     injectReviewers(reviewers);
   };
 
+  const handleRemoveReviewer = (
+    reviewer: GitlabReviewer & { username: string },
+  ) => {
+    const updated = selectedReviewers.filter(
+      (r) => r.gitlabId !== reviewer.gitlabId,
+    );
+    setSelectedReviewers(updated);
+    injectReviewers(updated);
+  };
+
   return (
     <StrictMode>
       <BottomRightPanel>
@@ -174,10 +184,17 @@ export const ReviewerControlsApp = ({
             <Button
               variant="outline"
               size="sm"
-              className="rounded-full shadow-sm gap-1.5"
+              className="rounded-full shadow-sm gap-1.5 h-auto py-1.5"
             >
-              <UsersIcon className="h-3.5 w-3.5" />
-              Reviewers & Presets
+              <UsersIcon className="h-3.5 w-3.5 shrink-0" />
+              <div className="flex flex-col items-start leading-tight">
+                <span className="text-xs">Reviewers & Presets</span>
+                {selectedReviewers?.length > 0 && (
+                  <span className="text-[10px] text-muted-foreground font-medium">
+                    {selectedReviewers.length} selected
+                  </span>
+                )}
+              </div>
             </Button>
           </PopoverTrigger>
           <PopoverContent
@@ -223,13 +240,7 @@ export const ReviewerControlsApp = ({
                     {selectedReviewer.name}
                   </span>
                   <button
-                    onClick={() =>
-                      setSelectedReviewers((prev) =>
-                        prev.filter(
-                          (r) => r.gitlabId !== selectedReviewer.gitlabId,
-                        ),
-                      )
-                    }
+                    onClick={() => handleRemoveReviewer(selectedReviewer)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5 hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
                   >
                     <XIcon className="h-3 w-3" />
