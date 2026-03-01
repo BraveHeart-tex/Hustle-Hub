@@ -1,6 +1,6 @@
 import '@/assets/tailwind.css';
 
-import { UsersIcon, XIcon } from 'lucide-react';
+import { UsersIcon } from 'lucide-react';
 import { StrictMode } from 'react';
 
 import { usePresets, useReviewers } from '@/lib/storage/reviewer-presets';
@@ -294,7 +294,8 @@ export const ReviewerControlsApp = ({
                 selectedReviewers.map((selectedReviewer) => (
                   <div
                     key={selectedReviewer.gitlabId}
-                    className="flex items-center gap-2 group"
+                    className="flex items-center gap-2 group cursor-pointer rounded px-1 hover:bg-destructive/10 transition-colors"
+                    onClick={() => handleRemoveReviewer(selectedReviewer)}
                   >
                     <Avatar className="h-6 w-6">
                       <AvatarImage
@@ -307,12 +308,9 @@ export const ReviewerControlsApp = ({
                     <span className="text-sm flex-1">
                       {selectedReviewer.name}
                     </span>
-                    <button
-                      onClick={() => handleRemoveReviewer(selectedReviewer)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5 hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
-                    >
-                      <XIcon className="h-3 w-3" />
-                    </button>
+                    <span className="text-[10px] text-destructive/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                      − remove
+                    </span>
                   </div>
                 ))
               )}
