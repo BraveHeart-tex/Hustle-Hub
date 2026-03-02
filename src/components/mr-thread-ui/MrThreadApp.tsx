@@ -8,6 +8,7 @@ import { ThreadList } from '@/components/mr-thread-ui/ThreadList';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 
 import { MrWarnings } from '../mr-warnings/MrWarnings';
+import { CodeReviewCommandsShortcut } from './CodeReviewCommandsShortcut';
 
 export const MrThreadApp = ({
   container,
@@ -26,6 +27,7 @@ export const MrThreadApp = ({
           jiraLink={jiraId && jiraId !== 'FE-1' ? getJiraTaskUrl(jiraId) : ''}
         />
         <ThreadList container={container} userId={gitlabUserId} />
+        <CodeReviewCommandsShortcut container={container} />
       </BottomRightPanel>
     </StrictMode>
   );
