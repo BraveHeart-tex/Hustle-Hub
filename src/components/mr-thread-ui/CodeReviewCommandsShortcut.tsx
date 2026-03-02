@@ -25,7 +25,7 @@ const commands: {
     id: 'pull-target',
     label: 'Pull target',
     description: 'Get latest target branch',
-    command: ({ target }) => `git pull origin ${target}`,
+    command: ({ target }) => `git pull --rebase origin ${target}`,
   },
   {
     id: 'checkout-source',
@@ -43,7 +43,7 @@ const commands: {
     id: 'pull-source',
     label: 'Pull source',
     description: 'Get latest changes for this branch',
-    command: ({ source }) => `git pull origin ${source}`,
+    command: ({ source }) => `git pull --rebase origin ${source}`,
   },
   {
     id: 'mrdiff',
