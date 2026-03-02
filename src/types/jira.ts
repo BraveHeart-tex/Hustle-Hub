@@ -29,6 +29,8 @@ export interface JiraIssue {
       id: string;
     };
     /** ISO date string */
+    created: string;
+    /** ISO date string */
     updated: string;
     status: {
       self: string;

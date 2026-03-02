@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
 import { Button } from '@/components/ui/button';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
+import { getTaskAge } from '@/lib/utils/misc/getTaskAge';
 import { JiraIssue } from '@/types/jira';
 
 const getPriorityIcon = (priority: string) => {
@@ -89,7 +90,12 @@ const JiraItem = ({ issue }: JiraItemProps) => {
       </h3>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>@{fields.assignee.displayName}</span>
+        <div className="flex items-center gap-2">
+          <span>@{fields.assignee.displayName}</span>
+          <span className="text-muted-foreground/60">
+            {getTaskAge(fields.created)}
+          </span>
+        </div>
         <div className="flex items-center gap-2">
           <WorkItemComments
             itemMeta={{
