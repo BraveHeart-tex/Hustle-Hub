@@ -17,17 +17,17 @@ const getCurrentReviewers = (
   reviewersContainer: HTMLElement | null,
 ): (GitlabReviewer & { username: string })[] => {
   if (!reviewersContainer) return [];
-  const inputs = reviewersContainer?.querySelectorAll<HTMLInputElement>(
-    'input[name="merge_request[reviewer_ids][]"]',
-  );
-  if (!inputs) return [];
-  return Array.from(inputs)
+  return Array.from(
+    reviewersContainer.querySelectorAll<HTMLInputElement>(
+      'input[name="merge_request[reviewer_ids][]"]',
+    ),
+  )
     .map((input) => ({
-      gitlabId: input.value || '',
-      name: input.dataset.name || '',
-      username: input.dataset.username || '',
+      gitlabId: input.value,
+      name: input.dataset.name ?? '',
+      username: input.dataset.username ?? '',
     }))
-    .filter((r) => r.gitlabId !== '' || +r.gitlabId !== 0);
+    .filter((r) => Boolean(r.gitlabId) && r.gitlabId !== '0');
 };
 
 const injectReviewers = (
