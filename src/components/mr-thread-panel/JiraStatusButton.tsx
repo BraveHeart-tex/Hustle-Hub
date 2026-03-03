@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { extractFerelId } from '@/lib/utils/misc/extractFerelId';
 
 interface JiraTransition {
   id: string;
@@ -103,23 +104,35 @@ export const JiraStatusButton = ({
   const [loading, setLoading] = useState(false);
   const [transitioning, setTransitioning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedJiraId, setResolvedJiraId] = useState(jiraId);
   const fetchedRef = useRef(false);
+  const targetBranch = useTargetBranch();
+
+  useEffect(() => {
+    if (!targetBranch) return;
+    const ferelId = extractFerelId(document);
+    if (ferelId && ferelId !== resolvedJiraId) {
+      fetchedRef.current = false;
+      setResolvedJiraId(ferelId);
+      setDetails(null);
+    }
+  }, [targetBranch, resolvedJiraId]);
 
   useEffect(() => {
     if (!open || fetchedRef.current) return;
     fetchedRef.current = true;
     setLoading(true);
-    fetch(`${API_BASE}/${jiraId}`)
+    fetch(`${API_BASE}/${resolvedJiraId}`)
       .then((r) => r.json())
       .then((data) => setDetails(data.data))
       .catch(() => setError('Failed to load issue details'))
       .finally(() => setLoading(false));
-  }, [open, jiraId]);
+  }, [open, resolvedJiraId]);
 
   const handleTransition = async (transition: JiraTransition) => {
     setTransitioning(transition.id);
     try {
-      await fetch(`${API_BASE}/${jiraId}/transition`, {
+      await fetch(`${API_BASE}/${resolvedJiraId}/transition`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transitionId: transition.id }),
@@ -143,7 +156,7 @@ export const JiraStatusButton = ({
     }
   };
 
-  if (!jiraId) return null;
+  if (!resolvedJiraId) return null;
 
   const statusColor = details ? getStatusColor(details.fields.status) : '';
 
@@ -166,7 +179,7 @@ export const JiraStatusButton = ({
             <JiraIcon className="h-3.5 w-3.5 shrink-0 text-blue-500" />
           </a>
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-xs">{jiraId}</span>
+            <span className="text-xs">{resolvedJiraId}</span>
             {details && (
               <span
                 className={`text-[10px] font-medium px-1 rounded ${statusColor}`}

@@ -32,6 +32,7 @@ const severityConfig = {
 
 import { useEffect, useState } from 'react';
 
+import { useTargetBranch } from '@/hooks/useTargetBranch';
 import { useUrlChange } from '@/hooks/useUrlChange';
 
 export const MrWarnings = ({
@@ -43,32 +44,7 @@ export const MrWarnings = ({
   const isMergeRequestRoot = /^.+\/-\/merge_requests\/\d+$/.test(pathname);
 
   const [warnings, setWarnings] = useState<MrWarning[]>([]);
-  const [targetBranch, setTargetBranch] = useState('');
-
-  useEffect(() => {
-    let debounceTimer: NodeJS.Timeout;
-    const observer = new MutationObserver(() => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        const target =
-          document
-            .querySelector<HTMLElement>('[data-testid="widget-target-branch"]')
-            ?.textContent?.trim() ?? '';
-        setTargetBranch(target);
-      }, 300);
-    });
-
-    const targetNode = document.querySelector('#widget-state') || document.body;
-    observer.observe(targetNode, {
-      childList: true,
-      subtree: true,
-    });
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(debounceTimer);
-    };
-  }, []);
+  const targetBranch = useTargetBranch();
 
   useEffect(() => {
     if (!targetBranch) {
