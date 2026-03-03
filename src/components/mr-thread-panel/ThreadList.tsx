@@ -21,6 +21,9 @@ interface ThreadListProps {
 }
 
 export const ThreadList = ({ container, userId }: ThreadListProps) => {
+  const { pathname } = useUrlChange();
+  const isMergeRequestRoot = /^.+\/-\/merge_requests\/\d+$/.test(pathname);
+
   const [threads, setThreads] = useState<Thread[]>([]);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -99,7 +102,7 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
     }, 1500);
   };
 
-  if (threads.length === 0) {
+  if (threads.length === 0 || !isMergeRequestRoot) {
     return null;
   }
 
