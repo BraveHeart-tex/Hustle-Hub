@@ -2,9 +2,9 @@ import '@/assets/tailwind.css';
 
 import { StrictMode } from 'react';
 
-import { BottomRightPanel } from '@/components/mr-thread-ui/BottomRightPanel';
-import { JiraQuickLink } from '@/components/mr-thread-ui/JiraQuickLink';
-import { ThreadList } from '@/components/mr-thread-ui/ThreadList';
+import { BottomRightPanel } from '@/components/mr-thread-panel/BottomRightPanel';
+import { JiraQuickLink } from '@/components/mr-thread-panel/JiraQuickLink';
+import { ThreadList } from '@/components/mr-thread-panel/ThreadList';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 
 import { MrWarnings } from '../mr-warnings/MrWarnings';

@@ -30,11 +30,18 @@ const severityConfig = {
   },
 } as const;
 
+import { useEffect, useState } from 'react';
+
+import { useUrlChange } from '@/hooks/useUrlChange';
+
 export const MrWarnings = ({
   container,
 }: {
   container?: HTMLElement | null;
 }) => {
+  const { pathname } = useUrlChange();
+  const isMergeRequestRoot = /^.+\/-\/merge_requests\/\d+$/.test(pathname);
+
   const [warnings, setWarnings] = useState<MrWarning[]>([]);
   const [targetBranch, setTargetBranch] = useState('');
 
@@ -78,7 +85,7 @@ export const MrWarnings = ({
     setWarnings(detected);
   }, [targetBranch]);
 
-  if (warnings.length === 0) {
+  if (warnings.length === 0 || !isMergeRequestRoot) {
     return null;
   }
 

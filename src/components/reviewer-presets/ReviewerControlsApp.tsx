@@ -7,7 +7,7 @@ import { usePresets, useReviewers } from '@/lib/storage/reviewer-presets';
 import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
 import { GitlabReviewer } from '@/types/reviewer-presets';
 
-import { BottomRightPanel } from '../mr-thread-ui/BottomRightPanel';
+import { BottomRightPanel } from '../mr-thread-panel/BottomRightPanel';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';

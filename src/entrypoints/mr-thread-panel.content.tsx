@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 
-import { MrThreadApp } from '@/components/mr-thread-ui/MrThreadApp';
+import { MrThreadApp } from '@/components/mr-thread-panel/MrThreadApp';
 import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';
 import { defineContentScript } from '#imports';
 
@@ -42,6 +42,20 @@ export default defineContentScript({
         container.append(app);
 
         const root = createRoot(app);
+
+        let lastUrl = location.href;
+        const observer = new MutationObserver(() => {
+          const url = location.href;
+          if (url !== lastUrl) {
+            lastUrl = url;
+            window.dispatchEvent(new Event('url-change'));
+          }
+        });
+
+        observer.observe(document, { subtree: true, childList: true });
+
+        ctx.onInvalidated(() => observer.disconnect());
+
         root.render(
           <MrThreadApp
             container={container}
