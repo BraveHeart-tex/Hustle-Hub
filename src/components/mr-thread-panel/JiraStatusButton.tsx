@@ -138,6 +138,22 @@ export const JiraStatusButton = ({
         body: JSON.stringify({ transitionId: transition.id }),
       });
 
+      if (targetBranch === 'main') {
+        await fetch(`${API_BASE}/${resolvedJiraId}/comment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mrUrl: window.location.href,
+            mrTitle:
+              document
+                .querySelector("[data-testid='title-content']")
+                ?.textContent?.trim() ?? '',
+          }),
+        }).catch(() => {
+          // Comment failure shouldn't block the transition
+        });
+      }
+
       setDetails((prev) =>
         prev
           ? {
