@@ -6,4 +6,8 @@ export const ENDPOINTS = {
     `${import.meta.env.VITE_BASE_API_URL}/data/gitlab/merge-requests?filter=${filter}`,
   JIRA_ISSUES: (filter: JiraFilter) =>
     `${import.meta.env.VITE_BASE_API_URL}/data/jira/issues?filter=${filter}`,
+  jira: {
+    getIssueByFeatureKey: (featureKey: string) =>
+      `${import.meta.env.VITE_BASE_API_URL}/data/jira/issues/by-feature-key/${featureKey}`,
+  },
 };

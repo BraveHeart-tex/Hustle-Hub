@@ -4,6 +4,7 @@ import { ReviewerControlsApp } from '@/components/reviewer-presets/ReviewerContr
 import { waitForElement } from '@/lib/utils/dom/waitForElement';
 import { extractJiraId } from '@/lib/utils/misc/extractJiraId';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
+import { fetchFerelKey } from '@/services/jira';
 import { defineContentScript } from '#imports';
 
 const SELECTORS = {
@@ -140,6 +141,11 @@ export default defineContentScript({
 
     const jiraId =
       extractJiraId(params.get('merge_request[source_branch]') ?? '') ?? '';
+
+    const ferelKeyPromise = jiraId
+      ? fetchFerelKey(jiraId)
+      : Promise.resolve('FEREL-TASK_NUMBER_HERE');
+
     const titleInput = document.querySelector<HTMLInputElement>(
       SELECTORS.title,
     );
@@ -155,10 +161,12 @@ export default defineContentScript({
       await click(SELECTORS.reviewerDropdownCloseIcon);
     }
 
+    const ferelKey = await ferelKeyPromise;
+
     if (await click(SELECTORS.labelDropdown)) {
       await findAndClickLabel('target::production').catch(console.error);
       await click(SELECTORS.closeLabels);
-      await updateDescription(getJiraTaskUrl('FEREL-TASK_NUMBER_HERE'));
+      await updateDescription(getJiraTaskUrl(ferelKey));
     }
   },
   runAt: 'document_end',
