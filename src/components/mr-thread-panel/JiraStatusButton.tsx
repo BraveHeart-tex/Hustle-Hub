@@ -1,4 +1,4 @@
-import { ExternalLinkIcon, Loader2Icon } from 'lucide-react';
+import { ExternalLinkIcon, Loader2Icon, SparklesIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import JiraIcon from '@/components/misc/JiraIcon';
@@ -104,22 +104,21 @@ export const JiraStatusButton = ({
   const [loading, setLoading] = useState(false);
   const [transitioning, setTransitioning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [resolvedJiraId, setResolvedJiraId] = useState(jiraId);
+
   const fetchedRef = useRef(false);
   const targetBranch = useTargetBranch();
 
-  useEffect(() => {
-    if (!targetBranch) return;
-    const ferelId = extractFerelId(document);
-    if (ferelId && ferelId !== resolvedJiraId) {
-      fetchedRef.current = false;
-      setResolvedJiraId(ferelId);
-      setDetails(null);
+  const resolvedJiraId = useMemo(() => {
+    if (targetBranch === 'main') {
+      const ferelId = extractFerelId(document);
+      if (ferelId) return ferelId;
+      return null;
     }
-  }, [targetBranch, resolvedJiraId]);
+    return jiraId;
+  }, [targetBranch, jiraId]);
 
   useEffect(() => {
-    if (fetchedRef.current || !targetBranch) return;
+    if (fetchedRef.current || !targetBranch || !resolvedJiraId) return;
     fetchedRef.current = true;
     setLoading(true);
     fetch(`${API_BASE}/${resolvedJiraId}`)
@@ -171,6 +170,32 @@ export const JiraStatusButton = ({
       setTransitioning(null);
     }
   };
+
+  const recommendedTransitionName = useMemo(() => {
+    if (!details || !targetBranch) return null;
+    const status = details.fields.status.name.toLowerCase();
+
+    if (targetBranch === 'main' && status === 'to do') return 'Code Review';
+    if (
+      targetBranch === 'develop' &&
+      (status === 'in progress' || status === 'to do')
+    )
+      return 'Code Review';
+
+    return null;
+  }, [details, targetBranch]);
+
+  const sortedTransitions = useMemo(() => {
+    if (!details?.transitions) return [];
+
+    return [...details.transitions].sort((a, b) => {
+      const aRec =
+        a.to.name.toLowerCase() === recommendedTransitionName?.toLowerCase();
+      const bRec =
+        b.to.name.toLowerCase() === recommendedTransitionName?.toLowerCase();
+      return aRec === bRec ? 0 : aRec ? -1 : 1;
+    });
+  }, [details?.transitions, recommendedTransitionName]);
 
   if (!resolvedJiraId || !targetBranch) return null;
 
@@ -293,27 +318,39 @@ export const JiraStatusButton = ({
                 <p className="px-3 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
                   Move to
                 </p>
-                {details.transitions.map((transition) => (
-                  <button
-                    key={transition.id}
-                    onClick={() => handleTransition(transition)}
-                    disabled={transitioning !== null}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-muted/60 transition-colors disabled:opacity-50 group"
-                  >
-                    <span
-                      className={`h-2 w-2 rounded-full shrink-0 ${getStatusDot(transition.to.name)}`}
-                    />
-                    <span className="text-xs flex-1">{transition.name}</span>
-                    <span
-                      className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${getStatusColor(transition.to)}`}
+                {sortedTransitions.map((transition) => {
+                  const isRecommended =
+                    !!recommendedTransitionName &&
+                    transition.to.name.toLowerCase() ===
+                      recommendedTransitionName.toLowerCase();
+
+                  return (
+                    <button
+                      key={transition.id}
+                      onClick={() => handleTransition(transition)}
+                      disabled={transitioning !== null}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-muted/60 transition-colors disabled:opacity-50 group"
                     >
-                      {transition.to.name}
-                    </span>
-                    {transitioning === transition.id && (
-                      <Loader2Icon className="h-3 w-3 animate-spin text-muted-foreground" />
-                    )}
-                  </button>
-                ))}
+                      <span
+                        className={`h-2 w-2 rounded-full shrink-0 ${getStatusDot(transition.to.name)}`}
+                      />
+                      <div className="text-xs flex-1 flex items-center gap-2">
+                        <span>{transition.name}</span>
+                        {isRecommended && (
+                          <SparklesIcon className="h-3 w-3 text-emerald-500 shrink-0" />
+                        )}
+                      </div>
+                      <span
+                        className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${getStatusColor(transition.to)}`}
+                      >
+                        {transition.to.name}
+                      </span>
+                      {transitioning === transition.id && (
+                        <Loader2Icon className="h-3 w-3 animate-spin text-muted-foreground" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </>
