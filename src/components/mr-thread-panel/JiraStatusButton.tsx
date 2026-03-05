@@ -119,7 +119,7 @@ export const JiraStatusButton = ({
   }, [targetBranch, resolvedJiraId]);
 
   useEffect(() => {
-    if (!open || fetchedRef.current) return;
+    if (fetchedRef.current || !targetBranch) return;
     fetchedRef.current = true;
     setLoading(true);
     fetch(`${API_BASE}/${resolvedJiraId}`)
@@ -127,7 +127,7 @@ export const JiraStatusButton = ({
       .then((data) => setDetails(data.data))
       .catch(() => setError('Failed to load issue details'))
       .finally(() => setLoading(false));
-  }, [open, resolvedJiraId]);
+  }, [resolvedJiraId, targetBranch]);
 
   const handleTransition = async (transition: JiraTransition) => {
     setTransitioning(transition.id);
@@ -172,7 +172,7 @@ export const JiraStatusButton = ({
     }
   };
 
-  if (!resolvedJiraId) return null;
+  if (!resolvedJiraId || !targetBranch) return null;
 
   const statusColor = details ? getStatusColor(details.fields.status) : '';
 
