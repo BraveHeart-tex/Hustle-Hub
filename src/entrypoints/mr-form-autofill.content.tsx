@@ -62,14 +62,10 @@ const updateDescription = async (content: string) => {
   if (isRichText) {
     const el = await waitForElement<HTMLElement>(SELECTORS.richTextEditor);
     el.focus();
-    el.textContent = content;
-    el.dispatchEvent(
-      new InputEvent('input', {
-        bubbles: true,
-        inputType: 'insertText',
-        data: content,
-      }),
-    );
+
+    document.execCommand('selectAll');
+    document.execCommand('insertText', false, content);
+
     el.blur();
   } else {
     const el = await waitForElement<HTMLTextAreaElement>(
