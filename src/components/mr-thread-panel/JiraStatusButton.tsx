@@ -175,12 +175,16 @@ export const JiraStatusButton = ({
     if (!details || !targetBranch) return null;
     const status = details.fields.status.name.toLowerCase();
 
-    if (targetBranch === 'main' && status === 'to do') return 'Code Review';
+    if (targetBranch === 'main' && status === 'to do') {
+      return 'Send to Code Review';
+    }
+
     if (
       targetBranch === 'develop' &&
       (status === 'in progress' || status === 'to do')
-    )
+    ) {
       return 'Code Review';
+    }
 
     return null;
   }, [details, targetBranch]);
