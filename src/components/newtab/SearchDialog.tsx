@@ -3,7 +3,6 @@ import { SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import GitlabIcon from '@/components/misc/GitlabIcon';
-import GoogleWorkspaceIcon from '@/components/misc/GoogleWorkspaceIcon';
 import JiraIcon from '@/components/misc/JiraIcon';
 import {
   CommandDialog,
@@ -14,18 +13,12 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { QUERY_KEYS } from '@/lib/constants';
-import { formatEventStartAndEnd } from '@/lib/utils/formatters/formatEventStartAndEnd';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { safeKeys } from '@/lib/utils/misc/safeKeys';
 import { GitlabMergeRequest } from '@/types/gitlab';
-import {
-  GoogleCalendarEvent,
-  GoogleCalendarEventsResponse,
-} from '@/types/google';
 import { JiraIssue } from '@/types/jira';
 
 interface GroupedData {
-  calendar: GoogleCalendarEvent[];
   gitlab: GitlabMergeRequest[];
   jira: JiraIssue[];
 }
@@ -34,7 +27,6 @@ const getGroupedData = (
   queryClient: ReturnType<typeof useQueryClient>,
 ): GroupedData => {
   const groupedData: GroupedData = {
-    calendar: [],
     gitlab: [],
     jira: [],
   };
@@ -43,32 +35,26 @@ const getGroupedData = (
     key: readonly unknown[],
     fallback: Partial<T>,
   ): T => {
-    return queryClient.getQueryData<T>(key) || (fallback as T);
+    return queryClient.getQueryData<T>(key) ?? (fallback as T);
   };
 
-  // Calendar
-  const calendarData = getSafeQueryData<GoogleCalendarEventsResponse>(
-    QUERY_KEYS.CALENDAR_EVENTS,
-    { items: [] },
-  );
-  const calendarMap = new Map<string, GoogleCalendarEvent>();
-  calendarData.items.forEach((event) => calendarMap.set(event.id, event));
-  groupedData.calendar = Array.from(calendarMap.values());
-
-  // GitLab
   const gitlabKeys = ['assigned', 'review'] as const;
   const gitlabMap = new Map<string, GitlabMergeRequest>();
   gitlabKeys.forEach((key) => {
-    const data = getSafeQueryData<{ data: GitlabMergeRequest[] }>(
+    const data = getSafeQueryData<GitlabMergeRequest[]>(
       QUERY_KEYS.GITLAB_MRS(key),
-      { data: [] },
+      [],
     );
-    data.data.forEach((mr) => gitlabMap.set(String(mr.iid), mr));
+
+    data.forEach((mr) => gitlabMap.set(String(mr.iid), mr));
   });
   groupedData.gitlab = Array.from(gitlabMap.values());
 
-  // Jira
-  const jiraKeys = ['for_you', 'literally_working_on'] as const;
+  const jiraKeys = [
+    'for_you',
+    'literally_working_on',
+    'frontend_releases',
+  ] as const;
   const jiraMap = new Map<string, JiraIssue>();
   jiraKeys.forEach((key) => {
     const data = getSafeQueryData<{ issues: JiraIssue[] }>(
@@ -129,40 +115,6 @@ const SearchDialog = () => {
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         {(safeKeys(data) as (keyof GroupedData)[]).map((group) => {
-          if (group === 'calendar' && data.calendar.length > 0) {
-            const filteredEvents = data.calendar.filter((event) =>
-              event.summary?.toLowerCase().includes(queryLower),
-            );
-            if (filteredEvents.length === 0) return null;
-            return (
-              <CommandGroup heading="Calendar" key={`command-group-${group}`}>
-                {filteredEvents.map((event) => (
-                  <CommandItem
-                    key={event.id}
-                    onSelect={() => {
-                      window.open(
-                        event.htmlLink,
-                        '_blank',
-                        'noopener,noreferrer',
-                      );
-                    }}
-                  >
-                    <GoogleWorkspaceIcon className="h-4 w-4" />
-                    <span className="font-semibold">{event.summary}</span>
-                    <span className="text-xs">
-                      (
-                      {formatEventStartAndEnd(
-                        event.start.dateTime,
-                        event.end.dateTime,
-                      )}
-                      )
-                    </span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            );
-          }
-
           if (group === 'gitlab' && data.gitlab.length > 0) {
             const filteredMrs = data.gitlab.filter((mr) =>
               mr.title.toLowerCase().includes(queryLower),
