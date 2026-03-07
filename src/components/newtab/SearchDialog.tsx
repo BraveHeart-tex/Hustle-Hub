@@ -42,7 +42,7 @@ const getGroupedData = (
   const gitlabMap = new Map<string, GitlabMergeRequest>();
   gitlabKeys.forEach((key) => {
     const data = getSafeQueryData<GitlabMergeRequest[]>(
-      QUERY_KEYS.GITLAB_MRS(key),
+      QUERY_KEYS.gitlab.mergeRequests(key),
       [],
     );
 
@@ -58,7 +58,7 @@ const getGroupedData = (
   const jiraMap = new Map<string, JiraIssue>();
   jiraKeys.forEach((key) => {
     const data = getSafeQueryData<{ issues: JiraIssue[] }>(
-      QUERY_KEYS.JIRA_ISSUES(key),
+      QUERY_KEYS.jira.issues(key),
       { issues: [] },
     );
     data.issues.forEach((issue) => jiraMap.set(issue.key, issue));

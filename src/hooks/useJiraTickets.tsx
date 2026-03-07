@@ -5,7 +5,7 @@ import { ApiResponse } from '@/types/api';
 import { JiraIssue } from '@/types/jira';
 
 export const useJiraTickets = (filter: JiraFilter) =>
-  useApi(QUERY_KEYS.JIRA_ISSUES(filter), async () => {
+  useApi(QUERY_KEYS.jira.issues(filter), async () => {
     const response = await fetch(ENDPOINTS.jira.issues(filter));
     return (await response.json()) as ApiResponse<{ issues: JiraIssue[] }>;
   });

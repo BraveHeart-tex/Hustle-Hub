@@ -25,14 +25,14 @@ export function useAttentionStream(): void {
       // Full snapshot on connect — replaces whatever is in cache
       es.addEventListener('snapshot', (e: MessageEvent) => {
         const items = JSON.parse(e.data) as AttentionItem[];
-        queryClient.setQueryData(QUERY_KEYS.ATTENTION, items);
+        queryClient.setQueryData(QUERY_KEYS.attention.list, items);
       });
 
       // Single item upserted (created or updated)
       es.addEventListener('upserted', (e: MessageEvent) => {
         const incoming = JSON.parse(e.data) as AttentionItem;
         queryClient.setQueryData<AttentionItem[]>(
-          QUERY_KEYS.ATTENTION,
+          QUERY_KEYS.attention.list,
           (prev = []) => {
             const exists = prev.findIndex((i) => i.id === incoming.id);
             if (exists !== -1) {
@@ -51,7 +51,7 @@ export function useAttentionStream(): void {
       es.addEventListener('resolved', (e: MessageEvent) => {
         const resolved = JSON.parse(e.data) as AttentionItem;
         queryClient.setQueryData<AttentionItem[]>(
-          QUERY_KEYS.ATTENTION,
+          QUERY_KEYS.attention.list,
           (prev = []) => prev.filter((i) => i.id !== resolved.id),
         );
       });

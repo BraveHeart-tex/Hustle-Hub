@@ -6,10 +6,21 @@ export const JIRA_FILTERS = {
 export type JiraFilter = (typeof JIRA_FILTERS)[keyof typeof JIRA_FILTERS];
 
 export const QUERY_KEYS = {
-  JIRA_ISSUES: (filter: JiraFilter) => ['jiraIssues', filter] as const,
-  CALENDAR_EVENTS: ['calendarEvents'] as const,
-  GITLAB_MRS: (filter: GitlabFilter) => ['gitlabMrs', filter] as const,
-  ATTENTION: ['attention'] as const,
+  calendar: {
+    events: ['calendar', 'events'] as const,
+  },
+  gitlab: {
+    mergeRequests: (filter: GitlabFilter) =>
+      ['gitlab', 'mergeRequests', filter] as const,
+  },
+  jira: {
+    issues: (filter: JiraFilter) => ['jira', 'issues', filter] as const,
+    issueByFeatureKey: (featureKey: string) =>
+      ['jira', 'issueByFeatureKey', featureKey] as const,
+  },
+  attention: {
+    list: ['attention', 'list'] as const,
+  },
 } as const;
 
 export const GITLAB_FILTERS = {
