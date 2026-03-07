@@ -19,18 +19,22 @@ const NewTab = () => {
         <div className="min-h-screen bg-background">
           <Header />
           <main className="container mx-auto px-4 py-6 min-w-full">
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              <div>
-                <JiraSection />
+            <div
+              className="
+              grid grid-cols-1 gap-6
+              xl:grid-cols-[minmax(280px,1fr)_minmax(0,1fr)_minmax(280px,1fr)]
+              xl:items-start
+            "
+            >
+              <div className="xl:sticky xl:top-6">
+                <AttentionSection />
               </div>
-              <div>
+              <div className="xl:sticky xl:top-6">
                 <GitlabSection />
               </div>
-              <div>
+              <div className="flex flex-col gap-6">
+                <JiraSection />
                 <NotesSection />
-              </div>
-              <div>
-                <AttentionSection />
               </div>
             </div>
           </main>
