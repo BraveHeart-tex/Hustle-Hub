@@ -9,6 +9,7 @@ export const QUERY_KEYS = {
   JIRA_ISSUES: (filter: JiraFilter) => ['jiraIssues', filter] as const,
   CALENDAR_EVENTS: ['calendarEvents'] as const,
   GITLAB_MRS: (filter: GitlabFilter) => ['gitlabMrs', filter] as const,
+  ATTENTION: ['attention'] as const,
 } as const;
 
 export const GITLAB_FILTERS = {

@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import AttentionSection from '@/components/newtab/attention/AttentionSection';
 import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
 import GlobalStatusIndicator from '@/components/newtab/GlobalStatusIndicator.tsx';
 import Header from '@/components/newtab/Header';
@@ -18,7 +19,7 @@ const NewTab = () => {
         <div className="min-h-screen bg-background">
           <Header />
           <main className="container mx-auto px-4 py-6 min-w-full">
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
               <div>
                 <JiraSection />
               </div>
@@ -27,6 +28,9 @@ const NewTab = () => {
               </div>
               <div>
                 <NotesSection />
+              </div>
+              <div>
+                <AttentionSection />
               </div>
             </div>
           </main>
