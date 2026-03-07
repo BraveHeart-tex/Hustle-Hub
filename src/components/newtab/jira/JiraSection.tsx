@@ -46,7 +46,9 @@ export default function JiraSection({ className }: JiraSectionProps) {
   }, [data?.issues]);
 
   const shouldShowStatusFilters =
-    !isLoading && taskStatuses.some((s) => s.count > 1);
+    !isLoading &&
+    taskStatuses.length > 1 &&
+    taskStatuses.some((s) => s.count > 1);
 
   const renderContent = useCallback(() => {
     if (isLoading) {
