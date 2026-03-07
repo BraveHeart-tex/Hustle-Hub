@@ -18,6 +18,7 @@ const NewTab = () => {
       <CommentsProvider>
         <div className="min-h-screen bg-background">
           <Header />
+
           <main className="container mx-auto px-4 py-6 min-w-full">
             <div
               className="
@@ -26,19 +27,35 @@ const NewTab = () => {
               xl:items-start
             "
             >
+              {/* LEFT — Attention, sticky */}
               <div className="xl:sticky xl:top-6">
                 <AttentionSection />
               </div>
+
+              {/* MIDDLE — GitLab, sticky */}
               <div className="xl:sticky xl:top-6">
                 <GitlabSection />
               </div>
-              <div className="flex flex-col gap-6">
-                <JiraSection />
-                <NotesSection />
+
+              {/* RIGHT — fixed height column, Jira gets most space, Notes always visible at bottom */}
+              <div
+                className="xl:sticky xl:top-6 flex flex-col gap-6"
+                style={{ height: 'calc(100vh - 110px)' }}
+              >
+                {/* Jira takes available space but never pushes Notes out */}
+                <div className="min-h-0 flex-1">
+                  <JiraSection className="h-full" />
+                </div>
+
+                {/* Notes has a fixed max so it's always present */}
+                <div className="shrink-0 max-h-64">
+                  <NotesSection className="max-h-64" />
+                </div>
               </div>
             </div>
           </main>
         </div>
+
         <Toaster />
         <SearchDialog />
         <GlobalStatusIndicator />
