@@ -19,7 +19,7 @@ export function useAttentionStream(): void {
     function connect() {
       if (unmounted) return;
 
-      const es = new EventSource(ENDPOINTS.ATTENTION_STREAM);
+      const es = new EventSource(ENDPOINTS.attention.stream);
       esRef.current = es;
 
       // Full snapshot on connect — replaces whatever is in cache

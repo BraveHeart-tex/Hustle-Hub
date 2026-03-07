@@ -21,7 +21,7 @@ export function useAttention() {
   // Initial fetch seeds the cache before first SSE snapshot arrives.
   // After that, SSE takes over and this query becomes stale-while-revalidate.
   return useApi(QUERY_KEYS.ATTENTION, async () => {
-    const response = await fetch(ENDPOINTS.ATTENTION);
+    const response = await fetch(ENDPOINTS.attention.list);
     return (await response.json()) as ApiResponse<AttentionItem[]>;
   });
 }

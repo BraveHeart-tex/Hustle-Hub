@@ -250,12 +250,12 @@ export default function AttentionSection() {
   const totalCount = items.length;
 
   const handleDismiss = useCallback(async (id: string) => {
-    await fetch(`${ENDPOINTS.ATTENTION}/${id}/dismiss`, { method: 'PATCH' });
+    await fetch(ENDPOINTS.attention.dismiss(id), { method: 'PATCH' });
     // SSE will push the resolved event and update cache automatically
   }, []);
 
   const handleSnooze = useCallback(async (id: string, duration: string) => {
-    await fetch(`${ENDPOINTS.ATTENTION}/${id}/snooze`, {
+    await fetch(ENDPOINTS.attention.snooze(id), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ duration }),
