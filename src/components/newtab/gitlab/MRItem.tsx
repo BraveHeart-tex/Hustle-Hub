@@ -10,11 +10,9 @@ import {
 } from 'lucide-react';
 
 import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
-import MRLabel from '@/components/newtab/gitlab/MRLabel';
 import MrStatusBadge from '@/components/newtab/gitlab/MrStatusBadge';
 import MRStatusIcon from '@/components/newtab/gitlab/MrStatusIcon';
 import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { GitlabMergeRequest } from '@/types/gitlab';
@@ -24,102 +22,139 @@ interface MRItemProps {
 }
 
 const MRItem = ({ mr }: MRItemProps) => {
+  const hasProblem = mr.conflicts || mr.headPipelineStatus === 'FAILED';
+
   return (
     <a href={mr.webUrl} target="_blank" rel="noopener noreferrer">
       <div
         className={cn(
-          'p-3 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer relative',
+          'px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer relative',
           mr.needsCurrentUserAction &&
+            !hasProblem &&
             'border-yellow-500 dark:border-yellow-700 border-2',
-          (mr.conflicts || mr.headPipelineStatus === 'FAILED') &&
-            'border-destructive border-2',
+          hasProblem && 'border-destructive border-2',
         )}
       >
-        {mr.needsCurrentUserAction && (
+        {/* Status icon — only one shown, conflicts take priority */}
+        {mr.needsCurrentUserAction && !hasProblem && (
           <MRStatusIcon
             title="Action required"
             variant="warning"
             icon={<AlertCircleIcon className="w-4 h-4" />}
           />
         )}
-        {mr.conflicts && (
+        {hasProblem && (
           <MRStatusIcon
-            title="This MR has conflicts"
+            title={mr.conflicts ? 'This MR has conflicts' : 'Pipeline failed'}
             variant="destructive"
             icon={<AlertCircleIcon />}
           />
         )}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-muted-foreground">
+
+        {/* Row 1: iid + merge status + auto-merge + date */}
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-xs font-mono text-muted-foreground shrink-0">
               !{mr.iid}
             </span>
             <MrStatusBadge status={mr.mergeStatus} draft={mr.draft} />
-            {mr.headPipelineStatus === 'FAILED' && (
-              <Badge variant="destructive" className="text-xs">
-                Pipeline Failed
-              </Badge>
+            {mr.autoMergeEnabled && (
+              <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium shrink-0">
+                <WorkflowIcon className="size-3" />
+                Auto-merge
+              </span>
             )}
           </div>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground shrink-0">
             {formatDate(mr.createdAt)}
           </span>
         </div>
 
-        <h3 className="font-medium text-sm text-foreground mb-2 text-balance">
+        {/* Row 2: Title */}
+        <h3 className="font-medium text-sm text-foreground mb-1 leading-snug">
           {mr.title}
         </h3>
+
+        {/* Row 3: Labels — colored background at low opacity */}
         {mr.labels && mr.labels.length > 0 && (
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
             {mr.labels.map((label) => (
-              <MRLabel key={label.title} label={label} />
+              <span
+                key={label.title}
+                className="text-[10px] font-medium rounded px-1.5 py-px leading-none"
+                style={{
+                  backgroundColor: `${label.color}26`,
+                  color: label.color,
+                  border: `1px solid ${label.color}40`,
+                }}
+              >
+                {label.title}
+              </span>
             ))}
           </div>
         )}
 
-        <div className="mb-2 space-y-2">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <FolderGit2 className="size-3" />
-            <span>{mr.projectName}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <GitBranch className="size-3" />
-            <span>{mr.sourceBranch}</span>
-            <span>→</span>
-            <span>{mr.targetBranch}</span>
-          </div>
+        {/* Row 4: Secondary metadata — muted, single line */}
+        <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-1.5 flex-wrap">
+          <span className="flex items-center gap-1">
+            <FolderGit2 className="size-3 shrink-0" />
+            {mr.projectName}
+          </span>
+          <span className="flex items-center gap-1">
+            <GitBranch className="size-3 shrink-0" />
+            {mr.sourceBranch}
+            <span className="opacity-40">→</span>
+            {mr.targetBranch}
+          </span>
           {mr.diffStatsSummary && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <FileDiffIcon className="size-3" />
-              <span className="flex items-center gap-2 font-mono">
-                <span className="text-green-600 dark:text-green-400">
-                  +{mr.diffStatsSummary.additions}
-                </span>
-                <span className="text-destructive">
-                  -{mr.diffStatsSummary.deletions}
-                </span>
+            <span className="flex items-center gap-1 font-mono">
+              <FileDiffIcon className="size-3 shrink-0" />
+              <span className="text-green-600/60 dark:text-green-400/60">
+                +{mr.diffStatsSummary.additions}
               </span>
-            </div>
-          )}
-          {mr.autoMergeEnabled && (
-            <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400 font-medium">
-              <WorkflowIcon className="size-3" />
-              <span>Auto-merge</span>
-            </div>
+              <span className="text-destructive/60">
+                -{mr.diffStatsSummary.deletions}
+              </span>
+            </span>
           )}
         </div>
 
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>by @{mr.author.username}</span>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
+        {/* Row 5: Author + reviewers left, stats right */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <GitlabUserAvatar src={mr.author.avatarUrl} className="w-5 h-5" />
+            <span className="text-xs text-muted-foreground">
+              @{mr.author.username}
+            </span>
+            {mr.reviewers && mr.reviewers.length > 0 && (
+              <>
+                <span className="text-muted-foreground/30 text-xs">·</span>
+                <div className="flex items-center gap-1">
+                  {mr.reviewers.map((reviewer) => (
+                    <div key={reviewer.id} className="relative inline-block">
+                      <GitlabUserAvatar
+                        src={reviewer.avatarUrl}
+                        className="w-5 h-5"
+                      />
+                      {reviewer.hasApproved && (
+                        <CheckIcon className="absolute -bottom-1 -right-1 w-3 h-3 text-white bg-green-500 dark:bg-green-700 rounded-full p-px border border-background" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
               <ThumbsUp className="size-3" />
-              <span>{`${mr.approvedBy}/${mr.approvalsRequired}`}</span>
-            </div>
-            <div className="flex items-center gap-1">
+              {mr.approvedBy}/{mr.approvalsRequired}
+            </span>
+            <span className="flex items-center gap-1">
               <MessageSquare className="size-3" />
-              <span>{mr.userNotesCount}</span>
-            </div>
+              {mr.userNotesCount}
+            </span>
             <WorkItemComments
               itemMeta={{
                 itemId: mr.iid,
@@ -130,24 +165,6 @@ const MRItem = ({ mr }: MRItemProps) => {
               preventDefaultOnClick
             />
           </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-4 mt-2">
-          <GitlabUserAvatar src={mr.author.avatarUrl} />
-
-          {mr.reviewers && mr.reviewers.length > 0 && (
-            <div className="flex items-center gap-2">
-              {mr.reviewers.map((reviewer) => (
-                <div key={reviewer.id} className="relative inline-block">
-                  <GitlabUserAvatar src={reviewer.avatarUrl} />
-
-                  {reviewer.hasApproved && (
-                    <CheckIcon className="absolute -bottom-1 -right-1 w-4 h-4 text-white bg-green-500 dark:bg-green-700 rounded-full p-px border border-gray-200" />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </a>
