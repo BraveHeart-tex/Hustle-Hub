@@ -17,6 +17,8 @@ import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { GitlabMergeRequest } from '@/types/gitlab';
 
+import MrLabel from './MrLabel';
+
 interface MRItemProps {
   mr: GitlabMergeRequest;
 }
@@ -35,7 +37,6 @@ const MRItem = ({ mr }: MRItemProps) => {
           hasProblem && 'border-destructive border-2',
         )}
       >
-        {/* Status icon — only one shown, conflicts take priority */}
         {mr.needsCurrentUserAction && !hasProblem && (
           <MRStatusIcon
             title="Action required"
@@ -51,7 +52,6 @@ const MRItem = ({ mr }: MRItemProps) => {
           />
         )}
 
-        {/* Row 1: iid + merge status + auto-merge + date */}
         <div className="flex items-center justify-between gap-2 mb-1">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="text-xs font-mono text-muted-foreground shrink-0">
@@ -70,31 +70,18 @@ const MRItem = ({ mr }: MRItemProps) => {
           </span>
         </div>
 
-        {/* Row 2: Title */}
         <h3 className="font-medium text-sm text-foreground mb-1 leading-snug">
           {mr.title}
         </h3>
 
-        {/* Row 3: Labels — colored background at low opacity */}
         {mr.labels && mr.labels.length > 0 && (
           <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
             {mr.labels.map((label) => (
-              <span
-                key={label.title}
-                className="text-[10px] font-medium rounded px-1.5 py-px leading-none"
-                style={{
-                  backgroundColor: `${label.color}26`,
-                  color: label.color,
-                  border: `1px solid ${label.color}40`,
-                }}
-              >
-                {label.title}
-              </span>
+              <MrLabel label={label} key={`${label.title}+${label.color}`} />
             ))}
           </div>
         )}
 
-        {/* Row 4: Secondary metadata — muted, single line */}
         <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-1.5 flex-wrap">
           <span className="flex items-center gap-1">
             <FolderGit2 className="size-3 shrink-0" />
