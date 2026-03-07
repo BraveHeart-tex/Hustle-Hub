@@ -1,41 +1,23 @@
-import {
-  AlertCircle,
-  CheckSquare,
-  ClipboardCopyIcon,
-  Clock,
-} from 'lucide-react';
+import { CheckSquare, ClipboardCopyIcon } from 'lucide-react';
 import { MouseEvent, useState } from 'react';
 import { toast } from 'sonner';
 
 import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
-import { getTaskAge } from '@/lib/utils/misc/getTaskAge';
 import { JiraIssue } from '@/types/jira';
 
-const getPriorityIcon = (priority: string) => {
-  switch (priority) {
-    case 'High':
-      return <AlertCircle className="h-3 w-3 text-destructive" />;
-    case 'Medium':
-      return <Clock className="h-3 w-3 text-amber-500" />;
-    default:
-      return <CheckSquare className="h-3 w-3 text-muted-foreground" />;
-  }
+// Status badge styles keyed by statusCategory.colorName
+const STATUS_BADGE: Record<string, string> = {
+  red: 'bg-destructive/10 text-destructive border-destructive/20',
+  yellow: 'bg-amber-400/10 text-amber-500 border-amber-400/20',
+  green:
+    'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
 };
 
-const getStatusColor = (colorName: string) => {
-  switch (colorName) {
-    case 'red':
-      return 'bg-destructive';
-    case 'yellow':
-      return 'bg-amber-500';
-    case 'green':
-      return 'bg-success';
-    default:
-      return 'bg-muted-foreground';
-  }
-};
+const getStatusBadgeClass = (colorName: string) =>
+  STATUS_BADGE[colorName] ?? 'bg-muted text-muted-foreground border-border';
 
 interface JiraItemProps {
   issue: JiraIssue;
@@ -44,16 +26,13 @@ interface JiraItemProps {
 const JiraItem = ({ issue }: JiraItemProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const { fields } = issue;
-  const statusColor = getStatusColor(fields.status.statusCategory.colorName);
 
   const handleIssueClick = () => {
     window.open(getJiraTaskUrl(issue.key), '_blank');
   };
 
-  const copyTaskLinkToClipboard = async (
-    event: MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.stopPropagation();
+  const copyTaskLinkToClipboard = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     try {
       await navigator.clipboard.writeText(getJiraTaskUrl(issue.key));
       setIsCopied(true);
@@ -66,56 +45,47 @@ const JiraItem = ({ issue }: JiraItemProps) => {
 
   return (
     <div
-      key={issue.id}
-      className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors dark:hover:bg-accent/50 cursor-pointer"
+      className="px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer"
       onClick={handleIssueClick}
     >
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-muted-foreground">
-            {issue.key}
-          </span>
-          {getPriorityIcon(fields.priority.name)}
-        </div>
-        <div className="flex items-center gap-1">
-          <div className={`w-2 h-2 rounded-full ${statusColor}`} />
-          <span className="text-xs text-muted-foreground">
-            {fields.status.name}
-          </span>
-        </div>
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <span className="text-xs font-mono text-muted-foreground shrink-0">
+          {issue.key}
+        </span>
+        <span
+          className={cn(
+            'text-[10px] font-medium border rounded px-1.5 py-px leading-none shrink-0',
+            getStatusBadgeClass(fields.status.statusCategory.colorName),
+          )}
+        >
+          {fields.status.name}
+        </span>
       </div>
 
-      <h3 className="font-medium text-sm text-foreground mb-2 text-balance">
+      <h3 className="text-sm font-medium leading-snug mb-1.5">
         {fields.summary}
       </h3>
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <span>@{fields.assignee.displayName}</span>
-          <span className="text-muted-foreground/60">
-            {getTaskAge(fields.created)}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <WorkItemComments
-            itemMeta={{
-              itemId: issue.id,
-              itemType: 'jira',
-              title: fields.summary,
-              url: getJiraTaskUrl(issue.key),
-            }}
-          />
-          <Button
-            size={'icon'}
-            variant={'ghost'}
-            className="size-4 z-10"
-            onClick={copyTaskLinkToClipboard}
-          >
-            {isCopied ? <CheckSquare /> : <ClipboardCopyIcon />}
-          </Button>
-        </div>
+      <div className="flex items-center justify-end gap-2 transition-opacity">
+        <WorkItemComments
+          itemMeta={{
+            itemId: issue.id,
+            itemType: 'jira',
+            title: fields.summary,
+            url: getJiraTaskUrl(issue.key),
+          }}
+        />
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-4 relative text-muted-foreground"
+          onClick={copyTaskLinkToClipboard}
+        >
+          {isCopied ? <CheckSquare /> : <ClipboardCopyIcon />}
+        </Button>
       </div>
     </div>
   );
 };
+
 export default JiraItem;
