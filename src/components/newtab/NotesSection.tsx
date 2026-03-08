@@ -1,11 +1,12 @@
 import { PlusIcon, StickyNote } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import FilterButton from '@/components/newtab/FilterButton';
 import NoteFormSheet from '@/components/newtab/notes/NoteFormSheet';
 import NoteItem from '@/components/newtab/notes/NoteItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { NOTE_PRIORITIES } from '@/lib/constants';
 import { useNotes } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
 import { Note } from '@/types/notes';
@@ -14,24 +15,30 @@ interface NotesSectionProps {
   className?: string;
 }
 
+const PRIORITY_FILTER_ORDER = [
+  NOTE_PRIORITIES.HIGH,
+  NOTE_PRIORITIES.MEDIUM,
+  NOTE_PRIORITIES.LOW,
+] as const;
+
 export default function NotesSection({ className }: NotesSectionProps) {
   const [dialogState, setDialogState] = useState<{
     selectedItem: Note | undefined;
     open: boolean;
-  }>({
-    selectedItem: undefined,
-    open: false,
-  });
+  }>({ selectedItem: undefined, open: false });
+
   const [selectedPriority, setSelectedPriority] = useState('');
   const { notes } = useNotes();
 
   const priorityStats = useMemo(() => {
-    if (!notes || notes.length === 0) return [];
+    if (!notes.length) return [];
     const map: Record<string, number> = {};
     for (const note of notes) {
       map[note.priority] = (map[note.priority] ?? 0) + 1;
     }
-    return Object.entries(map).map(([label, count]) => ({ label, count }));
+    return PRIORITY_FILTER_ORDER.filter((p) => map[p] !== undefined).map(
+      (p) => ({ label: p, count: map[p] }),
+    );
   }, [notes]);
 
   const handleItemClick = useCallback((selectedItem: Note) => {
@@ -47,7 +54,7 @@ export default function NotesSection({ className }: NotesSectionProps) {
     return notes.filter((note) => note.priority === selectedPriority);
   }, [notes, selectedPriority]);
 
-  const shouldShowPriorityFilters = priorityStats.some((p) => p.count > 1);
+  const shouldShowPriorityFilters = priorityStats.length > 1;
 
   return (
     <>

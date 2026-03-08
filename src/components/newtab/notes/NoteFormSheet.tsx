@@ -27,7 +27,7 @@ import { Note } from '@/types/notes';
 
 const RichTextEditor = lazy(() => import('@/components/ui/rich-text-editor'));
 
-interface NoteFormDialogProps {
+interface NoteFormSheetProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   selectedItem?: Note;
@@ -40,32 +40,21 @@ const defaultFormState: Note = {
   priority: NOTE_PRIORITIES.LOW,
 };
 
-const RESET_DELAY_MS = 100;
+const PRIORITY_OPTIONS = Object.entries(NOTE_PRIORITIES).map(
+  ([key, value]) => ({
+    label: key.charAt(0).toUpperCase() + key.toLowerCase().slice(1),
+    value,
+  }),
+);
 
 const NoteFormSheet = ({
   isOpen,
   onOpenChange,
   selectedItem,
-}: NoteFormDialogProps) => {
+}: NoteFormSheetProps) => {
   const [formState, setFormState] = useState<Note>(defaultFormState);
-  const formResetTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const lastToastId = useRef<string | number | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) {
-      formResetTimeoutRef.current = setTimeout(() => {
-        setFormState(defaultFormState);
-      }, RESET_DELAY_MS);
-    }
-
-    return () => {
-      if (formResetTimeoutRef.current !== null) {
-        clearTimeout(formResetTimeoutRef.current);
-        formResetTimeoutRef.current = null;
-      }
-    };
-  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && selectedItem) {
@@ -76,23 +65,15 @@ const NoteFormSheet = ({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!formState.title) {
-      if (lastToastId.current) {
-        toast.error('Please enter a title', {
-          id: lastToastId.current,
-        });
-        return;
-      }
-
-      lastToastId.current = toast.error('Please enter a title');
+    if (!formState.title.trim()) {
+      lastToastId.current = toast.error('Please enter a title', {
+        id: lastToastId.current ?? undefined,
+      });
       return;
     }
 
     if (!formState.id) {
-      await addNote({
-        ...formState,
-        id: crypto.randomUUID(),
-      });
+      await addNote({ ...formState, id: crypto.randomUUID() });
     } else {
       await updateNote(formState.id, formState);
     }
@@ -101,13 +82,20 @@ const NoteFormSheet = ({
     onOpenChange(false);
   };
 
+  const isEditing = Boolean(formState.id);
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-2xl">
+      <SheetContent
+        className="sm:max-w-2xl"
+        onCloseAutoFocus={() => {
+          setFormState(defaultFormState);
+        }}
+      >
         <SheetHeader>
-          <SheetTitle>{formState.id ? 'Edit Note' : 'New Note'}</SheetTitle>
+          <SheetTitle>{isEditing ? 'Edit Note' : 'New Note'}</SheetTitle>
           <SheetDescription>
-            {formState.id ? 'Edit an existing note' : 'Create a new note'}
+            {isEditing ? 'Edit an existing note' : 'Create a new note'}
           </SheetDescription>
         </SheetHeader>
         <form
@@ -115,7 +103,7 @@ const NoteFormSheet = ({
           onSubmit={handleSubmit}
           className="space-y-6 overflow-auto px-4"
         >
-          <div className="flex flex-col gap-2 group">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="title">Title</Label>
             <Input
               id="title"
@@ -132,19 +120,16 @@ const NoteFormSheet = ({
             <Suspense fallback={<EditorSkeleton />}>
               <RichTextEditor
                 content={formState.content}
-                onChange={(content) => {
-                  setFormState({ ...formState, content });
-                }}
-                onCmdEnter={() => {
-                  formRef.current?.requestSubmit();
-                }}
+                onChange={(content) => setFormState({ ...formState, content })}
+                onCmdEnter={() => formRef.current?.requestSubmit()}
               />
             </Suspense>
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="priority">Priority</Label>
+            {/* Use `value` not `defaultValue` so the select reflects edits correctly */}
             <Select
-              defaultValue={formState.priority}
+              value={formState.priority}
               onValueChange={(v) =>
                 setFormState({ ...formState, priority: v as NotePriority })
               }
@@ -153,17 +138,9 @@ const NoteFormSheet = ({
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(NOTE_PRIORITIES).map((priorityKey) => (
-                  <SelectItem
-                    key={priorityKey}
-                    value={
-                      NOTE_PRIORITIES[
-                        priorityKey as keyof typeof NOTE_PRIORITIES
-                      ]
-                    }
-                  >
-                    {priorityKey.charAt(0).toUpperCase() +
-                      priorityKey.toLowerCase().slice(1)}
+                {PRIORITY_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -174,8 +151,8 @@ const NoteFormSheet = ({
           <Button
             type="button"
             className="w-full"
-            disabled={!formState.title}
-            onClick={handleSubmit}
+            disabled={!formState.title.trim()}
+            onClick={() => formRef.current?.requestSubmit()}
           >
             Save
           </Button>
@@ -189,4 +166,5 @@ const NoteFormSheet = ({
     </Sheet>
   );
 };
+
 export default NoteFormSheet;
