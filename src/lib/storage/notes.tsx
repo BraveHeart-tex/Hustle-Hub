@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 
 import { Note } from '@/types/notes';
 
+import { NotePriority } from '../constants';
+
 const noteList = storage.defineItem<Note[]>('local:taskList', {
   fallback: [],
 });
@@ -41,27 +43,30 @@ export const updateNote = async (noteId: string, changes: Partial<Note>) => {
   );
 };
 
+const PRIORITY_ORDER: Record<NotePriority, number> = {
+  high: 0,
+  medium: 1,
+  low: 2,
+};
+const byPriority = (a: Note, b: Note) =>
+  PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+
 export const useNotes = () => {
   const [notes, setNotes] = useState<Note[]>([]);
 
   useEffect(() => {
     async function getInitialTasks() {
       const initialNotes = await noteList.getValue();
-      setNotes(initialNotes);
+      setNotes([...initialNotes].sort(byPriority));
     }
-
     getInitialTasks();
 
     const unwatch = noteList.watch((newNotes) => {
-      setNotes(newNotes);
+      setNotes([...newNotes].sort(byPriority));
     });
 
-    return () => {
-      unwatch();
-    };
+    return () => unwatch();
   }, []);
 
-  return {
-    notes,
-  };
+  return { notes };
 };
