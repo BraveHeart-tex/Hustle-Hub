@@ -104,6 +104,7 @@ const WorkItemComments = ({
   const handleTriggerClick: MouseEventHandler = (event) => {
     if (preventDefaultOnClick) event.preventDefault();
     event.stopPropagation();
+    setIsPopoverOpen((prev) => !prev);
   };
 
   const handleContentClick: MouseEventHandler = (event) => {
