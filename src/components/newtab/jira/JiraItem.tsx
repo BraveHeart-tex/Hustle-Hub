@@ -66,23 +66,29 @@ const JiraItem = ({ issue }: JiraItemProps) => {
         {fields.summary}
       </h3>
 
-      <div className="flex items-center justify-end gap-2 transition-opacity">
-        <WorkItemComments
-          itemMeta={{
-            itemId: issue.id,
-            itemType: 'jira',
-            title: fields.summary,
-            url: getJiraTaskUrl(issue.key),
-          }}
-        />
-        <Button
-          size="icon"
-          variant="ghost"
-          className="size-4 relative text-muted-foreground"
-          onClick={copyTaskLinkToClipboard}
-        >
-          {isCopied ? <CheckSquare /> : <ClipboardCopyIcon />}
-        </Button>
+      <div className="flex items-center justify-between gap-2 transition-opacity">
+        <span className="text-xs text-muted-foreground flex items-center gap-1">
+          <img src={fields.priority.iconUrl} alt="" width={12} height={12} />
+          {fields.priority.name}
+        </span>
+        <div className="flex items-center gap-2">
+          <WorkItemComments
+            itemMeta={{
+              itemId: issue.id,
+              itemType: 'jira',
+              title: fields.summary,
+              url: getJiraTaskUrl(issue.key),
+            }}
+          />
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-4 relative text-muted-foreground"
+            onClick={copyTaskLinkToClipboard}
+          >
+            {isCopied ? <CheckSquare /> : <ClipboardCopyIcon />}
+          </Button>
+        </div>
       </div>
     </div>
   );
