@@ -1,5 +1,12 @@
-import { CheckIcon, MessageSquareTextIcon } from 'lucide-react';
-import { lazy, type MouseEventHandler, Suspense, useState } from 'react';
+import { CheckIcon, MessageSquareIcon, PlusIcon, SendIcon } from 'lucide-react';
+import {
+  lazy,
+  type MouseEventHandler,
+  Suspense,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
 
 import { Button } from '@/components/ui/button';
 import EditorSkeleton from '@/components/ui/editor-skeleton';
@@ -10,6 +17,7 @@ import {
 } from '@/components/ui/popover';
 import { type TiptapRef } from '@/components/ui/rich-text-editor';
 import { addComment, removeComment, useComments } from '@/lib/storage/comments';
+import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { type CommentItemType } from '@/types/comments';
 
@@ -38,62 +46,73 @@ const WorkItemComments = ({
   const tiptapRef = useRef<TiptapRef>(null);
   const [draft, setDraft] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resolvingIds, setResolvingIds] = useState<Set<string>>(new Set());
+  const [showEditor, setShowEditor] = useState(false);
+
+  const focusEditor = useCallback(() => {
+    tiptapRef.current?.editor?.commands.focus();
+  }, []);
+
+  const clearEditor = useCallback(() => {
+    setDraft('');
+    tiptapRef.current?.editor?.commands.setContent('');
+  }, []);
 
   const handleSubmit = async () => {
     const editor = tiptapRef.current?.editor;
-    if (!editor) return;
-
-    if (editor.isEmpty || !draft.trim()) {
+    if (!editor || editor.isEmpty) {
       focusEditor();
       return;
     }
-
+    // Get content directly from editor, not from draft state
+    const content = editor.getHTML();
+    if (!content.trim()) {
+      focusEditor();
+      return;
+    }
     try {
       setIsSubmitting(true);
       await addComment({
+        content,
         item: {
           id: itemMeta.itemId,
-          type: itemMeta.itemType,
           title: itemMeta.title,
+          type: itemMeta.itemType,
           url: itemMeta.url,
         },
-        content: draft,
       });
-      setDraft('');
-      editor.commands.setContent('');
-      focusEditor();
+      clearEditor();
+      setShowEditor(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleResolveComment = async (commentId: string) => {
+    setResolvingIds((prev) => new Set(prev).add(commentId));
     try {
-      const shouldFocusAfterResolve = comments.length === 1;
-      setIsSubmitting(true);
       await removeComment(commentId);
-      if (shouldFocusAfterResolve) {
-        focusEditor();
-      }
     } finally {
-      setIsSubmitting(false);
+      setResolvingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(commentId);
+        return next;
+      });
     }
   };
 
-  const handlePopoverClick: MouseEventHandler = (event) => {
-    if (preventDefaultOnClick) {
-      event.preventDefault();
-    }
-
+  const handleTriggerClick: MouseEventHandler = (event) => {
+    if (preventDefaultOnClick) event.preventDefault();
     event.stopPropagation();
-    setIsPopoverOpen((prev) => !prev);
   };
 
-  const focusEditor = () => {
-    if (tiptapRef.current && tiptapRef.current?.editor) {
-      tiptapRef.current.editor.commands.focus();
-    }
+  const handleContentClick: MouseEventHandler = (event) => {
+    if (preventDefaultOnClick) event.preventDefault();
+    event.stopPropagation();
   };
+
+  const isEditorEmpty = !draft.trim();
+  const hasComments = comments.length > 0;
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -101,108 +120,148 @@ const WorkItemComments = ({
         <Button
           size="icon"
           variant="ghost"
-          className="size-4 relative text-muted-foreground"
-          onClick={handlePopoverClick}
+          className="size-4 relative text-muted-foreground hover:text-foreground transition-colors"
+          onClick={handleTriggerClick}
         >
-          <MessageSquareTextIcon />
-          {comments.length > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full px-1 py-0.5 text-[8px] leading-none">
+          <MessageSquareIcon />
+          {hasComments && (
+            <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground rounded-full min-w-[14px] h-[14px] px-[3px] text-[8px] leading-none flex items-center justify-center font-medium">
               {comments.length}
             </span>
           )}
         </Button>
       </PopoverTrigger>
+
       <PopoverContent
         side="bottom"
         align="end"
-        className="w-80 space-y-3"
-        onClick={(event) => {
-          if (preventDefaultOnClick) {
-            event.preventDefault();
-          }
-          event.stopPropagation();
-        }}
+        className="w-72 p-0 overflow-hidden shadow-lg"
+        onClick={handleContentClick}
       >
-        <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-          {comments.length === 0 ? (
-            <p className="text-xs text-muted-foreground">
-              No comments yet. Use the editor below to add one.
-            </p>
-          ) : (
-            comments.map((comment) => (
+        {/* Header */}
+        <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
+          <div className="flex items-center gap-1.5">
+            <MessageSquareIcon className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium">Notes</span>
+            {hasComments && (
+              <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-1.5 py-px">
+                {comments.length}
+              </span>
+            )}
+          </div>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-5 w-5 text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              setShowEditor((v) => !v);
+              if (!showEditor) setTimeout(focusEditor, 50);
+            }}
+          >
+            <PlusIcon className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+
+        {/* Comment list */}
+        {hasComments && (
+          <div className="max-h-48 overflow-y-auto">
+            {comments.map((comment, i) => (
               <div
                 key={comment.id}
-                className="rounded-md border px-2.5 py-2 space-y-1 wrap-break-word"
+                className={cn(
+                  'group px-3 py-2 transition-colors hover:bg-muted/30',
+                  i !== comments.length - 1 && 'border-b border-border/50',
+                )}
               >
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>You</span>
-                  <div className="flex items-center gap-2">
-                    {comment.createdAt && (
-                      <span>{formatDate(comment.createdAt)}</span>
+                {/* Meta row */}
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] text-muted-foreground/70">
+                    {comment.createdAt ? formatDate(comment.createdAt) : 'You'}
+                  </span>
+                  <button
+                    onClick={() => void handleResolveComment(comment.id)}
+                    disabled={resolvingIds.has(comment.id)}
+                    className={cn(
+                      'opacity-0 group-hover:opacity-100 transition-opacity',
+                      'h-4 w-4 rounded flex items-center justify-center',
+                      'text-muted-foreground hover:text-green-500 hover:bg-green-500/10',
+                      resolvingIds.has(comment.id) &&
+                        'opacity-50 cursor-not-allowed',
                     )}
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-6"
-                      onClick={() => handleResolveComment(comment.id)}
-                    >
-                      <CheckIcon className="size-4" />
-                    </Button>
-                  </div>
+                    title="Resolve"
+                  >
+                    <CheckIcon className="h-3 w-3" />
+                  </button>
                 </div>
+                {/* Content */}
                 <div
-                  className="prose prose-xs dark:prose-invert max-w-none text-foreground text-sm whitespace-pre-wrap hyphens-auto"
-                  // Content is produced by our own editor, so it's safe to render as HTML here.
+                  className="prose prose-xs dark:prose-invert max-w-none text-foreground text-xs leading-relaxed [&_p]:my-0"
                   dangerouslySetInnerHTML={{ __html: comment.content }}
                 />
               </div>
-            ))
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Suspense fallback={<EditorSkeleton className="h-24" />}>
-            <RichTextEditor
-              content={draft}
-              onChange={setDraft}
-              placeholder="Add a comment..."
-              className="border-muted h-24"
-              showToolbar={false}
-              ref={tiptapRef}
-              onReady={focusEditor}
-              onCmdEnter={handleSubmit}
-            />
-          </Suspense>
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              className="h-7 px-2 text-xs"
-              onClick={() => setDraft('')}
-              disabled={
-                !draft.trim() ||
-                isSubmitting ||
-                tiptapRef.current?.editor?.isEmpty
-              }
-            >
-              Clear
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              className="h-7 px-3 text-xs"
-              onClick={handleSubmit}
-              disabled={
-                !draft.trim() ||
-                isSubmitting ||
-                tiptapRef.current?.editor?.isEmpty
-              }
-            >
-              Add comment
-            </Button>
+            ))}
           </div>
-        </div>
+        )}
+
+        {/* Empty state — shown when no comments and editor is hidden */}
+        {!hasComments && !showEditor && (
+          <div className="flex flex-col items-center gap-2 py-6 text-center px-4">
+            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+              <MessageSquareIcon className="h-4 w-4 text-muted-foreground/50" />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              No notes yet.{' '}
+              <button
+                className="text-foreground underline underline-offset-2 hover:no-underline"
+                onClick={() => {
+                  setShowEditor(true);
+                  setTimeout(focusEditor, 50);
+                }}
+              >
+                Add one
+              </button>
+            </p>
+          </div>
+        )}
+
+        {/* Editor — toggled by + button */}
+        {showEditor && (
+          <div className="border-t border-border/50 p-2 space-y-2 bg-muted/10">
+            <Suspense fallback={<EditorSkeleton className="h-20" />}>
+              <RichTextEditor
+                ref={tiptapRef}
+                content={draft}
+                onChange={setDraft}
+                placeholder="Add a note..."
+                className="border-muted h-20 text-xs"
+                showToolbar={false}
+                onReady={focusEditor}
+                onCmdEnter={() => void handleSubmit()}
+              />
+            </Suspense>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => {
+                  clearEditor();
+                  setShowEditor(false);
+                }}
+                className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Cancel
+              </button>
+              <Button
+                type="button"
+                size="sm"
+                className="h-6 px-2.5 text-xs gap-1.5"
+                onClick={() => void handleSubmit()}
+                disabled={isEditorEmpty || isSubmitting}
+              >
+                <SendIcon className="h-3 w-3" />
+                Save
+              </Button>
+            </div>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );
