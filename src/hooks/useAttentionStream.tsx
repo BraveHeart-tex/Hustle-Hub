@@ -34,14 +34,20 @@ export function useAttentionStream(): void {
         queryClient.setQueryData<AttentionItem[]>(
           QUERY_KEYS.attention.list,
           (prev = []) => {
+            // Remove snoozed/dismissed items from the active feed
+            if (
+              incoming.status === 'snoozed' ||
+              incoming.status === 'dismissed'
+            ) {
+              return prev.filter((i) => i.id !== incoming.id);
+            }
+
             const exists = prev.findIndex((i) => i.id === incoming.id);
             if (exists !== -1) {
-              // Update in place, preserve order
               const next = [...prev];
               next[exists] = incoming;
               return next;
             }
-            // New item — insert sorted by priority
             return [...prev, incoming].sort(byPriority);
           },
         );
