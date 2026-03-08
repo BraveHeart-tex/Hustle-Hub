@@ -1,6 +1,6 @@
-import { usePresets } from '@/lib/storage/reviewer-presets';
+import { type usePresets } from '@/lib/storage/reviewer-presets';
 import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
-import { GitlabReviewer } from '@/types/reviewer-presets';
+import { type GitlabReviewer } from '@/types/reviewer-presets';
 
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';

@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
-import { GITLAB_FILTERS, GitlabFilter } from '@/lib/constants';
+import { GITLAB_FILTERS, type GitlabFilter } from '@/lib/constants';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { onMessage, sendMessage } from '@/messaging';
 

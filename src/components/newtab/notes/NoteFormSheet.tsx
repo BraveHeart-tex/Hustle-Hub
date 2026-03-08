@@ -21,9 +21,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { NOTE_PRIORITIES, NotePriority } from '@/lib/constants';
+import { NOTE_PRIORITIES, type NotePriority } from '@/lib/constants';
 import { addNote, updateNote } from '@/lib/storage/notes';
-import { Note } from '@/types/notes';
+import { type Note } from '@/types/notes';
 
 const RichTextEditor = lazy(() => import('@/components/ui/rich-text-editor'));
 

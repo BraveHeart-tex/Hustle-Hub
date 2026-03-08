@@ -1,6 +1,6 @@
 import { useTheme } from '@/components/newtab/ThemeProvider';
 import { formatGitLabLabel } from '@/lib/utils/formatters/formatGitLabel';
-import { GitlabMergeRequest } from '@/types/gitlab';
+import { type GitlabMergeRequest } from '@/types/gitlab';
 
 function hexToRgb(hex: string): [number, number, number] {
   const cleaned = hex.replace('#', '');

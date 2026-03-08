@@ -7,7 +7,7 @@ import {
 
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { MrWarning, mrWarningStrategies } from './mr-warning-strategies';
+import { type MrWarning, mrWarningStrategies } from './mr-warning-strategies';
 
 const severityConfig = {
   error: {

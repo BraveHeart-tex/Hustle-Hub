@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/popover';
 import { removeNote, updateNote } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
-import { Note } from '@/types/notes';
+import { type Note } from '@/types/notes';
 
 import { NotePriorityDropdown } from './NotePriorityDropdown';
 

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
-import { JIRA_FILTERS, JiraFilter } from '@/lib/constants';
+import { JIRA_FILTERS, type JiraFilter } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 

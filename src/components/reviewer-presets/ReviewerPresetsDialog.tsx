@@ -1,5 +1,5 @@
 import { Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
-import { FormEvent, useRef, useState } from 'react';
+import { type FormEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -19,7 +19,10 @@ import {
   useReviewers,
 } from '@/lib/storage/reviewer-presets';
 import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
-import { GitlabReviewer, ReviewerPreset } from '@/types/reviewer-presets';
+import {
+  type GitlabReviewer,
+  type ReviewerPreset,
+} from '@/types/reviewer-presets';
 
 import GitlabIcon from '../misc/GitlabIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';

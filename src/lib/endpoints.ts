@@ -1,4 +1,4 @@
-import { GitlabFilter, JiraFilter } from '@/lib/constants';
+import { type GitlabFilter, type JiraFilter } from '@/lib/constants';
 
 const BASE = import.meta.env.VITE_BASE_API_URL;
 

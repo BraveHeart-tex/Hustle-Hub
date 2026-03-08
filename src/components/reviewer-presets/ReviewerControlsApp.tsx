@@ -5,7 +5,7 @@ import { StrictMode } from 'react';
 
 import { usePresets, useReviewers } from '@/lib/storage/reviewer-presets';
 import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
-import { GitlabReviewer } from '@/types/reviewer-presets';
+import { type GitlabReviewer } from '@/types/reviewer-presets';
 
 import { BottomRightPanel } from '../mr-thread-panel/BottomRightPanel';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';

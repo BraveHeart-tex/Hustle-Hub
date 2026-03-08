@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import {
   fetchProjectLabels,
-  GitlabLabel,
+  type GitlabLabel,
 } from '@/lib/utils/gitlab/fetchProjectLabels';
 
 import { Button } from '../ui/button';

@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { MergeStatus } from '@/types/gitlab';
+import { type MergeStatus } from '@/types/gitlab';
 
 const getStatusBadge = ({
   status,

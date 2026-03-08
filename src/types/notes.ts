@@ -1,4 +1,4 @@
-import { NotePriority } from '@/lib/constants';
+import { type NotePriority } from '@/lib/constants';
 
 export interface Note {
   id: string;

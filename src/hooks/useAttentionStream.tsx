@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 
 import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
-import { AttentionItem } from '@/types/attention';
+import { type AttentionItem } from '@/types/attention';
 
 // SSE reconnect delay on unexpected disconnect (ms)
 const RECONNECT_DELAY = 3_000;

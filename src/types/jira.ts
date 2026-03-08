@@ -1,4 +1,4 @@
-import { ApiResponse } from '@/types/api';
+import { type ApiResponse } from '@/types/api';
 
 export interface JiraIssue {
   expand: string;

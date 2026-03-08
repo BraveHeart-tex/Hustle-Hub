@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { Note } from '@/types/notes';
+import { type Note } from '@/types/notes';
 
-import { NotePriority } from '../constants';
+import { type NotePriority } from '../constants';
 
 const noteList = storage.defineItem<Note[]>('local:taskList', {
   fallback: [],

@@ -1,5 +1,5 @@
 import { CheckIcon, MessageSquareTextIcon } from 'lucide-react';
-import { lazy, MouseEventHandler, Suspense, useState } from 'react';
+import { lazy, type MouseEventHandler, Suspense, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import EditorSkeleton from '@/components/ui/editor-skeleton';
@@ -8,10 +8,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { TiptapRef } from '@/components/ui/rich-text-editor';
+import { type TiptapRef } from '@/components/ui/rich-text-editor';
 import { addComment, removeComment, useComments } from '@/lib/storage/comments';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
-import { CommentItemType } from '@/types/comments';
+import { type CommentItemType } from '@/types/comments';
 
 const RichTextEditor = lazy(() => import('@/components/ui/rich-text-editor'));
 

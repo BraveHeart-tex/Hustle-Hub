@@ -1,7 +1,7 @@
 import { Extension } from '@tiptap/core';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Placeholder } from '@tiptap/extensions';
-import { Editor, EditorContent, useEditor } from '@tiptap/react';
+import { type Editor, EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
   Bold,
@@ -35,9 +35,9 @@ interface RichTextEditorProps {
   showToolbar?: boolean;
 }
 
-export type TiptapRef = {
+export interface TiptapRef {
   editor: Editor | null;
-};
+}
 
 const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
   (

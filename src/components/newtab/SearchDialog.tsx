@@ -15,8 +15,8 @@ import {
 import { QUERY_KEYS } from '@/lib/constants';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { safeKeys } from '@/lib/utils/misc/safeKeys';
-import { GitlabMergeRequest } from '@/types/gitlab';
-import { JiraIssue } from '@/types/jira';
+import { type GitlabMergeRequest } from '@/types/gitlab';
+import { type JiraIssue } from '@/types/jira';
 
 interface GroupedData {
   gitlab: GitlabMergeRequest[];

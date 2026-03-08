@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NOTE_PRIORITIES } from '@/lib/constants';
 import { useNotes } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
-import { Note } from '@/types/notes';
+import { type Note } from '@/types/notes';
 
 interface NotesSectionProps {
   className?: string;

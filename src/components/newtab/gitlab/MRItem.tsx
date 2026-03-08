@@ -15,7 +15,7 @@ import MRStatusIcon from '@/components/newtab/gitlab/MrStatusIcon';
 import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
-import { GitlabMergeRequest } from '@/types/gitlab';
+import { type GitlabMergeRequest } from '@/types/gitlab';
 
 import MrLabel from './MrLabel';
 

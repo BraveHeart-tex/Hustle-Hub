@@ -1,5 +1,5 @@
 import { Loader2, Pencil } from 'lucide-react';
-import { FormEvent, useRef, useState } from 'react';
+import { type FormEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

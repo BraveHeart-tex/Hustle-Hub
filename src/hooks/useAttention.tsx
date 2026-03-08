@@ -10,7 +10,7 @@ import { useApi } from '@/hooks/useApi';
 import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
 import type { ApiResponse } from '@/types/api';
-import { AttentionItem } from '@/types/attention';
+import { type AttentionItem } from '@/types/attention';
 
 import { useAttentionStream } from './useAttentionStream';
 

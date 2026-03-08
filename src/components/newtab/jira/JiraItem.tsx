@@ -1,12 +1,12 @@
 import { CheckSquare, ClipboardCopyIcon } from 'lucide-react';
-import { MouseEvent, useState } from 'react';
+import { type MouseEvent, useState } from 'react';
 import { toast } from 'sonner';
 
 import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
-import { JiraIssue } from '@/types/jira';
+import { type JiraIssue } from '@/types/jira';
 
 // Status badge styles keyed by statusCategory.colorName
 const STATUS_BADGE: Record<string, string> = {

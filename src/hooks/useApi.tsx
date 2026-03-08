@@ -1,6 +1,6 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
-import { ApiResponse } from '@/types/api';
+import { type ApiResponse } from '@/types/api';
 
 export function useApi<T, K extends readonly unknown[]>(
   queryKey: K,

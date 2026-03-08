@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/sheet';
 import { removeComment, useComments } from '@/lib/storage/comments';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
-import { Comment } from '@/types/comments';
+import { type Comment } from '@/types/comments';
 
 const AllCommentsWidget = () => {
   const [isOpen, setIsOpen] = useState(false);

@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { NOTE_PRIORITIES, NotePriority } from '@/lib/constants';
+import { NOTE_PRIORITIES, type NotePriority } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 const notePriorityColors = {

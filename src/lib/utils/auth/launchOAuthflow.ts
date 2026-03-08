@@ -1,5 +1,5 @@
-import { OAuthCallbackKey, sendMessage } from '@/messaging';
-import { OAuthProvider, OAuthStatus } from '@/types/auth';
+import { type OAuthCallbackKey, sendMessage } from '@/messaging';
+import { type OAuthProvider, type OAuthStatus } from '@/types/auth';
 
 export const launchOAuthFlow = async ({
   backendRedirectUri,

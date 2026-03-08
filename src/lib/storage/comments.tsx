@@ -7,10 +7,10 @@ import {
 } from 'react';
 
 import {
-  Comment,
-  CommentItemType,
-  CreateCommentPayload,
-  UpdateCommentPayload,
+  type Comment,
+  type CommentItemType,
+  type CreateCommentPayload,
+  type UpdateCommentPayload,
 } from '@/types/comments';
 
 const commentList = storage.defineItem<Comment[]>('local:comments', {

@@ -1,4 +1,7 @@
-import { GitlabReviewer, ReviewerPreset } from '@/types/reviewer-presets';
+import {
+  type GitlabReviewer,
+  type ReviewerPreset,
+} from '@/types/reviewer-presets';
 
 const gitlabReviewers = storage.defineItem<GitlabReviewer[]>(
   'local:gitlabReviewers',
