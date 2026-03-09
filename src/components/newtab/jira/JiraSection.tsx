@@ -45,6 +45,20 @@ export default function JiraSection({ className }: JiraSectionProps) {
     return Object.entries(counts).map(([label, count]) => ({ label, count }));
   }, [data?.issues]);
 
+  const filteredData = useMemo(() => {
+    return data?.issues.filter((issue) =>
+      selectedTaskStatus
+        ? issue.fields.status.name === selectedTaskStatus
+        : true,
+    );
+  }, [data?.issues, selectedTaskStatus]);
+
+  useEffect(() => {
+    if (selectedTaskStatus && filteredData?.length === 0) {
+      setSelectedTaskStatus('');
+    }
+  }, [filteredData?.length, selectedTaskStatus]);
+
   const shouldShowStatusFilters =
     !isLoading &&
     taskStatuses.length > 1 &&
@@ -65,19 +79,18 @@ export default function JiraSection({ className }: JiraSectionProps) {
         </div>
       );
     }
-    if (isError)
+    if (isError) {
       return <p className="text-destructive font-medium">{error?.message}</p>;
-    if (data?.issues.length === 0)
-      return <p className="text-muted-foreground">No issues found.</p>;
+    }
 
-    return data?.issues
-      .filter((issue) =>
-        selectedTaskStatus
-          ? issue.fields.status.name === selectedTaskStatus
-          : true,
-      )
-      .map((issue) => <JiraItem key={issue.id} issue={issue} />);
-  }, [data?.issues, error?.message, isError, isLoading, selectedTaskStatus]);
+    if (filteredData?.length === 0) {
+      return <p className="text-muted-foreground">No issues found.</p>;
+    }
+
+    return filteredData?.map((issue) => (
+      <JiraItem key={issue.id} issue={issue} />
+    ));
+  }, [filteredData, error?.message, isError, isLoading]);
 
   const handleFilterValueChange = (filterValue: string) => {
     if (isValueOf(JIRA_FILTERS, filterValue)) {
