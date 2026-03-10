@@ -105,10 +105,6 @@ export const JiraStatusButton = ({
   const [transitioning, setTransitioning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (details) {
-    console.log(details.fields.status.name);
-  }
-
   const fetchedRef = useRef(false);
   const targetBranch = useTargetBranch();
 
@@ -180,7 +176,7 @@ export const JiraStatusButton = ({
     const status = details.fields.status.name.toLowerCase();
 
     if (targetBranch === 'main' && status === 'to do') {
-      return 'Send to Code Review';
+      return 'On Review';
     }
 
     if (targetBranch === 'develop') {
