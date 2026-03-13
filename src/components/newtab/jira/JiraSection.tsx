@@ -1,3 +1,4 @@
+import { AlertCircle, CheckSquare } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import JiraIcon from '@/components/misc/JiraIcon';
@@ -79,12 +80,25 @@ export default function JiraSection({ className }: JiraSectionProps) {
         </div>
       );
     }
+
     if (isError) {
-      return <p className="text-destructive font-medium">{error?.message}</p>;
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+          <AlertCircle size={22} className="text-destructive/50" />
+          <p className="text-sm text-destructive font-medium">
+            {error?.message ?? 'Failed to load tickets.'}
+          </p>
+        </div>
+      );
     }
 
     if (filteredData?.length === 0) {
-      return <p className="text-muted-foreground">No issues found.</p>;
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+          <CheckSquare size={22} className="text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">No tickets found.</p>
+        </div>
+      );
     }
 
     return filteredData?.map((issue) => (
