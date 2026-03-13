@@ -1,3 +1,4 @@
+import { AlertCircle, GitMerge } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -95,11 +96,27 @@ export default function GitlabSection() {
     }
 
     if (isError) {
-      return <p className="text-destructive font-medium">{error?.message}</p>;
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+          <AlertCircle size={22} className="text-destructive/50" />
+          <p className="text-sm text-destructive font-medium">
+            {error?.message ?? 'Failed to load merge requests.'}
+          </p>
+        </div>
+      );
     }
 
     if (data?.length === 0) {
-      return <p className="text-muted-foreground">No MRs found.</p>;
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+          <GitMerge size={22} className="text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">
+            {filter === GITLAB_FILTERS.REVIEW
+              ? 'No review requests waiting for you.'
+              : 'No MRs assigned to you.'}
+          </p>
+        </div>
+      );
     }
 
     return (
@@ -114,6 +131,7 @@ export default function GitlabSection() {
     isLoading,
     isUnauthorized,
     selectedProjectName,
+    filter,
   ]);
 
   return (
