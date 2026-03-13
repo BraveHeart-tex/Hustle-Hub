@@ -30,6 +30,7 @@ export interface AttentionItem {
 
   entityId: string;
   entityUrl: string;
+  entityTitle: string;
 
   /**
    * Controls whether this item can resolve itself automatically.
