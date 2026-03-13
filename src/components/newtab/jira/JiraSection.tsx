@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
-import { JIRA_FILTERS, type JiraFilter } from '@/lib/constants';
+import { JIRA_FILTERS } from '@/lib/constants';
+import { useJiraFilter } from '@/lib/storage/filters';
 import { cn } from '@/lib/utils';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
@@ -30,9 +31,7 @@ interface JiraSectionProps {
 }
 
 export default function JiraSection({ className }: JiraSectionProps) {
-  const [filter, setFilter] = useState<JiraFilter>(
-    JIRA_FILTERS.LITERALLY_WORKING_ON,
-  );
+  const [filter, setFilter] = useJiraFilter();
   const { data, isLoading, isError, error } = useJiraTickets(filter);
   const [selectedTaskStatus, setSelectedTaskStatus] = useState('');
 

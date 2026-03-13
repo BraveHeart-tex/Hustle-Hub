@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
-import { GITLAB_FILTERS, type GitlabFilter } from '@/lib/constants';
+import { GITLAB_FILTERS } from '@/lib/constants';
+import { useGitlabFilter } from '@/lib/storage/filters';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { onMessage, sendMessage } from '@/messaging';
 
@@ -27,7 +28,7 @@ const filterOptions = [
 ];
 
 export default function GitlabSection() {
-  const [filter, setFilter] = useState<GitlabFilter>(GITLAB_FILTERS.REVIEW);
+  const [filter, setFilter] = useGitlabFilter();
   const { data, isError, isLoading, isUnauthorized, error, refetch } =
     useGitlabMrs(filter);
   const [selectedProjectName, setSelectedProjectName] = useState('');
