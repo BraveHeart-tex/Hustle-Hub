@@ -108,7 +108,14 @@ export default function NotesSection({ className }: NotesSectionProps) {
               />
             ))
           ) : (
-            <p className="text-muted-foreground">No notes found.</p>
+            <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+              <StickyNote size={22} className="text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">
+                {selectedPriority
+                  ? `No ${selectedPriority.toLowerCase()} priority notes.`
+                  : 'No notes yet. Add one to get started.'}
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>
