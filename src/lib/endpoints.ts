@@ -18,4 +18,7 @@ export const ENDPOINTS = {
     snooze: (id: string) => `${BASE}/attention/${id}/snooze`,
     dismiss: (id: string) => `${BASE}/attention/${id}/dismiss`,
   },
+  reviews: {
+    request: `${BASE}/reviews/request`,
+  },
 } as const;
