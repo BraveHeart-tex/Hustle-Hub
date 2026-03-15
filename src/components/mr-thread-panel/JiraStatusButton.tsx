@@ -117,16 +117,21 @@ export const JiraStatusButton = ({
     return jiraId;
   }, [targetBranch, jiraId]);
 
-  useEffect(() => {
-    if (fetchedRef.current || !targetBranch || !resolvedJiraId) return;
-    fetchedRef.current = true;
+  const fetchTaskDetails = useCallback(() => {
+    if (!resolvedJiraId) return;
     setLoading(true);
     fetch(`${API_BASE}/${resolvedJiraId}`)
       .then((r) => r.json())
       .then((data) => setDetails(data.data))
       .catch(() => setError('Failed to load issue details'))
       .finally(() => setLoading(false));
-  }, [resolvedJiraId, targetBranch]);
+  }, [resolvedJiraId]);
+
+  useEffect(() => {
+    if (fetchedRef.current || !targetBranch || !resolvedJiraId) return;
+    fetchedRef.current = true;
+    fetchTaskDetails();
+  }, [fetchTaskDetails, resolvedJiraId, targetBranch]);
 
   const handleTransition = async (transition: JiraTransition) => {
     setTransitioning(transition.id);
@@ -151,19 +156,9 @@ export const JiraStatusButton = ({
         }).catch(() => {
           // Comment failure shouldn't block the transition
         });
-      }
 
-      setDetails((prev) =>
-        prev
-          ? {
-              ...prev,
-              fields: { ...prev.fields, status: transition.to },
-              transitions: prev.transitions.filter(
-                (t) => t.id !== transition.id,
-              ),
-            }
-          : prev,
-      );
+        fetchTaskDetails();
+      }
     } catch {
       setError('Failed to update status');
     } finally {
