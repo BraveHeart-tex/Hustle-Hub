@@ -65,11 +65,15 @@ export function ReviewMarkdown({ content }: Props) {
               style={oneDark}
               language={match?.[1] ?? 'tsx'}
               PreTag="div"
+              wrapLines={true}
+              wrapLongLines={true}
               customStyle={{
                 margin: '0 0 8px 0',
                 borderRadius: '6px',
                 fontSize: '12px',
                 lineHeight: '1.6',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
               }}
             >
               {String(children).replace(/\n$/, '')}

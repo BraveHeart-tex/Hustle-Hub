@@ -317,7 +317,7 @@ export const CodeReviewCommandsShortcut = ({
 
             {/* Content */}
             <ScrollArea className="h-[min(640px,70vh)]">
-              <div className="px-4 py-3">
+              <div className="px-4 py-3 min-w-0 max-w-full overflow-hidden">
                 {reviewStatus === 'idle' && (
                   <p className="text-xs text-muted-foreground">
                     Click &quot;Run review&quot; to start an AI review of this
