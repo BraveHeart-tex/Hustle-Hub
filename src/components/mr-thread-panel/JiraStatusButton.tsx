@@ -142,10 +142,7 @@ export const JiraStatusButton = ({
         body: JSON.stringify({ transitionId: transition.id }),
       });
 
-      if (
-        targetBranch === 'main' &&
-        transition.name.toLowerCase() === 'on review'
-      ) {
+      if (targetBranch === 'main') {
         await fetch(`${API_BASE}/${resolvedJiraId}/comment`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
