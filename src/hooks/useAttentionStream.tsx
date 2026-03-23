@@ -1,26 +1,32 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { QUERY_KEYS } from '@/lib/constants';
+import { ENDPOINTS } from '@/lib/endpoints';
 import type { AttentionItem } from '@/types/attention';
 
-type AttentionMessage =
-  | { type: 'attention:snapshot'; items: AttentionItem[] }
-  | { type: 'attention:upserted'; item: AttentionItem }
-  | { type: 'attention:resolved'; item: AttentionItem };
+const RECONNECT_DELAY = 3_000;
 
 export function useAttentionStream(): void {
   const queryClient = useQueryClient();
+  const esRef = useRef<EventSource | null>(null);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const handler = (message: AttentionMessage) => {
-      if (message.type === 'attention:snapshot') {
-        queryClient.setQueryData(QUERY_KEYS.attention.list, message.items);
-        return;
-      }
+    let unmounted = false;
 
-      if (message.type === 'attention:upserted') {
-        const { item } = message;
+    function connect() {
+      if (unmounted) return;
+      const es = new EventSource(ENDPOINTS.attention.stream);
+      esRef.current = es;
+
+      es.addEventListener('snapshot', (e: MessageEvent) => {
+        const items = JSON.parse(e.data) as AttentionItem[];
+        queryClient.setQueryData(QUERY_KEYS.attention.list, items);
+      });
+
+      es.addEventListener('upserted', (e: MessageEvent) => {
+        const item = JSON.parse(e.data) as AttentionItem;
         queryClient.setQueryData<AttentionItem[]>(
           QUERY_KEYS.attention.list,
           (prev = []) => {
@@ -36,19 +42,35 @@ export function useAttentionStream(): void {
             return [...prev, item].sort(byPriority);
           },
         );
-        return;
-      }
+      });
 
-      if (message.type === 'attention:resolved') {
+      es.addEventListener('resolved', (e: MessageEvent) => {
+        const resolved = JSON.parse(e.data) as AttentionItem;
         queryClient.setQueryData<AttentionItem[]>(
           QUERY_KEYS.attention.list,
-          (prev = []) => prev.filter((i) => i.id !== message.item.id),
+          (prev = []) => prev.filter((i) => i.id !== resolved.id),
         );
-      }
-    };
+      });
 
-    browser.runtime.onMessage.addListener(handler);
-    return () => browser.runtime.onMessage.removeListener(handler);
+      es.addEventListener('heartbeat', () => {});
+
+      es.addEventListener('error', () => {
+        es.close();
+        esRef.current = null;
+        if (!unmounted) {
+          reconnectTimer.current = setTimeout(connect, RECONNECT_DELAY);
+        }
+      });
+    }
+
+    connect();
+
+    return () => {
+      unmounted = true;
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      esRef.current?.close();
+      esRef.current = null;
+    };
   }, [queryClient]);
 }
 
