@@ -49,6 +49,12 @@ function connectSSE(): void {
 export default defineBackground({
   persistent: true,
   main() {
+    browser.runtime.onStartup.addListener(() => {
+      console.warn(
+        'listening for browser start to prevent inactive service worker',
+      );
+    });
+
     setInterval(() => {
       browser.runtime.getPlatformInfo().catch(() => {});
     }, 20_000);
