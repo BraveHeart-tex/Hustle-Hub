@@ -1,7 +1,4 @@
-import {
-  queueNotification,
-  shouldNotify,
-} from '@/lib/attention/notificationManager';
+import { queueNotification } from '@/lib/attention/notificationManager';
 import { type AttentionItem } from '@/types/attention';
 
 const API_BASE = import.meta.env.VITE_BASE_API_URL as string;
@@ -49,9 +46,7 @@ function connectSSE(): void {
     const item = JSON.parse(e.data) as AttentionItem;
     broadcastToTabs({ type: 'attention:upserted', item });
 
-    if (shouldNotify(item)) {
-      queueNotification(item, notify);
-    }
+    queueNotification(item, notify);
   });
 
   es.addEventListener('resolved', (e: MessageEvent) => {
