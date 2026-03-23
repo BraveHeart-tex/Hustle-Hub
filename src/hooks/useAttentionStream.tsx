@@ -1,93 +1,56 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 import { QUERY_KEYS } from '@/lib/constants';
-import { ENDPOINTS } from '@/lib/endpoints';
-import { type AttentionItem } from '@/types/attention';
+import type { AttentionItem } from '@/types/attention';
 
-// SSE reconnect delay on unexpected disconnect (ms)
-const RECONNECT_DELAY = 3_000;
+type AttentionMessage =
+  | { type: 'attention:snapshot'; items: AttentionItem[] }
+  | { type: 'attention:upserted'; item: AttentionItem }
+  | { type: 'attention:resolved'; item: AttentionItem };
 
 export function useAttentionStream(): void {
   const queryClient = useQueryClient();
-  const esRef = useRef<EventSource | null>(null);
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    let unmounted = false;
+    const handler = (message: AttentionMessage) => {
+      if (message.type === 'attention:snapshot') {
+        queryClient.setQueryData(QUERY_KEYS.attention.list, message.items);
+        return;
+      }
 
-    function connect() {
-      if (unmounted) return;
-
-      const es = new EventSource(ENDPOINTS.attention.stream);
-      esRef.current = es;
-
-      // Full snapshot on connect — replaces whatever is in cache
-      es.addEventListener('snapshot', (e: MessageEvent) => {
-        const items = JSON.parse(e.data) as AttentionItem[];
-        queryClient.setQueryData(QUERY_KEYS.attention.list, items);
-      });
-
-      // Single item upserted (created or updated)
-      es.addEventListener('upserted', (e: MessageEvent) => {
-        const incoming = JSON.parse(e.data) as AttentionItem;
+      if (message.type === 'attention:upserted') {
+        const { item } = message;
         queryClient.setQueryData<AttentionItem[]>(
           QUERY_KEYS.attention.list,
           (prev = []) => {
-            // Remove snoozed/dismissed items from the active feed
-            if (
-              incoming.status === 'snoozed' ||
-              incoming.status === 'dismissed'
-            ) {
-              return prev.filter((i) => i.id !== incoming.id);
+            if (item.status === 'snoozed' || item.status === 'dismissed') {
+              return prev.filter((i) => i.id !== item.id);
             }
-
-            const exists = prev.findIndex((i) => i.id === incoming.id);
-            if (exists !== -1) {
+            const idx = prev.findIndex((i) => i.id === item.id);
+            if (idx !== -1) {
               const next = [...prev];
-              next[exists] = incoming;
+              next[idx] = item;
               return next;
             }
-            return [...prev, incoming].sort(byPriority);
+            return [...prev, item].sort(byPriority);
           },
         );
-      });
+        return;
+      }
 
-      // Item auto-resolved — remove from cache
-      es.addEventListener('resolved', (e: MessageEvent) => {
-        const resolved = JSON.parse(e.data) as AttentionItem;
+      if (message.type === 'attention:resolved') {
         queryClient.setQueryData<AttentionItem[]>(
           QUERY_KEYS.attention.list,
-          (prev = []) => prev.filter((i) => i.id !== resolved.id),
+          (prev = []) => prev.filter((i) => i.id !== message.item.id),
         );
-      });
-
-      // Heartbeat — no action needed, just keeps connection alive
-      es.addEventListener('heartbeat', () => {});
-
-      es.addEventListener('error', () => {
-        es.close();
-        esRef.current = null;
-        if (!unmounted) {
-          reconnectTimer.current = setTimeout(connect, RECONNECT_DELAY);
-        }
-      });
-    }
-
-    connect();
-
-    return () => {
-      unmounted = true;
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-      esRef.current?.close();
-      esRef.current = null;
+      }
     };
+
+    browser.runtime.onMessage.addListener(handler);
+    return () => browser.runtime.onMessage.removeListener(handler);
   }, [queryClient]);
 }
-
-// ------------------------------------------------------------
-// Priority sort — critical first, then warning, then info
-// ------------------------------------------------------------
 
 const PRIORITY_ORDER = { critical: 0, warning: 1, info: 2 } as const;
 

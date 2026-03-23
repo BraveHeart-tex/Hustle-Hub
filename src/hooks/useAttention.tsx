@@ -1,11 +1,9 @@
 // ============================================================
 // ATTENTION ENGINE - DATA HOOK
-// hustle-hub-extension/src/hooks/useAttention.ts
 //
 // Combines the SSE stream with an initial fetch so the cache
 // is populated immediately, then kept live by push events.
 // ============================================================
-
 import { useApi } from '@/hooks/useApi';
 import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
