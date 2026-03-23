@@ -8,6 +8,7 @@ let batchTimer: ReturnType<typeof setTimeout> | null = null;
 let pendingBatch: AttentionItem[] = [];
 
 export function shouldNotify(item: AttentionItem): boolean {
+  if (item.title.includes('FEREL')) return true;
   if (item.priority !== 'critical') return false;
   if (item.status !== 'active') return false;
   const last = lastNotified.get(item.id);

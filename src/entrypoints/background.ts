@@ -8,12 +8,11 @@ const API_BASE = import.meta.env.VITE_BASE_API_URL as string;
 const RECONNECT_DELAY = 3_000;
 
 function broadcastToTabs(message: unknown): void {
-  browser.tabs.query({}).then((tabs) => {
+  const newtabUrl = browser.runtime.getURL('/newtab.html');
+  browser.tabs.query({ url: `${newtabUrl}*` }).then((tabs) => {
     for (const tab of tabs) {
       if (tab.id) {
-        browser.tabs.sendMessage(tab.id, message).catch(() => {
-          // Tab may not have content script — ignore
-        });
+        browser.tabs.sendMessage(tab.id, message).catch(() => {});
       }
     }
   });
@@ -80,26 +79,6 @@ export default defineBackground({
     keepAlive();
     // SSE connection for attention feed
     connectSSE();
-
-    // temporary — remove after testing
-    (globalThis as any).testNotify = () =>
-      notify([
-        {
-          id: 'test:pipeline-failed:123',
-          title: 'Pipeline failed on MR !123',
-          entityTitle: 'Fix the checkout dark mode regression',
-          body: 'Investigate and push a fix',
-          priority: 'critical',
-          status: 'active',
-          source: 'gitlab',
-          ruleId: 'pipeline-failed',
-          entityId: '123',
-          entityUrl: 'https://gitlab.com',
-          resolutionMode: 'auto',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ]);
 
     // Click notification → open new tab
     browser.notifications.onClicked.addListener(() => {
