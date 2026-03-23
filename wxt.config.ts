@@ -17,6 +17,7 @@ export default defineConfig({
   manifest: {
     permissions: ['tabs', 'scripting', 'storage', 'notifications'],
     action: {},
+    name: 'Hustle Hub',
   },
   vite: () => {
     viteEnvSchema.parse(import.meta.env);
