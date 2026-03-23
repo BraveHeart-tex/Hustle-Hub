@@ -156,9 +156,9 @@ export const JiraStatusButton = ({
         }).catch(() => {
           // Comment failure shouldn't block the transition
         });
-
-        fetchTaskDetails();
       }
+
+      fetchTaskDetails();
     } catch {
       setError('Failed to update status');
     } finally {
