@@ -9,7 +9,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import { extractFerelId } from '@/lib/utils/misc/extractFerelId';
+import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 
 interface JiraTransition {
   id: string;
@@ -101,6 +103,7 @@ export const JiraStatusButton = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [details, setDetails] = useState<JiraIssueDetails | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [transitioning, setTransitioning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -216,11 +219,11 @@ export const JiraStatusButton = ({
           className="rounded-full shadow-sm gap-1.5 h-auto py-1.5"
         >
           <a
-            href={jiraLink}
+            href={details?.key ? getJiraTaskUrl(details?.key || '') : '#'}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="shrink-0"
+            className={cn('shrink-0', !details?.key && 'pointer-events-none')}
           >
             <JiraIcon className="h-3.5 w-3.5 shrink-0 text-blue-500" />
           </a>
@@ -248,18 +251,13 @@ export const JiraStatusButton = ({
         align="end"
         className="w-80 p-0 overflow-hidden"
       >
-        {loading && (
-          <div className="flex items-center justify-center py-8">
-            <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        )}
-
         {error && (
           <div className="px-3 py-4 text-xs text-destructive">{error}</div>
         )}
 
-        {details && !loading && (
-          <>
+        {details ? (
+          // Show existing details even while loading
+          <div className={cn(loading && 'opacity-50 pointer-events-none')}>
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2.5 border-b bg-muted/40">
               <div className="flex-1 min-w-0">
@@ -268,7 +266,10 @@ export const JiraStatusButton = ({
                     {details.key}
                   </span>
                   <span
-                    className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${statusColor}`}
+                    className={cn(
+                      'text-[10px] font-medium px-1.5 py-0.5 rounded-full',
+                      getStatusColor(details.fields.status),
+                    )}
                   >
                     {details.fields.status.name}
                   </span>
@@ -337,7 +338,10 @@ export const JiraStatusButton = ({
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-muted/60 transition-colors disabled:opacity-50 group"
                     >
                       <span
-                        className={`h-2 w-2 rounded-full shrink-0 ${getStatusDot(transition.to.name)}`}
+                        className={cn(
+                          'h-2 w-2 rounded-full shrink-0',
+                          getStatusDot(transition.to.name),
+                        )}
                       />
                       <div className="text-xs flex-1 flex items-center gap-2">
                         <span>{transition.name}</span>
@@ -346,7 +350,10 @@ export const JiraStatusButton = ({
                         )}
                       </div>
                       <span
-                        className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${getStatusColor(transition.to)}`}
+                        className={cn(
+                          'text-[10px] font-medium px-1.5 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity',
+                          getStatusColor(transition.to),
+                        )}
                       >
                         {transition.to.name}
                       </span>
@@ -358,7 +365,11 @@ export const JiraStatusButton = ({
                 })}
               </div>
             )}
-          </>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-8">
+            <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
         )}
       </PopoverContent>
     </Popover>
