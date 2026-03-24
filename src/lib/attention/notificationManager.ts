@@ -15,6 +15,7 @@ const ALWAYS_NOTIFY_RULES = new Set([
   'ferel-missing-mr',
   'pipeline-failed',
   'ready-but-pipeline-pending',
+  'release-mr-merged-ticket-not-updated',
 ]);
 
 export function shouldNotify(item: AttentionItem): boolean {
