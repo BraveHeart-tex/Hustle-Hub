@@ -10,12 +10,16 @@ const lastNotifiedAt = new Map<string, string>(); // itemId → updatedAt
 const ALWAYS_NOTIFY_RULES = new Set([
   'pending-your-review',
   'unanswered-reply',
+  'mr-got-activity',
   'release-mr-got-activity',
   'ferel-on-preprod',
   'ferel-missing-mr',
+  'release-mr-merged-ticket-not-updated',
   'pipeline-failed',
   'ready-but-pipeline-pending',
-  'release-mr-merged-ticket-not-updated',
+  'post-merge-pipeline-failed',
+  'post-merge-pipeline-success',
+  'pipeline-stuck',
 ]);
 
 export function shouldNotify(item: AttentionItem): boolean {
