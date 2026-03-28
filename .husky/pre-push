@@ -1,0 +1,22 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Get the current local branch name.
+current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+# Only deploy on main branch (or set DEPLOY_BRANCH env var).
+DEPLOY_BRANCH="${DEPLOY_BRANCH:-main}"
+
+if [ "$current_branch" = "$DEPLOY_BRANCH" ]; then
+  echo "Pushing to $current_branch branch - deployment will start after push..."
+
+  # Start deployment asynchronously so push is not blocked.
+  (
+    sleep 1
+    cd "$(git rev-parse --show-toplevel)" && ./scripts/deploy.sh
+  ) &
+
+  exit 0
+else
+  echo "Pushing to $current_branch branch (not $DEPLOY_BRANCH) - skipping deployment"
+fi
