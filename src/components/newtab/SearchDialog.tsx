@@ -1,11 +1,10 @@
-import { useQueryClient } from '@tanstack/react-query';
 import {
   GitMerge,
   GitPullRequestDraft,
   SearchIcon,
   SquareArrowOutUpRight,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import GitlabIcon from '@/components/misc/GitlabIcon';
 import JiraIcon from '@/components/misc/JiraIcon';
@@ -17,50 +16,28 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { QUERY_KEYS } from '@/lib/constants';
+import { useGitlabMrs } from '@/hooks/useGitlabMrs';
+import { useJiraTickets } from '@/hooks/useJiraTickets';
+import {
+  GITLAB_FILTERS,
+  type GitlabFilter,
+  JIRA_FILTERS,
+  type JiraFilter,
+} from '@/lib/constants';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { type GitlabMergeRequest } from '@/types/gitlab';
 import { type JiraIssue } from '@/types/jira';
 
-interface GroupedData {
-  gitlab: GitlabMergeRequest[];
-  jira: JiraIssue[];
-}
+const GITLAB_SEARCH_FILTERS: GitlabFilter[] = [
+  GITLAB_FILTERS.ASSIGNED,
+  GITLAB_FILTERS.REVIEW,
+];
 
-const getGroupedData = (
-  queryClient: ReturnType<typeof useQueryClient>,
-): GroupedData => {
-  const groupedData: GroupedData = { gitlab: [], jira: [] };
-
-  const getSafeQueryData = <T,>(
-    key: readonly unknown[],
-    fallback: Partial<T>,
-  ): T => queryClient.getQueryData<T>(key) ?? (fallback as T);
-
-  const gitlabMap = new Map<string, GitlabMergeRequest>();
-  (['assigned', 'review'] as const).forEach((key) => {
-    const data = getSafeQueryData<GitlabMergeRequest[]>(
-      QUERY_KEYS.gitlab.mergeRequests(key),
-      [],
-    );
-    data.forEach((mr) => gitlabMap.set(String(mr.iid), mr));
-  });
-  groupedData.gitlab = Array.from(gitlabMap.values());
-
-  const jiraMap = new Map<string, JiraIssue>();
-  (['for_you', 'literally_working_on', 'frontend_releases'] as const).forEach(
-    (key) => {
-      const data = getSafeQueryData<{ issues: JiraIssue[] }>(
-        QUERY_KEYS.jira.issues(key),
-        { issues: [] },
-      );
-      data.issues.forEach((issue) => jiraMap.set(issue.key, issue));
-    },
-  );
-  groupedData.jira = Array.from(jiraMap.values());
-
-  return groupedData;
-};
+const JIRA_SEARCH_FILTERS: JiraFilter[] = [
+  JIRA_FILTERS.FOR_YOU,
+  JIRA_FILTERS.LITERALLY_WORKING_ON,
+  JIRA_FILTERS.FRONTEND_RELEASES,
+];
 
 // Maps Jira status category to a color pill
 const STATUS_CATEGORY_CONFIG: Record<string, string> = {
@@ -82,7 +59,6 @@ function getStatusStyle(statusName: string): string {
 const SearchDialog = () => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -95,7 +71,38 @@ const SearchDialog = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const data = useMemo(() => getGroupedData(queryClient), [queryClient]);
+  const assignedMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[0]);
+  const reviewMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[1]);
+  const jiraForYou = useJiraTickets(JIRA_SEARCH_FILTERS[0]);
+  const jiraWorkingOn = useJiraTickets(JIRA_SEARCH_FILTERS[1]);
+  const jiraFrontendReleases = useJiraTickets(JIRA_SEARCH_FILTERS[2]);
+
+  const data = useMemo(() => {
+    const gitlabMap = new Map<string, GitlabMergeRequest>();
+    [assignedMrs.data ?? [], reviewMrs.data ?? []].forEach((mrs) =>
+      mrs.forEach((mr) => gitlabMap.set(String(mr.iid), mr)),
+    );
+
+    const jiraMap = new Map<string, JiraIssue>();
+    [
+      jiraForYou.data?.issues ?? [],
+      jiraWorkingOn.data?.issues ?? [],
+      jiraFrontendReleases.data?.issues ?? [],
+    ].forEach((issues) =>
+      issues.forEach((issue) => jiraMap.set(issue.key, issue)),
+    );
+
+    return {
+      gitlab: Array.from(gitlabMap.values()),
+      jira: Array.from(jiraMap.values()),
+    };
+  }, [
+    assignedMrs.data,
+    jiraForYou.data,
+    jiraFrontendReleases.data,
+    jiraWorkingOn.data,
+    reviewMrs.data,
+  ]);
 
   const queryLower = query.toLowerCase();
 
