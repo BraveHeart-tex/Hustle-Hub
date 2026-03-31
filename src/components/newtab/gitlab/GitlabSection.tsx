@@ -1,11 +1,9 @@
 import { AlertCircle, ChevronDown, GitMerge } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useMemo, useState } from 'react';
 
 import GitlabIcon from '@/components/misc/GitlabIcon';
 import FilterButton from '@/components/newtab/FilterButton';
 import MRItem from '@/components/newtab/gitlab/MRItem';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Collapsible,
@@ -26,7 +24,6 @@ import { GITLAB_FILTERS } from '@/lib/constants';
 import { useGitlabFilter } from '@/lib/storage/filters';
 import { cn } from '@/lib/utils';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
-import { onMessage, sendMessage } from '@/messaging';
 
 const filterOptions = [
   { label: 'Review Requested', value: GITLAB_FILTERS.REVIEW },
@@ -35,29 +32,9 @@ const filterOptions = [
 
 export default function GitlabSection() {
   const [filter, setFilter] = useGitlabFilter();
-  const { data, isError, isLoading, isUnauthorized, error, refetch } =
-    useGitlabMrs(filter);
+  const { data, isError, isLoading, error } = useGitlabMrs(filter);
   const [selectedProjectName, setSelectedProjectName] = useState('');
   const [isDraftsOpen, setIsDraftsOpen] = useState(false);
-  const handleAuthorize = () => {
-    sendMessage('authorizeGitlab');
-  };
-
-  useEffect(() => {
-    const unsubscribe = onMessage('gitlabOAuthCallback', (message) => {
-      if (message.data.status === 'error') {
-        toast.error('Gitlab authorization failed.');
-        return;
-      }
-
-      toast.success('Gitlab authorization is successful.');
-      refetch();
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [refetch]);
 
   const handleFilterValueChange = (value: string) => {
     if (isValueOf(GITLAB_FILTERS, value)) {
@@ -107,16 +84,6 @@ export default function GitlabSection() {
               </CardContent>
             </Card>
           ))}
-        </div>
-      );
-    }
-
-    if (isUnauthorized) {
-      return (
-        <div className="flex justify-center">
-          <Button onClick={handleAuthorize} variant="default">
-            Authorize GitLab
-          </Button>
         </div>
       );
     }
@@ -196,7 +163,6 @@ export default function GitlabSection() {
     isError,
     isDraftsOpen,
     isLoading,
-    isUnauthorized,
     filter,
     data?.length,
   ]);
