@@ -1,5 +1,5 @@
-import { AlertCircle, GitMerge } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, ChevronDown, GitMerge } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import GitlabIcon from '@/components/misc/GitlabIcon';
@@ -7,6 +7,11 @@ import FilterButton from '@/components/newtab/FilterButton';
 import MRItem from '@/components/newtab/gitlab/MRItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   Select,
   SelectContent,
@@ -19,6 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { GITLAB_FILTERS } from '@/lib/constants';
 import { useGitlabFilter } from '@/lib/storage/filters';
+import { cn } from '@/lib/utils';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { onMessage, sendMessage } from '@/messaging';
 
@@ -32,6 +38,7 @@ export default function GitlabSection() {
   const { data, isError, isLoading, isUnauthorized, error, refetch } =
     useGitlabMrs(filter);
   const [selectedProjectName, setSelectedProjectName] = useState('');
+  const [isDraftsOpen, setIsDraftsOpen] = useState(false);
   const handleAuthorize = () => {
     sendMessage('authorizeGitlab');
   };
@@ -69,6 +76,24 @@ export default function GitlabSection() {
       return acc;
     }, []);
   }, [data]);
+
+  const filteredMrs = useMemo(() => {
+    if (!data) return [];
+
+    return selectedProjectName
+      ? data.filter((mr) => mr.projectName === selectedProjectName)
+      : data;
+  }, [data, selectedProjectName]);
+
+  const activeMrs = useMemo(
+    () => filteredMrs.filter((mr) => !mr.draft),
+    [filteredMrs],
+  );
+
+  const draftMrs = useMemo(
+    () => filteredMrs.filter((mr) => mr.draft),
+    [filteredMrs],
+  );
 
   const renderContent = useCallback(() => {
     if (isLoading) {
@@ -121,18 +146,59 @@ export default function GitlabSection() {
     }
 
     return (
-      selectedProjectName
-        ? data?.filter((mr) => mr.projectName === selectedProjectName)
-        : data
-    )?.map((mr) => <MRItem mr={mr} key={mr.iid} />);
+      <>
+        {activeMrs.map((mr) => (
+          <MRItem mr={mr} key={mr.iid} />
+        ))}
+
+        {draftMrs.length > 0 && (
+          <Collapsible
+            open={isDraftsOpen}
+            onOpenChange={setIsDraftsOpen}
+            className="rounded-xl border border-dashed border-border/80 bg-muted/20"
+          >
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  Draft merge requests
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {draftMrs.length} hidden by default to keep the list focused
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  {draftMrs.length}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    'size-4 text-muted-foreground transition-transform duration-200',
+                    isDraftsOpen && 'rotate-180',
+                  )}
+                />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+              <div className="grid gap-3 border-t border-border/60 px-3 py-3">
+                {draftMrs.map((mr) => (
+                  <MRItem mr={mr} key={mr.iid} />
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+      </>
+    );
   }, [
-    data,
+    activeMrs,
+    draftMrs,
     error?.message,
     isError,
+    isDraftsOpen,
     isLoading,
     isUnauthorized,
-    selectedProjectName,
     filter,
+    data?.length,
   ]);
 
   return (

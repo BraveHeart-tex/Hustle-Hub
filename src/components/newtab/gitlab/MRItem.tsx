@@ -11,13 +11,13 @@ import {
 
 import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
 import MrStatusBadge from '@/components/newtab/gitlab/MrStatusBadge';
-import MRStatusIcon from '@/components/newtab/gitlab/MrStatusIcon';
+import MRStatusIcon from '@/components/newtab/gitlab/MRStatusIcon';
 import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { type GitlabMergeRequest } from '@/types/gitlab';
 
-import MrLabel from './MrLabel';
+import MrLabel from './MRLabel';
 
 interface MRItemProps {
   mr: GitlabMergeRequest;
@@ -25,6 +25,8 @@ interface MRItemProps {
 
 const MRItem = ({ mr }: MRItemProps) => {
   const hasProblem = mr.conflicts || mr.headPipelineStatus === 'FAILED';
+  const shouldHighlightProblem = hasProblem && !mr.draft;
+  const draftProblemLabel = mr.conflicts ? 'Conflicts' : 'Failed pipeline';
 
   return (
     <a href={mr.webUrl} target="_blank" rel="noopener noreferrer">
@@ -34,7 +36,7 @@ const MRItem = ({ mr }: MRItemProps) => {
           mr.needsCurrentUserAction &&
             !hasProblem &&
             'border-yellow-500 dark:border-yellow-700 border-2',
-          hasProblem && 'border-destructive border-2',
+          shouldHighlightProblem && 'border-destructive border-2',
         )}
       >
         {mr.needsCurrentUserAction && !hasProblem && (
@@ -44,7 +46,7 @@ const MRItem = ({ mr }: MRItemProps) => {
             icon={<AlertCircleIcon className="w-4 h-4" />}
           />
         )}
-        {hasProblem && (
+        {shouldHighlightProblem && (
           <MRStatusIcon
             title={mr.conflicts ? 'This MR has conflicts' : 'Pipeline failed'}
             variant="destructive"
@@ -69,6 +71,15 @@ const MRItem = ({ mr }: MRItemProps) => {
             {formatDate(mr.createdAt)}
           </span>
         </div>
+
+        {mr.draft && hasProblem && (
+          <div className="mb-1.5 flex items-center">
+            <span className="inline-flex items-center gap-1 rounded-md border border-destructive/25 bg-destructive/8 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
+              <AlertCircleIcon className="size-3" />
+              {draftProblemLabel}
+            </span>
+          </div>
+        )}
 
         <h3 className="font-medium text-sm text-foreground mb-1 leading-snug">
           {mr.title}
