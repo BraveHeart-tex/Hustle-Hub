@@ -7,6 +7,7 @@
 import { useApi } from '@/hooks/useApi';
 import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
+import { type AttentionItem } from '@/types/attention';
 
 import { useAttentionStream } from './useAttentionStream';
 
@@ -19,9 +20,10 @@ export function useAttention() {
   return useApi(QUERY_KEYS.attention.list, async () => {
     const response = await fetch(ENDPOINTS.attention.list);
     const json = await response.json();
+
     return {
       success: true,
-      data: json.items,
+      data: json.items as AttentionItem[],
     };
   });
 }
