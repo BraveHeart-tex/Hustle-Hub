@@ -124,7 +124,7 @@ export default function GitlabSection() {
             onOpenChange={setIsDraftsOpen}
             className="rounded-xl border border-dashed border-border/80 bg-muted/20"
           >
-            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40">
+            <CollapsibleTrigger className="rounded-xl flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-all hover:bg-muted/20 data-[state=open]:rounded-b-none dark:hover:bg-accent/50">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">
                   Draft merge requests
