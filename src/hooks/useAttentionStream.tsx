@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 
 import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
-import type { AttentionItem } from '@/types/attention';
+import type { AttentionItem, AttentionSource } from '@/types/attention';
 
 const RECONNECT_DELAY = 3_000;
 
@@ -23,6 +23,9 @@ export function useAttentionStream(): void {
       es.addEventListener('snapshot', (e: MessageEvent) => {
         const items = JSON.parse(e.data) as AttentionItem[];
         queryClient.setQueryData(QUERY_KEYS.attention.list, items);
+        refreshRelatedQueries(queryClient, [
+          ...new Set(items.map((item) => item.source)),
+        ]);
       });
 
       es.addEventListener('upserted', (e: MessageEvent) => {
@@ -42,6 +45,7 @@ export function useAttentionStream(): void {
             return [...prev, item].sort(byPriority);
           },
         );
+        refreshRelatedQueries(queryClient, [item.source]);
       });
 
       es.addEventListener('resolved', (e: MessageEvent) => {
@@ -50,6 +54,7 @@ export function useAttentionStream(): void {
           QUERY_KEYS.attention.list,
           (prev = []) => prev.filter((i) => i.id !== resolved.id),
         );
+        refreshRelatedQueries(queryClient, [resolved.source]);
       });
 
       es.addEventListener('heartbeat', () => {});
@@ -78,4 +83,19 @@ const PRIORITY_ORDER = { critical: 0, warning: 1, info: 2 } as const;
 
 function byPriority(a: AttentionItem, b: AttentionItem): number {
   return (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2);
+}
+
+function refreshRelatedQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  sources: AttentionSource[],
+): void {
+  for (const source of sources) {
+    if (source === 'gitlab') {
+      void queryClient.invalidateQueries({ queryKey: ['gitlab'] });
+    }
+
+    if (source === 'jira') {
+      void queryClient.invalidateQueries({ queryKey: ['jira'] });
+    }
+  }
 }
