@@ -27,6 +27,15 @@ export interface GitlabMergeRequest {
   };
 }
 
+export interface GitlabTagDetails {
+  title: string;
+  message: string;
+  webUrl: string;
+  authorName: string;
+  authoredDate: string;
+  authorAvatar: string;
+}
+
 export type PipelineStatus =
   /** Pipeline was canceled before completion. */
   | 'CANCELED'
@@ -65,3 +74,4 @@ export type MergeStatus =
   | string;
 
 export type GitlabApiResponse = ApiResponse<{ data: GitlabMergeRequest[] }>;
+export type GitlabTagDetailsApiResponse = ApiResponse<GitlabTagDetails>;
