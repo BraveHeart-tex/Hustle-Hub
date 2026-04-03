@@ -317,7 +317,13 @@ export const DeploymentWidgetApp = ({
                 <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border/70 bg-muted/35 p-3">
                   <Avatar size="lg" className="ring-2 ring-background">
                     <AvatarImage
-                      src={details.authorAvatar}
+                      src={
+                        details.authorAvatar.startsWith('https')
+                          ? details.authorAvatar
+                          : `https://gitlab.com${details.authorAvatar}`
+                      }
+                      loading="lazy"
+                      fetchPriority="low"
                       alt={details.authorName}
                     />
                     <AvatarFallback>
