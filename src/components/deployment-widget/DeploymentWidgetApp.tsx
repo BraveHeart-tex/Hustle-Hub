@@ -187,25 +187,21 @@ export const DeploymentWidgetApp = ({
               variant="outline"
               size="sm"
               className={cn(
-                'h-auto rounded-full border px-3 py-2 shadow-lg backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5',
-                'supports-[backdrop-filter]:bg-background/85',
+                'h-11 w-11 rounded-full border px-0 py-0 shadow-lg backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5',
+                'supports-backdrop-filter:bg-background/85',
                 triggerTone[state.status],
               )}
+              aria-label={`Open deployment details for ${deploymentId}`}
             >
-              <span
-                className={cn(
-                  'inline-flex h-2.5 w-2.5 rounded-full',
-                  dotTone[state.status],
-                )}
-              />
-              <div className="flex flex-col items-start leading-tight">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Deployment
-                </span>
-                <span className="max-w-52 truncate font-mono text-xs font-medium">
-                  {shortId}
-                </span>
-              </div>
+              <span className="relative inline-flex items-center justify-center">
+                <RocketIcon className="h-4 w-4" />
+                <span
+                  className={cn(
+                    'absolute -right-1.5 -top-1.5 inline-flex h-2.5 w-2.5 rounded-full border border-background',
+                    dotTone[state.status],
+                  )}
+                />
+              </span>
             </Button>
           </PopoverTrigger>
 
