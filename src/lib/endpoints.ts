@@ -6,6 +6,7 @@ export const ENDPOINTS = {
   gitlab: {
     mergeRequests: (filter: GitlabFilter) =>
       `${BASE}/data/gitlab/merge-requests?filter=${filter}`,
+    approveMergeRequests: `${BASE}/data/gitlab/merge-requests/approve`,
     tagDetails: ({ tag, projectPath }: { tag: string; projectPath: string }) =>
       `${BASE}/data/gitlab/tag-details?fullPath=${projectPath}&tag=${tag}`,
   },

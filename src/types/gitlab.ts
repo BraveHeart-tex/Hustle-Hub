@@ -20,6 +20,7 @@ export interface GitlabMergeRequest {
   conflicts: boolean;
   headPipelineStatus?: PipelineStatus;
   projectName: string;
+  projectId: string;
   autoMergeEnabled: boolean;
   diffStatsSummary: {
     additions: number;
