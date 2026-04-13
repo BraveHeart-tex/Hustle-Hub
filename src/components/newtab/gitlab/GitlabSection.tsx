@@ -89,7 +89,11 @@ export default function GitlabSection() {
       return [];
     }
 
-    return filteredMrs.filter((mr) => !mr.draft && hasSyncLabel(mr.labels));
+    return filteredMrs.filter(
+      (mr) =>
+        !mr.draft &&
+        (hasSyncLabel(mr.labels) || mr.sourceBranch.startsWith('sync/')),
+    );
   }, [filter, filteredMrs]);
 
   const approveAllSyncMrs = useCallback(() => {
