@@ -76,7 +76,9 @@ export default function GitlabSection() {
       return nonDraftMrs;
     }
 
-    return nonDraftMrs.filter((mr) => !hasSyncLabel(mr.labels));
+    return nonDraftMrs.filter(
+      (mr) => !hasSyncLabel(mr.labels) || !mr.sourceBranch.startsWith('sync/'),
+    );
   }, [filter, filteredMrs]);
 
   const draftMrs = useMemo(
