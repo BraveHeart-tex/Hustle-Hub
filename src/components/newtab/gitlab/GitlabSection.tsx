@@ -34,6 +34,9 @@ const filterOptions = [
 const hasSyncLabel = (labels: { title: string }[]) =>
   labels.some((label) => label.title.trim().toLowerCase() === 'sync');
 
+const isSyncBranch = (sourceBranch: string): boolean =>
+  sourceBranch.startsWith('sync/');
+
 export default function GitlabSection() {
   const { mutate: approveSyncMrs, isPending: isApprovingSyncMrs } =
     useApproveSyncMrs();
@@ -76,9 +79,9 @@ export default function GitlabSection() {
       return nonDraftMrs;
     }
 
-    return nonDraftMrs.filter(
-      (mr) => !hasSyncLabel(mr.labels) || !mr.sourceBranch.startsWith('sync/'),
-    );
+    return nonDraftMrs.filter((mr) => {
+      return !hasSyncLabel(mr.labels) && !isSyncBranch(mr.sourceBranch);
+    });
   }, [filter, filteredMrs]);
 
   const draftMrs = useMemo(
@@ -93,8 +96,7 @@ export default function GitlabSection() {
 
     return filteredMrs.filter(
       (mr) =>
-        !mr.draft &&
-        (hasSyncLabel(mr.labels) || mr.sourceBranch.startsWith('sync/')),
+        !mr.draft && (hasSyncLabel(mr.labels) || isSyncBranch(mr.sourceBranch)),
     );
   }, [filter, filteredMrs]);
 
