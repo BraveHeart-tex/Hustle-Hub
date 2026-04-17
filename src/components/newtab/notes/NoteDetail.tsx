@@ -129,8 +129,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
     },
     editorProps: {
       attributes: {
-        class:
-          'tiptap prose prose-sm dark:prose-invert max-w-none min-h-[300px] focus:outline-none text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-blockquote:text-muted-foreground prose-blockquote:border-border prose-hr:border-border prose-ul:text-foreground prose-ol:text-foreground [&_ul[data-type="taskList"]]:list-none [&_ul[data-type="taskList"]]:p-0 [&_ul[data-type="taskList"]_li]:flex [&_ul[data-type="taskList"]_li]:items-start [&_ul[data-type="taskList"]_li]:gap-2 [&_ul[data-type="taskList"]_li>label]:mt-0.5',
+        class: 'tiptap not-prose min-h-[300px] focus:outline-none',
       },
     },
   });
