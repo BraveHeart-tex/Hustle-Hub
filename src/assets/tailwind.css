@@ -195,11 +195,347 @@
     cursor: pointer;
   }
 
-  .tiptap p.is-editor-empty:first-child::before {
-    color: var(--color-muted-foreground);
+  /* TipTap editor block styles */
+  .tiptap.ProseMirror {
+    caret-color: var(--foreground);
+    color: var(--foreground);
+    outline: none;
+    position: relative;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .tiptap.ProseMirror:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .tiptap ::selection,
+  .tiptap *::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .tiptap p.is-editor-empty:first-child::before,
+  .tiptap .is-editor-empty::before {
+    color: var(--muted-foreground);
     content: attr(data-placeholder);
     float: left;
     height: 0;
     pointer-events: none;
+  }
+
+  .tiptap > *:first-child {
+    margin-top: 0;
+  }
+
+  .tiptap > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .tiptap p {
+    color: var(--foreground);
+    font-size: 1rem;
+    line-height: 1.75;
+    margin: 0.75rem 0;
+  }
+
+  .tiptap h1,
+  .tiptap h2,
+  .tiptap h3,
+  .tiptap h4 {
+    color: var(--foreground);
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.2;
+    scroll-margin-top: 4rem;
+  }
+
+  .tiptap h1 {
+    font-size: 2.25rem;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .tiptap h2 {
+    font-size: 1.875rem;
+    margin: 1.75rem 0 0.625rem;
+  }
+
+  .tiptap h3 {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .tiptap h4 {
+    font-size: 1.25rem;
+    margin: 1.25rem 0 0.5rem;
+  }
+
+  .tiptap h1:first-child,
+  .tiptap h2:first-child,
+  .tiptap h3:first-child,
+  .tiptap h4:first-child {
+    margin-top: 0;
+  }
+
+  .tiptap strong {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .tiptap em {
+    color: var(--foreground);
+  }
+
+  .tiptap a {
+    color: var(--primary);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.2em;
+  }
+
+  .tiptap a:hover {
+    color: var(--primary);
+    text-decoration-thickness: 0.12em;
+  }
+
+  .tiptap ul:not([data-type='taskList']),
+  .tiptap ol {
+    color: var(--foreground);
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .tiptap ul:not([data-type='taskList']) {
+    list-style-type: disc;
+  }
+
+  .tiptap ul:not([data-type='taskList']) ul {
+    list-style-type: circle;
+  }
+
+  .tiptap ul:not([data-type='taskList']) ul ul {
+    list-style-type: square;
+  }
+
+  .tiptap ol {
+    list-style-type: decimal;
+  }
+
+  .tiptap ol ol {
+    list-style-type: lower-alpha;
+  }
+
+  .tiptap ol ol ol {
+    list-style-type: lower-roman;
+  }
+
+  .tiptap ul:not([data-type='taskList']) li,
+  .tiptap ol li {
+    line-height: 1.75;
+    margin: 0.25rem 0;
+    padding-left: 0.25rem;
+  }
+
+  .tiptap ul ul,
+  .tiptap ol ol,
+  .tiptap ul ol,
+  .tiptap ol ul {
+    margin: 0.125rem 0;
+  }
+
+  .tiptap ul[data-type='taskList'] {
+    list-style: none;
+    margin: 0.75rem 0;
+    padding: 0;
+  }
+
+  .tiptap ul[data-type='taskList'] li {
+    align-items: flex-start;
+    display: flex;
+    gap: 0.5rem;
+    line-height: 1.75;
+    margin: 0;
+    padding: 0.25rem 0;
+  }
+
+  .tiptap ul[data-type='taskList'] li > label {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    flex-shrink: 0;
+    margin-top: 0;
+    padding-top: 0.35rem;
+  }
+
+  .tiptap ul[data-type='taskList'] li > label > span {
+    display: none;
+  }
+
+  .tiptap ul[data-type='taskList'] li > label > input[type='checkbox'] {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    height: 1rem;
+    position: relative;
+    transition:
+      background 0.15s,
+      border-color 0.15s;
+    width: 1rem;
+  }
+
+  .tiptap ul[data-type='taskList'] li > label > input[type='checkbox']:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .tiptap
+    ul[data-type='taskList']
+    li
+    > label
+    > input[type='checkbox']:checked::after {
+    border: 2px solid var(--primary-foreground);
+    border-left: none;
+    border-top: none;
+    content: '';
+    height: 0.6rem;
+    left: 0.22rem;
+    position: absolute;
+    top: 0.05rem;
+    transform: rotate(45deg);
+    width: 0.35rem;
+  }
+
+  .tiptap ul[data-type='taskList'] li > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tiptap ul[data-type='taskList'] li > div > p {
+    line-height: 1.75;
+    margin: 0;
+  }
+
+  .tiptap ul[data-type='taskList'] li[data-checked='true'] > div {
+    color: var(--muted-foreground);
+    text-decoration: line-through;
+  }
+
+  .tiptap blockquote {
+    background: var(--muted);
+    border-left: 4px solid var(--border);
+    border-radius: 0 0.5rem 0.5rem 0;
+    color: var(--muted-foreground);
+    font-style: italic;
+    margin: 1.25rem 0;
+    padding: 0.875rem 1rem;
+  }
+
+  .tiptap code {
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    color: var(--foreground);
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.9em;
+    padding: 0.15em 0.4em;
+  }
+
+  .tiptap pre {
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    margin: 1.25rem 0;
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  .tiptap pre code {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    line-height: 1.75;
+    padding: 0;
+  }
+
+  .tiptap hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  .tiptap table {
+    border: 1px solid var(--border);
+    border-collapse: separate;
+    border-radius: 0.5rem;
+    border-spacing: 0;
+    margin: 1.25rem 0;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .tiptap th {
+    background: var(--muted);
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    text-align: left;
+  }
+
+  .tiptap td {
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+    padding: 0.75rem 1rem;
+  }
+
+  .tiptap tr:last-child td {
+    border-bottom: none;
+  }
+
+  .tiptap tr:hover td {
+    background: var(--muted);
+  }
+
+  .tiptap img {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    display: block;
+    height: auto;
+    margin: 1rem auto;
+    max-width: 100%;
+  }
+
+  @media (max-width: 640px) {
+    .tiptap h1 {
+      font-size: 1.875rem;
+    }
+
+    .tiptap h2 {
+      font-size: 1.625rem;
+    }
+
+    .tiptap h3 {
+      font-size: 1.375rem;
+    }
+
+    .tiptap h4 {
+      font-size: 1.125rem;
+    }
+  }
+
+  @media print {
+    .tiptap {
+      min-height: auto;
+    }
   }
 }
