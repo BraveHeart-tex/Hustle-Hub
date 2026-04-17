@@ -6,5 +6,16 @@ export interface Note {
   content: string;
   priority: NotePriority;
   createdAt?: string;
+  updatedAt?: string;
   completed?: boolean;
+  archived?: boolean;
+  pinned?: boolean;
+  tags?: string[];
+  tasks?: NoteTask[];
+}
+
+export interface NoteTask {
+  id: string;
+  label: string;
+  completed: boolean;
 }
