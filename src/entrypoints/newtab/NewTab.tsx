@@ -6,7 +6,7 @@ import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
 import GlobalStatusIndicator from '@/components/newtab/GlobalStatusIndicator.tsx';
 import Header from '@/components/newtab/Header';
 import JiraSection from '@/components/newtab/jira/JiraSection';
-import NotesSection from '@/components/newtab/NotesSection';
+import NotesPage from '@/components/newtab/notes/NotesPage';
 import SearchDialog from '@/components/newtab/SearchDialog';
 import { Toaster } from '@/components/ui/sonner';
 import { CommentsProvider } from '@/lib/storage/comments';
@@ -46,10 +46,6 @@ const NewTab = () => {
   );
 };
 
-const NotesPage = () => {
-  return <div>hello world</div>;
-};
-
 const DashboardPage = () => {
   return (
     <>
@@ -68,17 +64,8 @@ const DashboardPage = () => {
           <GitlabSection />
         </div>
 
-        <div
-          className="xl:sticky xl:top-6 flex flex-col gap-6"
-          style={{ height: 'calc(100vh - 110px)' }}
-        >
-          <div className="min-h-0" style={{ flex: '6 1 0' }}>
-            <JiraSection className="h-full" />
-          </div>
-
-          <div className="min-h-0" style={{ flex: '4 1 0' }}>
-            <NotesSection className="h-full" />
-          </div>
+        <div className="xl:sticky xl:top-6">
+          <JiraSection className="h-full" />
         </div>
       </div>
       <SearchDialog />

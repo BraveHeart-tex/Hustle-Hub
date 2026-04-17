@@ -190,6 +190,11 @@
     -ms-overflow-style: -ms-autohiding-scrollbar;
   }
 
+  button:not([disabled]),
+  [role='button']:not([disabled]) {
+    cursor: pointer;
+  }
+
   .tiptap p.is-editor-empty:first-child::before {
     color: var(--color-muted-foreground);
     content: attr(data-placeholder);
