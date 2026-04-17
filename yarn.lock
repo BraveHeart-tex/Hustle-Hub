@@ -738,6 +738,11 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
+"@popperjs/core@^2.9.0":
+  version "2.11.8"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
+  integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
+
 "@radix-ui/number@1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@radix-ui/number/-/number-1.1.1.tgz#7b2c9225fbf1b126539551f5985769d0048d9090"
@@ -1763,6 +1768,16 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-strike/-/extension-strike-3.10.1.tgz#58c49b884deaf31b77cda64aa94786783751ffb3"
   integrity sha512-NYnQOQM/HRvOcCRdetZthMMOZFpxpJ2PBuYg6u6ysotFJPWVVaegtNfZ4se0UdxDNPYInTW3gAgF05Tq/XszRQ==
 
+"@tiptap/extension-task-item@3.22.3":
+  version "3.22.3"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-task-item/-/extension-task-item-3.22.3.tgz#e92c0fb4f765536c502c318b5be97b5b748bc106"
+  integrity sha512-bUxP6fmlrF4sbpHnkm0nTKNVmtQXNnhrbWsUt0MCnvAd9y5Nq3ohpOzMOCL71AEHfmeV1kEkPbpdwKb1R7XDbg==
+
+"@tiptap/extension-task-list@3.22.3":
+  version "3.22.3"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-task-list/-/extension-task-list-3.22.3.tgz#a63d8753cc2162b834eb9b906c98fac950697fcf"
+  integrity sha512-ze/DNj7Uq/Xjo+t8UuumnvJcmGVrVvLar11nFxobgpij21ja6XiUNMZ+BywvFurWbh5NrHeSYV07vFOWWf5Cpg==
+
 "@tiptap/extension-text@^3.10.1":
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text/-/extension-text-3.10.1.tgz#9d3c74b64b750a7efc37bb4d3966dd00f80594fd"
@@ -1843,6 +1858,11 @@
     "@tiptap/extension-underline" "^3.10.1"
     "@tiptap/extensions" "^3.10.1"
     "@tiptap/pm" "^3.10.1"
+
+"@tiptap/suggestion@3.22.3":
+  version "3.22.3"
+  resolved "https://registry.yarnpkg.com/@tiptap/suggestion/-/suggestion-3.22.3.tgz#268e08b57a17f275b2d85233b2f4dc059c87cfc4"
+  integrity sha512-m2c+5gDj2vW7UI1J4JHCKehQUVE12qBhgF+DC+WEWUU8ZrFNf5OEYWQHDNsopa5RRpilfKfhPNbMtXgvGOsk6g==
 
 "@tybys/wasm-util@^0.10.1":
   version "0.10.1"
@@ -6987,6 +7007,13 @@ tinyglobby@^0.2.15:
   dependencies:
     fdir "^6.5.0"
     picomatch "^4.0.3"
+
+tippy.js@6.3.7:
+  version "6.3.7"
+  resolved "https://registry.yarnpkg.com/tippy.js/-/tippy.js-6.3.7.tgz#8ccfb651d642010ed9a32ff29b0e9e19c5b8c61c"
+  integrity sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==
+  dependencies:
+    "@popperjs/core" "^2.9.0"
 
 tmp@0.2.5:
   version "0.2.5"
