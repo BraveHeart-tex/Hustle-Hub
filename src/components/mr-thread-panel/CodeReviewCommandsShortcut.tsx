@@ -74,6 +74,9 @@ const resolveCommand = (
 const allCommands = (branches: BranchInfo) =>
   commands.map((c) => resolveCommand(c, branches)).join('\n');
 
+const codexReviewPrompt = ({ source, target }: BranchInfo) =>
+  `$strict-review review branch ${source} against ${target}`;
+
 const getSourceBranch = (doc: Document): string =>
   doc.querySelector<HTMLButtonElement>('.js-source-branch-copy')?.dataset
     .clipboardText ?? '';
@@ -155,17 +158,32 @@ export const CodeReviewCommandsShortcut = ({
           <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
             {commands.length} steps
           </span>
-          <button
-            onClick={() => copy('all', allCommands(branchInfo))}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border/50 px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-          >
-            {copiedId === 'all' ? (
-              <CheckIcon className="h-3 w-3 text-green-500" />
-            ) : (
-              <CopyIcon className="h-3 w-3" />
-            )}
-            {copiedId === 'all' ? 'Copied!' : 'Copy all'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() =>
+                copy('codex-prompt', codexReviewPrompt(branchInfo))
+              }
+              className="inline-flex items-center gap-1.5 rounded-md border border-border/50 px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            >
+              {copiedId === 'codex-prompt' ? (
+                <CheckIcon className="h-3 w-3 text-green-500" />
+              ) : (
+                <CopyIcon className="h-3 w-3" />
+              )}
+              {copiedId === 'codex-prompt' ? 'Copied!' : 'Copy Codex prompt'}
+            </button>
+            <button
+              onClick={() => copy('all', allCommands(branchInfo))}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border/50 px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            >
+              {copiedId === 'all' ? (
+                <CheckIcon className="h-3 w-3 text-green-500" />
+              ) : (
+                <CopyIcon className="h-3 w-3" />
+              )}
+              {copiedId === 'all' ? 'Copied!' : 'Copy all'}
+            </button>
+          </div>
         </div>
 
         <ul className="py-2">
