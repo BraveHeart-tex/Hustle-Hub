@@ -1,5 +1,4 @@
 import { EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 import {
   ArchiveIcon,
   MoreHorizontalIcon,
@@ -9,18 +8,10 @@ import {
   Trash2Icon,
   XIcon,
 } from 'lucide-react';
-import {
-  type KeyboardEvent,
-  type ReactNode,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -43,8 +34,10 @@ import {
 } from '@/components/ui/popover';
 import { removeNote, updateNote } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
-import { type Note, type NoteTask } from '@/types/notes';
+import { type Note } from '@/types/notes';
 
+import { createEditorExtensions } from './editor/editorExtensions';
+import FloatingToolbar from './editor/FloatingToolbar';
 import { useNotesPage } from './useNotesPage';
 
 const priorityConfig: Record<Note['priority'], { label: string; dot: string }> =
@@ -107,31 +100,6 @@ const formatDate = (value?: string) => {
   }).format(date);
 };
 
-const extractBulletItems = (content: string) => {
-  if (!content.trim() || typeof DOMParser === 'undefined') {
-    return [];
-  }
-
-  const doc = new DOMParser().parseFromString(content, 'text/html');
-  return Array.from(doc.querySelectorAll('li'))
-    .map((item) => item.textContent?.trim() ?? '')
-    .filter(Boolean);
-};
-
-interface SectionProps {
-  title: string;
-  children: ReactNode;
-}
-
-const DetailSection = ({ title, children }: SectionProps) => (
-  <section className="space-y-3">
-    <h2 className="mb-3 border-b border-border pb-2 text-base font-semibold text-foreground">
-      {title}
-    </h2>
-    {children}
-  </section>
-);
-
 interface SelectedNoteDetailProps {
   note: Note;
 }
@@ -140,17 +108,12 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
   const { setSelectedNoteId } = useNotesPage();
   const [title, setTitle] = useState(note.title);
   const [newTag, setNewTag] = useState('');
-  const [newTask, setNewTask] = useState('');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const bulletItems = useMemo(
-    () => extractBulletItems(note.content),
-    [note.content],
-  );
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: createEditorExtensions(),
     content: note.content,
     onUpdate: ({ editor }) => {
       if (saveTimerRef.current) {
@@ -166,9 +129,8 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
     },
     editorProps: {
       attributes: {
-        'data-placeholder': 'Write context for this note...',
         class:
-          'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[120px]',
+          'tiptap prose prose-sm dark:prose-invert max-w-none min-h-[300px] focus:outline-none text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-blockquote:text-muted-foreground prose-blockquote:border-border prose-hr:border-border prose-ul:text-foreground prose-ol:text-foreground [&_ul[data-type="taskList"]]:list-none [&_ul[data-type="taskList"]]:p-0 [&_ul[data-type="taskList"]_li]:flex [&_ul[data-type="taskList"]_li]:items-start [&_ul[data-type="taskList"]_li]:gap-2 [&_ul[data-type="taskList"]_li>label]:mt-0.5',
       },
     },
   });
@@ -179,10 +141,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
 
   useEffect(() => {
     const isFreshNote =
-      note.title === 'Untitled' &&
-      !note.content &&
-      !note.tags?.length &&
-      !note.tasks?.length;
+      note.title === 'Untitled' && !note.content && !note.tags?.length;
 
     if (!isFreshNote) {
       return;
@@ -192,13 +151,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
       titleRef.current?.focus();
       titleRef.current?.select();
     }, 0);
-  }, [
-    note.content,
-    note.id,
-    note.tags?.length,
-    note.tasks?.length,
-    note.title,
-  ]);
+  }, [note.content, note.id, note.tags?.length, note.title]);
 
   useEffect(() => {
     return () => {
@@ -238,27 +191,6 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
 
   const removeTag = (tag: string) => {
     void saveNote({ tags: (note.tags ?? []).filter((item) => item !== tag) });
-  };
-
-  const updateTasks = (tasks: NoteTask[]) => {
-    void saveNote({ tasks });
-  };
-
-  const addTask = () => {
-    const cleanTask = newTask.trim();
-    if (!cleanTask) {
-      return;
-    }
-
-    updateTasks([
-      ...(note.tasks ?? []),
-      {
-        id: crypto.randomUUID(),
-        label: cleanTask,
-        completed: false,
-      },
-    ]);
-    setNewTask('');
   };
 
   const handleDelete = async () => {
@@ -405,78 +337,10 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           </span>
         </div>
 
-        <DetailSection title="Context">
-          <div
-            key={note.id}
-            className="rounded-lg border border-border bg-background p-4"
-          >
-            <EditorContent editor={editor} />
-          </div>
-        </DetailSection>
-
-        <DetailSection title="Tasks">
-          <div className="space-y-2">
-            {(note.tasks ?? []).map((task) => (
-              <div key={task.id} className="flex items-center gap-3">
-                <Checkbox
-                  checked={task.completed}
-                  onCheckedChange={(checked) =>
-                    updateTasks(
-                      (note.tasks ?? []).map((item) =>
-                        item.id === task.id
-                          ? { ...item, completed: checked === true }
-                          : item,
-                      ),
-                    )
-                  }
-                />
-                <Input
-                  value={task.label}
-                  onChange={(event) =>
-                    updateTasks(
-                      (note.tasks ?? []).map((item) =>
-                        item.id === task.id
-                          ? { ...item, label: event.target.value }
-                          : item,
-                      ),
-                    )
-                  }
-                  className={cn(
-                    'h-8 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0',
-                    task.completed && 'text-muted-foreground line-through',
-                  )}
-                />
-              </div>
-            ))}
-
-            <Input
-              value={newTask}
-              onChange={(event) => setNewTask(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  addTask();
-                }
-              }}
-              placeholder="+ Add task"
-              className="h-9 border-dashed bg-transparent"
-            />
-          </div>
-        </DetailSection>
-
-        <DetailSection title="Notes">
-          {bulletItems.length > 0 ? (
-            <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
-              {bulletItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No bullet notes found in the editor content.
-            </p>
-          )}
-        </DetailSection>
+        <div className="min-h-[300px]">
+          <FloatingToolbar editor={editor} />
+          <EditorContent editor={editor} />
+        </div>
 
         <div className="flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
           <span>Created {formatDate(note.createdAt)}</span>
@@ -491,7 +355,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           <DialogHeader>
             <DialogTitle>Delete note?</DialogTitle>
             <DialogDescription>
-              This permanently removes the note and its tasks.
+              This permanently removes the note.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

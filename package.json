@@ -34,10 +34,13 @@
     "@tailwindcss/vite": "^4.1.12",
     "@tanstack/react-query": "^5.87.4",
     "@tiptap/extension-list": "^3.7.2",
+    "@tiptap/extension-task-item": "3.22.3",
+    "@tiptap/extension-task-list": "3.22.3",
     "@tiptap/extensions": "^3.7.2",
     "@tiptap/pm": "^3.7.2",
     "@tiptap/react": "^3.7.2",
     "@tiptap/starter-kit": "^3.7.2",
+    "@tiptap/suggestion": "3.22.3",
     "@webext-core/messaging": "^2.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -53,6 +56,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12",
+    "tippy.js": "6.3.7",
     "zod": "^4.1.12"
   },
   "devDependencies": {
