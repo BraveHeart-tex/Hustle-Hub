@@ -4,8 +4,9 @@ import { Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
 
 import { SlashCommands } from './SlashCommands';
+import { type SlashCommandOptions } from './SlashMenuItem';
 
-export const createEditorExtensions = () => [
+export const createEditorExtensions = (options: SlashCommandOptions = {}) => [
   StarterKit.configure({
     heading: {
       levels: [1, 2, 3, 4],
@@ -16,5 +17,5 @@ export const createEditorExtensions = () => [
   Placeholder.configure({
     placeholder: "Write something, or type '/' for commands…",
   }),
-  SlashCommands,
+  SlashCommands.configure(options),
 ];

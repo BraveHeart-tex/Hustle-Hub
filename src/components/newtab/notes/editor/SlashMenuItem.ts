@@ -6,3 +6,7 @@ export interface SlashMenuItem {
   icon: string;
   command: (editor: Editor, range: Range) => void;
 }
+
+export interface SlashCommandOptions {
+  onWorkItemLink?: () => void;
+}

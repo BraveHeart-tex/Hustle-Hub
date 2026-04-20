@@ -12,10 +12,25 @@ export interface Note {
   pinned?: boolean;
   tags?: string[];
   tasks?: NoteTask[];
+  linkedItems?: NoteLinkedWorkItem[];
 }
 
 export interface NoteTask {
   id: string;
   label: string;
   completed: boolean;
+}
+
+export interface NoteLinkedWorkItem {
+  id: string;
+  type: 'jira' | 'gitlab';
+  title: string;
+  url: string;
+  key?: string;
+  status?: string;
+  projectName?: string;
+  draft?: boolean;
+  approvedBy?: number;
+  approvalsRequired?: number;
+  conflicts?: boolean;
 }

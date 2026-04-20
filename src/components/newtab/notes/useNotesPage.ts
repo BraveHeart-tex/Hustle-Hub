@@ -84,6 +84,20 @@ const fuzzyIncludes = (value: string, target: string) => {
   return false;
 };
 
+const linkedItemSearchText = (note: Note) =>
+  (note.linkedItems ?? [])
+    .map((item) =>
+      [
+        item.id,
+        item.key,
+        item.title,
+        item.status,
+        item.projectName,
+        item.type,
+      ].join(' '),
+    )
+    .join(' ');
+
 const timestamp = (value?: string) => {
   if (!value) {
     return 0;
@@ -165,7 +179,9 @@ export const NotesPageProvider = ({ children }: NotesPageProviderProps) => {
       if (
         cleanSearchQuery &&
         !fuzzyIncludes(
-          `${note.title} ${stripHtml(note.content)}`,
+          `${note.title} ${stripHtml(note.content)} ${linkedItemSearchText(
+            note,
+          )}`,
           cleanSearchQuery,
         )
       ) {

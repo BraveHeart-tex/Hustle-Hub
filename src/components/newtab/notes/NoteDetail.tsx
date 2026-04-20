@@ -1,6 +1,7 @@
 import { EditorContent, useEditor } from '@tiptap/react';
 import {
   ArchiveIcon,
+  ExternalLinkIcon,
   MoreHorizontalIcon,
   NotebookTextIcon,
   PencilIcon,
@@ -8,8 +9,16 @@ import {
   Trash2Icon,
   XIcon,
 } from 'lucide-react';
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
+import GitlabIcon from '@/components/misc/GitlabIcon';
+import JiraIcon from '@/components/misc/JiraIcon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,10 +43,11 @@ import {
 } from '@/components/ui/popover';
 import { removeNote, updateNote } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
-import { type Note } from '@/types/notes';
+import { type Note, type NoteLinkedWorkItem } from '@/types/notes';
 
 import { createEditorExtensions } from './editor/editorExtensions';
 import FloatingToolbar from './editor/FloatingToolbar';
+import NoteWorkItemPicker from './NoteWorkItemPicker';
 import { useNotesPage } from './useNotesPage';
 
 const priorityConfig: Record<Note['priority'], { label: string; dot: string }> =
@@ -100,6 +110,13 @@ const formatDate = (value?: string) => {
   }).format(date);
 };
 
+const isSameLinkedItem = (
+  left: NoteLinkedWorkItem,
+  right: NoteLinkedWorkItem,
+) => left.type === right.type && left.id === right.id;
+
+const linkedItemLabel = (item: NoteLinkedWorkItem) => item.key ?? item.id;
+
 interface SelectedNoteDetailProps {
   note: Note;
 }
@@ -109,11 +126,14 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
   const [title, setTitle] = useState(note.title);
   const [newTag, setNewTag] = useState('');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isWorkItemPickerOpen, setIsWorkItemPickerOpen] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
-    extensions: createEditorExtensions(),
+    extensions: createEditorExtensions({
+      onWorkItemLink: () => setIsWorkItemPickerOpen(true),
+    }),
     content: note.content,
     onUpdate: ({ editor }) => {
       if (saveTimerRef.current) {
@@ -190,6 +210,27 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
 
   const removeTag = (tag: string) => {
     void saveNote({ tags: (note.tags ?? []).filter((item) => item !== tag) });
+  };
+
+  const linkWorkItem = (item: NoteLinkedWorkItem) => {
+    const linkedItems = note.linkedItems ?? [];
+    if (linkedItems.some((linkedItem) => isSameLinkedItem(linkedItem, item))) {
+      return;
+    }
+
+    void saveNote({ linkedItems: [...linkedItems, item] });
+  };
+
+  const removeLinkedItem = (
+    item: NoteLinkedWorkItem,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.stopPropagation();
+    void saveNote({
+      linkedItems: (note.linkedItems ?? []).filter(
+        (linkedItem) => !isSameLinkedItem(linkedItem, item),
+      ),
+    });
   };
 
   const handleDelete = async () => {
@@ -330,6 +371,53 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
             />
           </div>
 
+          {!!note.linkedItems?.length && (
+            <>
+              <span>·</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {note.linkedItems.map((item) => {
+                  const Icon = item.type === 'jira' ? JiraIcon : GitlabIcon;
+
+                  return (
+                    <Badge
+                      key={`${item.type}-${item.id}`}
+                      variant="secondary"
+                      className="max-w-60 gap-1"
+                      title={item.title}
+                    >
+                      <Icon
+                        className={cn(
+                          'h-3 w-3 shrink-0',
+                          item.type === 'jira' && 'text-blue-500',
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          window.open(item.url, '_blank', 'noopener,noreferrer')
+                        }
+                        className="flex min-w-0 items-center gap-1 rounded-sm hover:text-foreground"
+                      >
+                        <span className="shrink-0 font-mono">
+                          {linkedItemLabel(item)}
+                        </span>
+                        <span className="truncate">{item.title}</span>
+                        <ExternalLinkIcon className="h-3 w-3 shrink-0 text-muted-foreground" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => removeLinkedItem(item, event)}
+                        className="rounded-sm text-muted-foreground hover:text-foreground"
+                      >
+                        <XIcon className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
           <span>·</span>
           <span>
             Updated {formatRelativeTime(note.updatedAt ?? note.createdAt)}
@@ -367,6 +455,12 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <NoteWorkItemPicker
+        open={isWorkItemPickerOpen}
+        linkedItems={note.linkedItems ?? []}
+        onOpenChange={setIsWorkItemPickerOpen}
+        onSelect={linkWorkItem}
+      />
     </article>
   );
 };

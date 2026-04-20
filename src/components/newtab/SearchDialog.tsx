@@ -4,7 +4,7 @@ import {
   SearchIcon,
   SquareArrowOutUpRight,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import GitlabIcon from '@/components/misc/GitlabIcon';
 import JiraIcon from '@/components/misc/JiraIcon';
@@ -16,28 +16,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { useGitlabMrs } from '@/hooks/useGitlabMrs';
-import { useJiraTickets } from '@/hooks/useJiraTickets';
-import {
-  GITLAB_FILTERS,
-  type GitlabFilter,
-  JIRA_FILTERS,
-  type JiraFilter,
-} from '@/lib/constants';
-import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
-import { type GitlabMergeRequest } from '@/types/gitlab';
-import { type JiraIssue } from '@/types/jira';
-
-const GITLAB_SEARCH_FILTERS: GitlabFilter[] = [
-  GITLAB_FILTERS.ASSIGNED,
-  GITLAB_FILTERS.REVIEW,
-];
-
-const JIRA_SEARCH_FILTERS: JiraFilter[] = [
-  JIRA_FILTERS.FOR_YOU,
-  JIRA_FILTERS.LITERALLY_WORKING_ON,
-  JIRA_FILTERS.FRONTEND_RELEASES,
-];
+import { useWorkItemSearch } from '@/hooks/useWorkItemSearch';
 
 // Maps Jira status category to a color pill
 const STATUS_CATEGORY_CONFIG: Record<string, string> = {
@@ -59,6 +38,8 @@ function getStatusStyle(statusName: string): string {
 const SearchDialog = () => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const { gitlab: filteredMRs, jira: filteredIssues } =
+    useWorkItemSearch(query);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -70,61 +51,6 @@ const SearchDialog = () => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  const assignedMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[0]);
-  const reviewMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[1]);
-  const jiraForYou = useJiraTickets(JIRA_SEARCH_FILTERS[0]);
-  const jiraWorkingOn = useJiraTickets(JIRA_SEARCH_FILTERS[1]);
-  const jiraFrontendReleases = useJiraTickets(JIRA_SEARCH_FILTERS[2]);
-
-  const data = useMemo(() => {
-    const gitlabMap = new Map<string, GitlabMergeRequest>();
-    [assignedMrs.data ?? [], reviewMrs.data ?? []].forEach((mrs) =>
-      mrs.forEach((mr) => gitlabMap.set(String(mr.iid), mr)),
-    );
-
-    const jiraMap = new Map<string, JiraIssue>();
-    [
-      jiraForYou.data?.issues ?? [],
-      jiraWorkingOn.data?.issues ?? [],
-      jiraFrontendReleases.data?.issues ?? [],
-    ].forEach((issues) =>
-      issues.forEach((issue) => jiraMap.set(issue.key, issue)),
-    );
-
-    return {
-      gitlab: Array.from(gitlabMap.values()),
-      jira: Array.from(jiraMap.values()),
-    };
-  }, [
-    assignedMrs.data,
-    jiraForYou.data,
-    jiraFrontendReleases.data,
-    jiraWorkingOn.data,
-    reviewMrs.data,
-  ]);
-
-  const queryLower = query.toLowerCase();
-
-  const filteredMRs = useMemo(
-    () =>
-      data.gitlab.filter(
-        (mr) =>
-          mr.title.toLowerCase().includes(queryLower) ||
-          String(mr.iid).includes(queryLower),
-      ),
-    [data.gitlab, queryLower],
-  );
-
-  const filteredIssues = useMemo(
-    () =>
-      data.jira.filter(
-        (issue) =>
-          issue.fields.summary.toLowerCase().includes(queryLower) ||
-          issue.key.toLowerCase().includes(queryLower),
-      ),
-    [data.jira, queryLower],
-  );
 
   const hasResults = filteredMRs.length > 0 || filteredIssues.length > 0;
 
@@ -184,11 +110,11 @@ const SearchDialog = () => {
           >
             {filteredMRs.map((mr) => (
               <CommandItem
-                key={mr.iid}
-                value={`${mr.iid} ${mr.title}`}
+                key={mr.id}
+                value={`${mr.id} ${mr.title} ${mr.projectName ?? ''}`}
                 className="group flex items-start gap-3 px-3 py-2.5 cursor-pointer"
                 onSelect={() =>
-                  window.open(mr.webUrl, '_blank', 'noopener,noreferrer')
+                  window.open(mr.url, '_blank', 'noopener,noreferrer')
                 }
               >
                 {/* MR icon */}
@@ -208,7 +134,7 @@ const SearchDialog = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-mono text-muted-foreground shrink-0">
-                      !{mr.iid}
+                      {mr.key ?? mr.id}
                     </span>
                     <span className="text-sm font-medium truncate">
                       {mr.title}
@@ -223,9 +149,9 @@ const SearchDialog = () => {
                         Draft
                       </span>
                     )}
-                    {mr.approvedBy > 0 && (
+                    {(mr.approvedBy ?? 0) > 0 && (
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-1.5 py-px">
-                        ✓ {mr.approvedBy}/{mr.approvalsRequired}
+                        ✓ {mr.approvedBy}/{mr.approvalsRequired ?? 0}
                       </span>
                     )}
                     {mr.conflicts && (
@@ -264,12 +190,12 @@ const SearchDialog = () => {
           >
             {filteredIssues.map((issue) => (
               <CommandItem
-                key={issue.key}
-                value={`${issue.key} ${issue.fields.summary}`}
+                key={issue.id}
+                value={`${issue.id} ${issue.key ?? ''} ${issue.title} ${
+                  issue.status ?? ''
+                }`}
                 className="group flex items-start gap-3 px-3 py-2.5 cursor-pointer"
-                onSelect={() =>
-                  window.open(getJiraTaskUrl(issue.key), '_blank')
-                }
+                onSelect={() => window.open(issue.url, '_blank')}
               >
                 {/* Priority dot */}
                 <div className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-blue-400/60" />
@@ -279,16 +205,18 @@ const SearchDialog = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[11px] font-mono font-medium text-foreground/70 shrink-0">
-                      {issue.key}
+                      {issue.key ?? issue.id}
                     </span>
-                    <span
-                      className={`inline-flex items-center text-[10px] font-medium border rounded-full px-1.5 py-px shrink-0 ${getStatusStyle(issue.fields.status.name)}`}
-                    >
-                      {issue.fields.status.name}
-                    </span>
+                    {issue.status && (
+                      <span
+                        className={`inline-flex items-center text-[10px] font-medium border rounded-full px-1.5 py-px shrink-0 ${getStatusStyle(issue.status)}`}
+                      >
+                        {issue.status}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm font-medium truncate mt-0.5">
-                    {issue.fields.summary}
+                    {issue.title}
                   </p>
                 </div>
 

@@ -4,6 +4,7 @@ import {
   Heading2Icon,
   Heading3Icon,
   Heading4Icon,
+  LinkIcon,
   ListIcon,
   ListOrderedIcon,
   ListTodoIcon,
@@ -34,6 +35,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Blockquote: QuoteIcon,
   'Code Block': Code2Icon,
   Divider: MinusIcon,
+  'Work Item': LinkIcon,
 };
 
 export interface SlashMenuRendererProps {

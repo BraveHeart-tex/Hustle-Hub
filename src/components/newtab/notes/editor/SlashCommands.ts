@@ -3,7 +3,7 @@ import { ReactRenderer } from '@tiptap/react';
 import { Suggestion, type SuggestionKeyDownProps } from '@tiptap/suggestion';
 import tippy, { type Instance, type Props } from 'tippy.js';
 
-import { type SlashMenuItem } from './SlashMenuItem';
+import { type SlashCommandOptions, type SlashMenuItem } from './SlashMenuItem';
 import SlashMenuRenderer, {
   type SlashMenuRendererProps,
   type SlashMenuRendererRef,
@@ -161,8 +161,33 @@ const slashMenuItems: SlashMenuItem[] = [
   },
 ];
 
-export const SlashCommands = Extension.create({
+const createSlashMenuItems = (
+  options: SlashCommandOptions,
+): SlashMenuItem[] => {
+  if (!options.onWorkItemLink) {
+    return slashMenuItems;
+  }
+
+  return [
+    ...slashMenuItems,
+    {
+      title: 'Work Item',
+      description: 'Link a Jira ticket or GitLab MR',
+      icon: 'LinkIcon',
+      command: (editor, range) => {
+        editor.chain().focus().deleteRange(deleteRange(range)).run();
+        options.onWorkItemLink?.();
+      },
+    },
+  ];
+};
+
+export const SlashCommands = Extension.create<SlashCommandOptions>({
   name: 'slashCommands',
+
+  addOptions() {
+    return {};
+  },
 
   addProseMirrorPlugins() {
     return [
@@ -172,7 +197,7 @@ export const SlashCommands = Extension.create({
         items: ({ query }) => {
           const normalizedQuery = query.toLowerCase();
 
-          return slashMenuItems.filter((item) =>
+          return createSlashMenuItems(this.options).filter((item) =>
             item.title.toLowerCase().includes(normalizedQuery),
           );
         },
