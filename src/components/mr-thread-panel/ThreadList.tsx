@@ -1,6 +1,15 @@
-import { CheckCircle2Icon, MessageSquareIcon, XCircleIcon } from 'lucide-react';
+import { MessageSquareIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import {
+  buildCodexPromptForThread,
+  extractPromptData,
+} from '@/components/mr-thread-panel/mr-thread-helpers';
+import {
+  type Thread,
+  type ThreadReply,
+} from '@/components/mr-thread-panel/mr-thread-panel.types';
+import { MrThreadItem } from '@/components/mr-thread-panel/MrThreadItem';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -8,28 +17,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
-
-interface ThreadReply {
-  authorName: string;
-  authorAvatar: string;
-  authorUrl: string;
-  timestamp: string;
-  timeAgo: string;
-  text: string;
-  isCurrentUser: boolean;
-}
-
-interface Thread {
-  id: string;
-  resolved: boolean;
-  replies: ThreadReply[];
-}
-
-interface ThreadListProps {
-  container: HTMLElement | null;
-  userId: string;
-}
 
 function extractReplies(
   discussion: HTMLElement,
@@ -68,6 +55,11 @@ function extractReplies(
   return replies;
 }
 
+interface ThreadListProps {
+  container: HTMLElement | null;
+  userId: string;
+}
+
 export const ThreadList = ({ container, userId }: ThreadListProps) => {
   const { pathname } = useUrlChange();
   const isMergeRequestRoot = /^.+\/-\/merge_requests\/\d+$/.test(pathname);
@@ -77,7 +69,9 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(
     new Set(),
   );
+  const [copiedThreadId, setCopiedThreadId] = useState<string | null>(null);
   const threadsRef = useRef<Thread[]>([]);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Ref map for each thread li — used to scroll active item into view in the popover
   const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
@@ -85,9 +79,12 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
     const discussions = document.querySelectorAll(
       `.discussion[data-testid="discussion-content"]`,
     );
+
     const newUserThreads: Thread[] = [];
+
     discussions.forEach((el) => {
       const discussion = el as HTMLElement;
+
       const author = discussion.querySelector(
         `a.author-name-link[data-user-id="${userId}"]`,
       );
@@ -96,16 +93,34 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
           id: discussion.dataset.discussionId ?? '',
           replies: extractReplies(discussion, userId),
           resolved: discussion.dataset.discussionResolved === 'true',
+          promptData: extractPromptData(discussion),
         });
       }
     });
+
     const isDifferent =
       JSON.stringify(newUserThreads) !== JSON.stringify(threadsRef.current);
+
     if (isDifferent) {
       threadsRef.current = newUserThreads;
       setThreads(newUserThreads);
     }
   }, [userId]);
+
+  const copyPrompt = useCallback(async (thread: Thread) => {
+    const prompt = buildCodexPromptForThread(thread);
+    await navigator.clipboard.writeText(prompt);
+    setCopiedThreadId(thread.id);
+
+    if (copiedTimeoutRef.current) {
+      clearTimeout(copiedTimeoutRef.current);
+    }
+
+    copiedTimeoutRef.current = setTimeout(() => {
+      setCopiedThreadId(null);
+      copiedTimeoutRef.current = null;
+    }, 1500);
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -122,6 +137,14 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
       clearTimeout(debounceTimer);
     };
   }, [userId, collectThreads]);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) {
+        clearTimeout(copiedTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const scrollToDiscussion = useCallback((id: string, index: number) => {
     // Scroll the page to the GitLab discussion
@@ -150,6 +173,11 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
       else next.add(id);
       return next;
     });
+  }, []);
+
+  const setItemRef = useCallback((id: string, el: HTMLLIElement | null) => {
+    if (el) itemRefs.current.set(id, el);
+    else itemRefs.current.delete(id);
   }, []);
 
   if (threads.length === 0 || !isMergeRequestRoot) return null;
@@ -203,134 +231,20 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
 
         {/* Thread list */}
         <ul className="py-1 max-h-[420px] overflow-y-auto divide-y divide-border/40">
-          {threads.map((thread, index) => {
-            const isExpanded = expandedReplies.has(thread.id);
-            const replyCount = thread.replies.length;
-            const lastReply = thread.replies[thread.replies.length - 1];
-            const hasUnreadReply =
-              !thread.resolved && lastReply && !lastReply.isCurrentUser;
-
-            return (
-              <li
-                key={thread.id}
-                ref={(el) => {
-                  if (el) itemRefs.current.set(thread.id, el);
-                  else itemRefs.current.delete(thread.id);
-                }}
-              >
-                {/* Thread row — div to avoid button-in-button.
-                    Left area scrolls to discussion, right area toggles replies. */}
-                <div
-                  className={cn(
-                    'flex items-center gap-2.5 px-3 py-2 transition-colors',
-                    index === activeIndex ? 'bg-muted' : 'hover:bg-muted/60',
-                  )}
-                >
-                  {/* Clickable left area — scroll to discussion */}
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => scrollToDiscussion(thread.id, index)}
-                    onKeyDown={(e) =>
-                      e.key === 'Enter' && scrollToDiscussion(thread.id, index)
-                    }
-                    className="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer"
-                  >
-                    {thread.resolved ? (
-                      <CheckCircle2Icon className="h-4 w-4 shrink-0 text-green-500" />
-                    ) : (
-                      <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
-                    )}
-                    <span
-                      className={cn(
-                        'text-xs flex-1 truncate',
-                        thread.resolved
-                          ? 'text-muted-foreground line-through'
-                          : 'text-foreground font-medium',
-                      )}
-                    >
-                      Thread {index + 1}
-                    </span>
-                  </div>
-
-                  {/* Right side — unread dot + reply toggle + viewing label */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {hasUnreadReply && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                    )}
-                    {replyCount > 0 && (
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => toggleReplies(thread.id)}
-                        onKeyDown={(e) =>
-                          e.key === 'Enter' && toggleReplies(thread.id)
-                        }
-                        className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-muted cursor-pointer"
-                      >
-                        <MessageSquareIcon className="h-3 w-3" />
-                        {replyCount}
-                      </div>
-                    )}
-                    {index === activeIndex && (
-                      <span className="text-[10px] text-muted-foreground">
-                        viewing
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Replies — 1 level deep */}
-                {isExpanded && replyCount > 0 && (
-                  <ul className="border-t border-border/40 bg-muted/20">
-                    {thread.replies.map((reply, rIndex) => (
-                      <li
-                        key={rIndex}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => scrollToDiscussion(thread.id, index)}
-                        onKeyDown={(e) =>
-                          e.key === 'Enter' &&
-                          scrollToDiscussion(thread.id, index)
-                        }
-                        className="flex items-start gap-2 px-4 py-2 border-b border-border/30 last:border-0 cursor-pointer hover:bg-muted/40 transition-colors"
-                      >
-                        {reply.authorAvatar ? (
-                          <img
-                            src={reply.authorAvatar}
-                            alt={reply.authorName}
-                            className="h-5 w-5 rounded-full shrink-0 mt-0.5"
-                          />
-                        ) : (
-                          <div className="h-5 w-5 rounded-full bg-muted shrink-0 mt-0.5" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-baseline gap-1.5 mb-0.5">
-                            <span
-                              className={cn(
-                                'text-[11px] font-medium truncate',
-                                reply.isCurrentUser
-                                  ? 'text-foreground'
-                                  : 'text-muted-foreground',
-                              )}
-                            >
-                              {reply.isCurrentUser ? 'You' : reply.authorName}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground/60 shrink-0">
-                              {reply.timeAgo}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
-                            {reply.text}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            );
-          })}
+          {threads.map((thread, index) => (
+            <MrThreadItem
+              key={thread.id}
+              active={index === activeIndex}
+              copied={copiedThreadId === thread.id}
+              expanded={expandedReplies.has(thread.id)}
+              index={index}
+              thread={thread}
+              onCopyPrompt={(thread) => void copyPrompt(thread)}
+              onScrollToDiscussion={scrollToDiscussion}
+              onSetItemRef={setItemRef}
+              onToggleReplies={toggleReplies}
+            />
+          ))}
         </ul>
       </PopoverContent>
     </Popover>
