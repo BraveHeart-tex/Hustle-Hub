@@ -127,9 +127,7 @@ export function buildCodexPromptForThread(thread: Thread): string {
     .map((line) => {
       const marker =
         line.type === 'old' ? '-' : line.type === 'new' ? '+' : ' ';
-
       const lineNumber = line.newLine ?? line.oldLine ?? '';
-
       return `${marker} ${String(lineNumber).padStart(4, ' ')} | ${line.code}`;
     })
     .join('\n');
@@ -137,24 +135,24 @@ export function buildCodexPromptForThread(thread: Thread): string {
   const commentedLine = thread.promptData.commentedLine;
   const commentedLineNumber = commentedLine?.newLine ?? commentedLine?.oldLine;
 
-  return `Fix the GitLab merge request discussion below.
+  return `You are helping address a GitLab merge request review comment.
 
-File:
-${thread.promptData.filePath ?? 'Unknown file'}
+File: ${thread.promptData.filePath ?? 'Unknown'}
+Discussion: ${thread.promptData.permalink ?? 'Unknown'}
 
-Discussion URL:
-${thread.promptData.permalink ?? window.location.href}
-
-Reviewer comments:
-${comments}
-
-Commented line:
-${commentedLineNumber ?? 'Unknown'} | ${commentedLine?.code ?? 'Unknown'}
-
-Code context:
+Code context (unified diff format — lines prefixed with '-' were removed, '+' added, ' ' unchanged):
 \`\`\`
 ${context}
 \`\`\`
 
-Please update the code to address the reviewer feedback only if needed. Keep the change minimal and preserve existing style.`;
+The reviewer's comment targets line ${commentedLineNumber ?? 'unknown'}: \`${commentedLine?.code ?? 'unknown'}\`
+
+Reviewer discussion:
+${comments}
+
+Task: Suggest the minimal code change that addresses the reviewer's feedback. Preserve the existing style, naming conventions, and indentation. If no change is needed, say so and explain why.
+
+Respond with:
+1. A brief explanation of what needs to change (or why no change is needed)
+2. The updated code snippet (not the full file — just the relevant lines)`;
 }
