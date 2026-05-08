@@ -4,6 +4,7 @@ export interface SlashMenuItem {
   title: string;
   description: string;
   icon: string;
+  aliases?: string[];
   command: (editor: Editor, range: Range) => void;
 }
 

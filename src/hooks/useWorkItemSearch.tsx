@@ -39,12 +39,16 @@ const matchesWorkItem = (item: NoteLinkedWorkItem, query: string) => {
   ].some((value) => normalized(value ?? '').includes(query));
 };
 
-export const useWorkItemSearch = (query = '') => {
-  const assignedMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[0]);
-  const reviewMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[1]);
-  const jiraForYou = useJiraTickets(JIRA_SEARCH_FILTERS[0]);
-  const jiraWorkingOn = useJiraTickets(JIRA_SEARCH_FILTERS[1]);
-  const jiraFrontendReleases = useJiraTickets(JIRA_SEARCH_FILTERS[2]);
+export const useWorkItemSearch = (query = '', enabled = true) => {
+  const queryOptions = { enabled };
+  const assignedMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[0], queryOptions);
+  const reviewMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[1], queryOptions);
+  const jiraForYou = useJiraTickets(JIRA_SEARCH_FILTERS[0], queryOptions);
+  const jiraWorkingOn = useJiraTickets(JIRA_SEARCH_FILTERS[1], queryOptions);
+  const jiraFrontendReleases = useJiraTickets(
+    JIRA_SEARCH_FILTERS[2],
+    queryOptions,
+  );
 
   const items = useMemo(() => {
     const gitlabMap = new Map<string, NoteLinkedWorkItem>();

@@ -106,7 +106,7 @@ const NoteWorkItemPicker = ({
   onSelect,
 }: NoteWorkItemPickerProps) => {
   const [query, setQuery] = useState('');
-  const { gitlab, jira, isLoading, isError } = useWorkItemSearch(query);
+  const { gitlab, jira, isLoading, isError } = useWorkItemSearch(query, open);
   const hasResults = gitlab.length > 0 || jira.length > 0;
 
   const handleOpenChange = (nextOpen: boolean) => {

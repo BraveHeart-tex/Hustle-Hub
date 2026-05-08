@@ -13,6 +13,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -117,6 +118,15 @@ const isSameLinkedItem = (
 
 const linkedItemLabel = (item: NoteLinkedWorkItem) => item.key ?? item.id;
 
+const autosizeTitle = (element: HTMLTextAreaElement | null) => {
+  if (!element) {
+    return;
+  }
+
+  element.style.height = 'auto';
+  element.style.height = `${element.scrollHeight}px`;
+};
+
 interface SelectedNoteDetailProps {
   note: Note;
 }
@@ -157,6 +167,10 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
   useEffect(() => {
     setTitle(note.title);
   }, [note.id, note.title]);
+
+  useLayoutEffect(() => {
+    autosizeTitle(titleRef.current);
+  }, [note.id, title]);
 
   useEffect(() => {
     const isFreshNote =
@@ -291,8 +305,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           onBlur={saveTitle}
           onChange={(event) => {
             setTitle(event.target.value);
-            event.target.style.height = 'auto';
-            event.target.style.height = `${event.target.scrollHeight}px`;
+            autosizeTitle(event.target);
           }}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
@@ -455,12 +468,14 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <NoteWorkItemPicker
-        open={isWorkItemPickerOpen}
-        linkedItems={note.linkedItems ?? []}
-        onOpenChange={setIsWorkItemPickerOpen}
-        onSelect={linkWorkItem}
-      />
+      {isWorkItemPickerOpen && (
+        <NoteWorkItemPicker
+          open={isWorkItemPickerOpen}
+          linkedItems={note.linkedItems ?? []}
+          onOpenChange={setIsWorkItemPickerOpen}
+          onSelect={linkWorkItem}
+        />
+      )}
     </article>
   );
 };

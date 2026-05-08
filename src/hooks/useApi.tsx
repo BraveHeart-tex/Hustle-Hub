@@ -2,9 +2,14 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { type ApiResponse } from '@/types/api';
 
+interface UseApiOptions {
+  enabled?: boolean;
+}
+
 export function useApi<T, K extends readonly unknown[]>(
   queryKey: K,
   fetcher: () => Promise<ApiResponse<T>>,
+  options: UseApiOptions = {},
 ) {
   const query: UseQueryResult<
     T,
@@ -18,6 +23,7 @@ export function useApi<T, K extends readonly unknown[]>(
 
       throw response.error;
     },
+    enabled: options.enabled,
     retry: false,
   });
 

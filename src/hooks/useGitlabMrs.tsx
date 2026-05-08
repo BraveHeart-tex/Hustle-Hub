@@ -4,9 +4,20 @@ import { ENDPOINTS } from '@/lib/endpoints';
 import { type ApiResponse } from '@/types/api';
 import { type GitlabMergeRequest } from '@/types/gitlab';
 
-export const useGitlabMrs = (filter: GitlabFilter) =>
-  useApi(QUERY_KEYS.gitlab.mergeRequests(filter), async () => {
-    const response = await fetch(ENDPOINTS.gitlab.mergeRequests(filter));
+interface UseGitlabMrsOptions {
+  enabled?: boolean;
+}
 
-    return (await response.json()) as ApiResponse<GitlabMergeRequest[]>;
-  });
+export const useGitlabMrs = (
+  filter: GitlabFilter,
+  options?: UseGitlabMrsOptions,
+) =>
+  useApi(
+    QUERY_KEYS.gitlab.mergeRequests(filter),
+    async () => {
+      const response = await fetch(ENDPOINTS.gitlab.mergeRequests(filter));
+
+      return (await response.json()) as ApiResponse<GitlabMergeRequest[]>;
+    },
+    options,
+  );
