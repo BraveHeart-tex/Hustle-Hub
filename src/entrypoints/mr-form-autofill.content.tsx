@@ -29,6 +29,13 @@ const OPTIONAL_ELEMENT_TIMEOUT = 2500;
 const DROPDOWN_OPTION_TIMEOUT = 3500;
 const DESCRIPTION_EDITOR_TIMEOUT = 3500;
 const FEREL_FALLBACK_KEY = 'FEREL-TASK_NUMBER_HERE';
+const SYNC_LABEL = 'sync';
+
+interface GitLabMergeRequestSearchResult {
+  iid: number;
+  web_url: string;
+  reference: string;
+}
 
 const waitForOptionalElement = async <T extends Element>(
   selector: string,
@@ -75,6 +82,24 @@ const findAndClickLabel = async (text: string) => {
   if (!target) return false;
 
   (target.closest('li') || (target as HTMLElement)).click();
+  return true;
+};
+
+const applyLabel = async (label: string) => {
+  const openedLabelDropdown = await clickWhenAvailable(SELECTORS.labelDropdown);
+  if (!openedLabelDropdown) return false;
+
+  const selectedLabel = await findAndClickLabel(label).catch((error) => {
+    console.error(`failed to select label: ${label}`, error);
+    return false;
+  });
+
+  await clickWhenAvailable(SELECTORS.closeLabels);
+
+  if (!selectedLabel) {
+    console.warn(`label was not found: ${label}`);
+  }
+
   return true;
 };
 
@@ -162,9 +187,12 @@ const handleBranchRedirection = async () => {
     const url = new URL(location.href);
     const prevSource = url.searchParams.get('merge_request[source_branch]');
     const newSource = input.value;
-    if (input.value.startsWith('release/') && prevSource !== newSource) {
+    if (prevSource !== newSource) {
       url.searchParams.set('merge_request[source_branch]', newSource);
-      url.searchParams.set('merge_request[target_branch]', 'main');
+      url.searchParams.set(
+        'merge_request[target_branch]',
+        input.value.startsWith('release/') ? 'main' : 'develop',
+      );
       window.location.href = url.toString();
     }
   };
@@ -226,14 +254,101 @@ const selectReleaseReviewer = async (reviewerId: string) => {
 const applyProductionLabelAndDescription = async (
   ferelKeyPromise: Promise<string>,
 ) => {
-  const openedLabelDropdown = await clickWhenAvailable(SELECTORS.labelDropdown);
-  if (!openedLabelDropdown) return;
-
-  await findAndClickLabel('target::production').catch(console.error);
-  await clickWhenAvailable(SELECTORS.closeLabels);
+  await applyLabel('target::production');
 
   const ferelKey = await ferelKeyPromise;
   await updateDescription(getJiraTaskUrl(ferelKey));
+};
+
+const getSyncSourceKey = (sourceBranch: string | null): string | null => {
+  if (!sourceBranch?.startsWith('sync/')) return null;
+
+  const syncSourceKey = sourceBranch.slice('sync/'.length).trim();
+  return syncSourceKey || null;
+};
+
+const getGitLabProjectPathFromUrl = (url: string): string | null => {
+  const { pathname } = new URL(url);
+
+  const marker = '/-/';
+  const markerIndex = pathname.indexOf(marker);
+
+  if (markerIndex === -1) return null;
+
+  return decodeURIComponent(pathname.slice(1, markerIndex));
+};
+
+const fetchRelatedReleaseMergeRequest = async (
+  syncSourceKey: string,
+): Promise<GitLabMergeRequestSearchResult | null> => {
+  const projectPath = getGitLabProjectPathFromUrl(window.location.href);
+
+  if (!projectPath) {
+    console.error('Failed to extract project path from url');
+    return null;
+  }
+
+  const gitlabRequestParams = new URLSearchParams({
+    state: 'opened',
+    search: `Production Release for ${syncSourceKey}`,
+    in: 'title',
+    order_by: 'updated_at',
+    sort: 'desc',
+    per_page: '20',
+    scope: 'assigned_to_me',
+  });
+
+  const response = await fetch(
+    `https://gitlab.com/api/v4/projects/${encodeURIComponent(
+      projectPath,
+    )}/merge_requests?${gitlabRequestParams.toString()}`,
+  );
+
+  if (!response.ok) {
+    console.warn('Gitlab request for release MR details failed');
+    return null;
+  }
+
+  const mergeRequests =
+    (await response.json()) as GitLabMergeRequestSearchResult[];
+
+  if (!Array.isArray(mergeRequests) || mergeRequests.length === 0) {
+    console.warn('MR data for sync merge request base was not found.');
+    return null;
+  }
+
+  return mergeRequests[0];
+};
+
+const fillSyncMergeRequest = async (
+  params: URLSearchParams,
+  assignCurrentUserPromise: Promise<void>,
+) => {
+  const syncSourceKey = getSyncSourceKey(
+    params.get('merge_request[source_branch]'),
+  );
+
+  if (!syncSourceKey) return false;
+
+  const relatedReleaseMergeRequestPromise =
+    fetchRelatedReleaseMergeRequest(syncSourceKey);
+  const updateDescriptionPromise = relatedReleaseMergeRequestPromise.then(
+    (relatedReleaseMergeRequest) => {
+      if (!relatedReleaseMergeRequest) return false;
+
+      return updateDescription(
+        `${relatedReleaseMergeRequest.web_url} için sync MR`,
+      );
+    },
+  );
+
+  await Promise.allSettled([
+    assignCurrentUserPromise,
+    applyLabel(SYNC_LABEL),
+    updateDescriptionPromise,
+  ]);
+
+  return true;
 };
 
 export default defineContentScript({
@@ -249,6 +364,15 @@ export default defineContentScript({
     void mountReviewerControlsIfNeeded(ctx, isNewMR, isEditMode);
     void setupBranchRedirectionIfNeeded(isNewMR);
     const assignCurrentUserPromise = assignCurrentUser();
+
+    const filledSyncMergeRequest = await fillSyncMergeRequest(
+      params,
+      assignCurrentUserPromise,
+    );
+
+    if (filledSyncMergeRequest) {
+      return;
+    }
 
     if (params.get('merge_request[target_branch]') !== 'main') {
       await assignCurrentUserPromise;
