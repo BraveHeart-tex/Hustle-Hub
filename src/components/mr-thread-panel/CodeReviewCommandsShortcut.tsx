@@ -74,8 +74,16 @@ const resolveCommand = (
 const allCommands = (branches: BranchInfo) =>
   commands.map((c) => resolveCommand(c, branches)).join('\n');
 
-const codexReviewPrompt = ({ source, target }: BranchInfo) =>
-  `$strict-review review branch ${source} against ${target}`;
+const codexReviewPrompt = ({ source, target }: BranchInfo) => {
+  return `$strict-review Run strict-review on ${window.location.href}.
+
+Source branch: ${source}
+Target branch: ${target}
+Scope: full diff from ${source} into ${target}
+Read existing MR discussions and dedupe.
+Do not fetch Jira.
+Output Turkish findings with severity, confidence, file:line, impact, and next step.`;
+};
 
 const getSourceBranch = (doc: Document): string =>
   doc.querySelector<HTMLButtonElement>('.js-source-branch-copy')?.dataset
