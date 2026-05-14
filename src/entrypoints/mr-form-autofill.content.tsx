@@ -5,7 +5,7 @@ import { ReviewerControlsApp } from '@/components/reviewer-presets/ReviewerContr
 import { waitForElement } from '@/lib/utils/dom/waitForElement';
 import { extractJiraId } from '@/lib/utils/misc/extractJiraId';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
-import { fetchFerelKey } from '@/services/jira';
+import { fetchFerelKey, fetchJiraIssueDetails } from '@/services/jira';
 import { defineContentScript } from '#imports';
 
 const SELECTORS = {
@@ -247,6 +247,10 @@ const getFeatureMergeRequestTitle = (
   return `${jiraId}: ${capitalizeFirstLetter(commitMessageWithoutScope)}`;
 };
 
+const getSourceBranchJiraId = (params: URLSearchParams) => {
+  return extractJiraId(params.get('merge_request[source_branch]') ?? '');
+};
+
 const fillFeatureMergeRequestTitle = async (params: URLSearchParams) => {
   const titleInput = await waitForOptionalElement<HTMLInputElement>(
     SELECTORS.title,
@@ -255,15 +259,43 @@ const fillFeatureMergeRequestTitle = async (params: URLSearchParams) => {
   if (!titleInput) return false;
 
   const jiraId =
-    extractJiraId(params.get('merge_request[source_branch]') ?? '') ??
-    extractJiraId(titleInput.value) ??
-    '';
+    getSourceBranchJiraId(params) ?? extractJiraId(titleInput.value) ?? '';
   const title = getFeatureMergeRequestTitle(jiraId, titleInput.value);
 
   if (!title) return false;
 
   setInputValue(titleInput, title);
   return true;
+};
+
+const getFeatureMergeRequestJiraId = async (params: URLSearchParams) => {
+  const sourceBranchJiraId = getSourceBranchJiraId(params);
+  if (sourceBranchJiraId) return sourceBranchJiraId;
+
+  const titleInput = await waitForOptionalElement<HTMLInputElement>(
+    SELECTORS.title,
+  );
+
+  return extractJiraId(titleInput?.value ?? '');
+};
+
+const getResolvedJiraIssueKey = async (jiraId: string) => {
+  try {
+    const issueDetails = await fetchJiraIssueDetails(jiraId);
+    return issueDetails.key;
+  } catch (error) {
+    console.warn(`Failed to fetch Jira issue details for ${jiraId}:`, error);
+    return jiraId;
+  }
+};
+
+const fillFeatureMergeRequestDescription = async (params: URLSearchParams) => {
+  const jiraId = await getFeatureMergeRequestJiraId(params);
+
+  if (!jiraId) return false;
+
+  const jiraIssueKey = await getResolvedJiraIssueKey(jiraId);
+  return updateDescription(`Jira: ${getJiraTaskUrl(jiraIssueKey)}`);
 };
 
 const fillReleaseBasics = (params: URLSearchParams) => {
@@ -431,6 +463,7 @@ export default defineContentScript({
       await Promise.allSettled([
         assignCurrentUserPromise,
         fillFeatureMergeRequestTitle(params),
+        fillFeatureMergeRequestDescription(params),
       ]);
       return;
     }

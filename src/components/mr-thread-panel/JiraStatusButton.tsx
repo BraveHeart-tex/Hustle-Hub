@@ -1,5 +1,5 @@
 import { ExternalLinkIcon, Loader2Icon, SparklesIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import JiraIcon from '@/components/misc/JiraIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,42 +12,13 @@ import {
 import { cn } from '@/lib/utils';
 import { extractFerelId } from '@/lib/utils/misc/extractFerelId';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
-
-interface JiraTransition {
-  id: string;
-  name: string;
-  to: { name: string; statusCategory: { colorName: string } };
-}
-
-interface JiraIssueDetails {
-  key: string;
-  fields: {
-    summary: string;
-    status: { name: string; statusCategory: { colorName: string } };
-    priority: { name: string; iconUrl: string };
-    assignee: { displayName: string; avatarUrls: { '24x24': string } } | null;
-    description: unknown;
-  };
-  transitions: JiraTransition[];
-}
-
-interface JiraTransition {
-  id: string;
-  name: string;
-  to: { name: string; statusCategory: { colorName: string } };
-}
-
-interface JiraIssueDetails {
-  key: string;
-  fields: {
-    summary: string;
-    status: { name: string; statusCategory: { colorName: string } };
-    priority: { name: string; iconUrl: string };
-    assignee: { displayName: string; avatarUrls: { '24x24': string } } | null;
-    description: unknown;
-  };
-  transitions: JiraTransition[];
-}
+import {
+  addJiraIssueComment,
+  fetchJiraIssueDetails,
+  type JiraIssueDetails,
+  type JiraTransition,
+  transitionJiraIssue,
+} from '@/services/jira';
 
 const statusNameColors: Record<string, string> = {
   'Code Review': 'bg-purple-100 text-purple-700 border border-purple-200',
@@ -90,8 +61,6 @@ const getStatusColor = (status: JiraIssueDetails['fields']['status']) =>
 const getStatusDot = (statusName: string) =>
   statusDotColors[statusName] ?? 'bg-gray-300';
 
-const API_BASE = `${import.meta.env.VITE_BASE_API_URL}/data/jira/issues`;
-
 export const JiraStatusButton = ({
   jiraId,
   jiraLink,
@@ -123,9 +92,8 @@ export const JiraStatusButton = ({
   const fetchTaskDetails = useCallback(() => {
     if (!resolvedJiraId) return;
     setLoading(true);
-    fetch(`${API_BASE}/${resolvedJiraId}`)
-      .then((r) => r.json())
-      .then((data) => setDetails(data.data))
+    fetchJiraIssueDetails(resolvedJiraId)
+      .then((data) => setDetails(data))
       .catch(() => setError('Failed to load issue details'))
       .finally(() => setLoading(false));
   }, [resolvedJiraId]);
@@ -137,28 +105,23 @@ export const JiraStatusButton = ({
   }, [fetchTaskDetails, resolvedJiraId, targetBranch]);
 
   const handleTransition = async (transition: JiraTransition) => {
+    if (!resolvedJiraId) return;
+
     setTransitioning(transition.id);
     try {
-      await fetch(`${API_BASE}/${resolvedJiraId}/transition`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transitionId: transition.id }),
-      });
+      await transitionJiraIssue(resolvedJiraId, transition.id);
 
       if (
         targetBranch === 'main' &&
         transition.name === 'Send to Code Review'
       ) {
-        await fetch(`${API_BASE}/${resolvedJiraId}/comment`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            mrUrl: window.location.href,
-            mrTitle:
-              document
-                .querySelector("[data-testid='title-content']")
-                ?.textContent?.trim() ?? '',
-          }),
+        await addJiraIssueComment({
+          jiraId: resolvedJiraId,
+          mrUrl: window.location.href,
+          mrTitle:
+            document
+              .querySelector("[data-testid='title-content']")
+              ?.textContent?.trim() ?? '',
         }).catch(() => {
           // Comment failure shouldn't block the transition
         });

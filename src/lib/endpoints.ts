@@ -12,6 +12,11 @@ export const ENDPOINTS = {
   },
   jira: {
     issues: (filter: JiraFilter) => `${BASE}/data/jira/issues?filter=${filter}`,
+    issue: (issueKey: string) => `${BASE}/data/jira/issues/${issueKey}`,
+    issueTransition: (issueKey: string) =>
+      `${BASE}/data/jira/issues/${issueKey}/transition`,
+    issueComment: (issueKey: string) =>
+      `${BASE}/data/jira/issues/${issueKey}/comment`,
     issueByFeatureKey: (featureKey: string) =>
       `${BASE}/data/jira/issues/by-feature-key/${featureKey}`,
   },
