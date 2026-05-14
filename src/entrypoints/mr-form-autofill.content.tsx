@@ -213,6 +213,59 @@ const assignCurrentUser = async () => {
   await clickWhenAvailable(SELECTORS.assignMe);
 };
 
+const capitalizeFirstLetter = (value: string) => {
+  if (!value) return value;
+
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
+const getCommitMessageWithoutScope = (commitMessage: string) => {
+  const trimmedCommitMessage = commitMessage.trim();
+  const alreadyFormattedTitleMatch =
+    trimmedCommitMessage.match(/^[A-Z]+-\d+:\s*(.+)$/);
+
+  if (alreadyFormattedTitleMatch) return alreadyFormattedTitleMatch[1].trim();
+
+  const conventionalCommitMatch = trimmedCommitMessage.match(
+    /^[a-z]+(?:\([^)]+\))?!?:\s*(.+)$/i,
+  );
+
+  if (!conventionalCommitMatch) return trimmedCommitMessage;
+
+  return conventionalCommitMatch[1].trim();
+};
+
+const getFeatureMergeRequestTitle = (
+  jiraId: string,
+  commitMessage: string,
+): string | null => {
+  if (!jiraId) return null;
+
+  const commitMessageWithoutScope = getCommitMessageWithoutScope(commitMessage);
+  if (!commitMessageWithoutScope) return null;
+
+  return `${jiraId}: ${capitalizeFirstLetter(commitMessageWithoutScope)}`;
+};
+
+const fillFeatureMergeRequestTitle = async (params: URLSearchParams) => {
+  const titleInput = await waitForOptionalElement<HTMLInputElement>(
+    SELECTORS.title,
+  );
+
+  if (!titleInput) return false;
+
+  const jiraId =
+    extractJiraId(params.get('merge_request[source_branch]') ?? '') ??
+    extractJiraId(titleInput.value) ??
+    '';
+  const title = getFeatureMergeRequestTitle(jiraId, titleInput.value);
+
+  if (!title) return false;
+
+  setInputValue(titleInput, title);
+  return true;
+};
+
 const fillReleaseBasics = (params: URLSearchParams) => {
   const jiraId =
     extractJiraId(params.get('merge_request[source_branch]') ?? '') ?? '';
@@ -375,7 +428,10 @@ export default defineContentScript({
     }
 
     if (params.get('merge_request[target_branch]') !== 'main') {
-      await assignCurrentUserPromise;
+      await Promise.allSettled([
+        assignCurrentUserPromise,
+        fillFeatureMergeRequestTitle(params),
+      ]);
       return;
     }
 
