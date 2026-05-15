@@ -447,6 +447,9 @@ export default defineContentScript({
     );
 
     void mountReviewerControlsIfNeeded(ctx, isNewMR, isEditMode);
+
+    if (!isNewMR) return;
+
     void setupBranchRedirectionIfNeeded(isNewMR);
     const assignCurrentUserPromise = assignCurrentUser();
 
