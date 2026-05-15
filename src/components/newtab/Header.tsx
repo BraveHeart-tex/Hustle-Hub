@@ -9,6 +9,7 @@ import { NavLink } from 'react-router-dom';
 
 import { ModeToggle } from '@/components/newtab/ModeToggle';
 import { Button } from '@/components/ui/button';
+import { useNotes } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
 
 import { AppSettings } from './AppSettings';
@@ -17,6 +18,7 @@ import AllCommentsWidget from './misc/AllCommentsWidget';
 export default function Header() {
   const queryClient = useQueryClient();
   const isFetching = useIsFetching();
+  const { notes } = useNotes();
 
   const handleRefreshData = () => {
     void queryClient.refetchQueries({ type: 'active' });
@@ -65,6 +67,9 @@ export default function Header() {
             >
               <NotebookTextIcon className="h-4 w-4" />
               Notes
+              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold leading-5 text-primary-foreground">
+                {notes.length}
+              </span>
             </NavLink>
           </div>
           <div className="flex items-center space-x-3">
