@@ -1,6 +1,5 @@
 import { CheckSquare, ClipboardCopyIcon } from 'lucide-react';
 import { type MouseEvent, useState } from 'react';
-import { toast } from 'sonner';
 
 import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
 import { Button } from '@/components/ui/button';
@@ -39,7 +38,7 @@ const JiraItem = ({ issue }: JiraItemProps) => {
       setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
       console.error(error);
-      toast.error('Failed to copy task link to clipboard');
+      window.alert('Failed to copy task link to clipboard');
     }
   };
 

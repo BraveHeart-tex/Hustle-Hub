@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 
 import { GITLAB_FILTERS, QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
@@ -35,7 +34,7 @@ export const useApproveSyncMrs = () => {
       });
     },
     onError: (error) => {
-      toast.error(
+      window.alert(
         error instanceof Error
           ? error.message
           : 'Failed to approve sync merge requests.',

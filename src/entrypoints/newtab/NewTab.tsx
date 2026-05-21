@@ -8,7 +8,6 @@ import Header from '@/components/newtab/Header';
 import JiraSection from '@/components/newtab/jira/JiraSection';
 import NotesPage from '@/components/newtab/notes/NotesPage';
 import SearchDialog from '@/components/newtab/SearchDialog';
-import { Toaster } from '@/components/ui/sonner';
 import { CommentsProvider } from '@/lib/storage/comments';
 
 const queryClient = new QueryClient();
@@ -38,7 +37,6 @@ const NewTab = () => {
             </Route>
           </Routes>
 
-          <Toaster />
           <GlobalStatusIndicator />
         </CommentsProvider>
       </QueryClientProvider>

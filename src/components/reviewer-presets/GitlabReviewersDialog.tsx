@@ -1,6 +1,5 @@
 import { Loader2, Pencil, PlusIcon, UserIcon } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
-import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -61,7 +60,7 @@ export const GitlabReviewersDialog = ({
     if (mode === 'add') {
       const duplicate = reviewers.find((r) => r.gitlabId === formData.gitlabId);
       if (duplicate) {
-        toast.error('A reviewer with this GitLab ID already exists.');
+        window.alert('A reviewer with this GitLab ID already exists.');
         return;
       }
       setIsLoading(true);
@@ -70,10 +69,10 @@ export const GitlabReviewersDialog = ({
           gitlabId: formData.gitlabId,
           name: formData.name,
         });
-        toast.success('Reviewer added successfully');
+        window.alert('Reviewer added successfully');
         resetForm();
       } catch {
-        toast.error('Failed to add reviewer');
+        window.alert('Failed to add reviewer');
       } finally {
         setIsLoading(false);
       }
@@ -84,7 +83,7 @@ export const GitlabReviewersDialog = ({
           (r) => r.gitlabId === formData.gitlabId,
         );
         if (duplicate) {
-          toast.error('A reviewer with this GitLab ID already exists.');
+          window.alert('A reviewer with this GitLab ID already exists.');
           return;
         }
       }
@@ -94,10 +93,10 @@ export const GitlabReviewersDialog = ({
           gitlabId: formData.gitlabId,
           name: formData.name,
         });
-        toast.success('Reviewer updated');
+        window.alert('Reviewer updated');
         resetForm();
       } catch {
-        toast.error('Failed to update reviewer');
+        window.alert('Failed to update reviewer');
       } finally {
         setIsLoading(false);
       }

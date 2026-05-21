@@ -1,6 +1,5 @@
 import { Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
-import { toast } from 'sonner';
 
 import {
   Dialog,
@@ -141,10 +140,10 @@ export const ReviewerPresetsDialog = ({
   const handleDeleteClick = async (preset: ReviewerPreset) => {
     try {
       await removeReviewerPreset(preset);
-      toast.success('Preset removed');
+      window.alert('Preset removed');
       if (editingPreset?.id === preset.id) resetForm();
     } catch {
-      toast.error('Failed to remove preset');
+      window.alert('Failed to remove preset');
     }
   };
 
@@ -159,7 +158,7 @@ export const ReviewerPresetsDialog = ({
         p.id !== editingPreset?.id,
     );
     if (duplicate) {
-      toast.error('A preset with this name already exists.');
+      window.alert('A preset with this name already exists.');
       return;
     }
 
@@ -171,19 +170,19 @@ export const ReviewerPresetsDialog = ({
           label: trimmedName,
           users: formData.users,
         });
-        toast.success('Preset added');
+        window.alert('Preset added');
       } else {
         await updateReviewerPreset(editingPreset!.id, {
           ...editingPreset!,
           label: trimmedName,
           users: formData.users,
         });
-        toast.success('Preset updated');
+        window.alert('Preset updated');
       }
       resetForm();
       nameInputRef.current?.focus();
     } catch {
-      toast.error(
+      window.alert(
         mode === 'add' ? 'Failed to add preset' : 'Failed to update preset',
       );
     } finally {

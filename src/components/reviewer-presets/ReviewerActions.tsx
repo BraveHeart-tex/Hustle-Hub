@@ -1,7 +1,6 @@
 import { PopoverClose } from '@radix-ui/react-popover';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,9 +19,9 @@ export const ReviewerActions = ({ gitlabId }: { gitlabId: string }) => {
       await removeGitlabReviewer(gitlabId);
     } catch (error) {
       console.error(error);
-      toast.error('Something went wrong while deleting the reviewer', {
-        description: String(error),
-      });
+      window.alert(
+        `Something went wrong while deleting the reviewer\n\n${String(error)}`,
+      );
     } finally {
       setIsLoading(false);
     }
