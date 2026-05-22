@@ -18,6 +18,7 @@ import { useJiraTickets } from '@/hooks/useJiraTickets';
 import { JIRA_FILTERS } from '@/lib/constants';
 import { useJiraFilter } from '@/lib/storage/filters';
 import { cn } from '@/lib/utils';
+import { getJiraForYouUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
 const filterOptions = [
@@ -117,11 +118,7 @@ export default function JiraSection({ className }: JiraSectionProps) {
       <CardHeader className="pb-3 shrink-0">
         <CardTitle className="w-full flex items-center justify-between">
           <div className="flex items-center gap-2 text-lg">
-            <a
-              href="https://letgotr.atlassian.net/jira/for-you"
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a href={getJiraForYouUrl()} target="_blank" rel="noreferrer">
               <JiraIcon className="text-blue-500" />
             </a>
             Jira Tickets
