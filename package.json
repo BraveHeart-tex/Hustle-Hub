@@ -81,21 +81,7 @@
     "wxt": "0.20.26"
   },
   "resolutions": {
-    "**/flatted": "3.4.2",
-    "**/fast-uri": "3.1.2",
-    "**/js-yaml": "4.1.1",
-    "**/node-forge": "1.4.0",
-    "@commitlint/cli/**/ajv": "8.18.0",
-    "@commitlint/cli/**/fast-uri": "3.1.2",
-    "wxt/**/defu": "6.1.7",
-    "wxt/**/@aklinker1/rollup-plugin-visualizer/**/picomatch": "2.3.2",
-    "wxt/**/publish-browser-extension": "3.0.2",
-    "wxt/**/tinyglobby/**/picomatch": "4.0.4",
-    "wxt/picomatch": "4.0.4",
-    "wxt/web-ext-run/**/brace-expansion": "1.1.14",
-    "wxt/web-ext-run/**/minimatch": "3.1.5",
-    "wxt/web-ext-run/**/multimatch/**/minimatch/**/brace-expansion": "1.1.14",
-    "wxt/web-ext-run/multimatch/minimatch/brace-expansion": "1.1.14"
+    "**/uuid": "11.1.1"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
