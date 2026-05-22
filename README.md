@@ -1,100 +1,159 @@
 # Hustle Hub
 
-Hustle Hub is a browser extension that helps you organize and manage your work items in one centralized place. It serves as a personal productivity dashboard that integrates with various work tools to give you a comprehensive overview of your tasks, meetings, and code reviews.
+Hustle Hub is a personal browser-extension dashboard for daily engineering work. It replaces the default new tab with a focused view of work that usually lives across GitLab, Jira, notes, alerts, and internal deployment pages.
 
-## Purpose
+## What It Does
 
-Hustle Hub was created to solve the problem of context switching between different work platforms. Instead of constantly jumping between Jira, GitLab, Google Calendar, and other tools, Hustle Hub brings all your important work information into a single, convenient dashboard.
+### Dashboard
 
-## Features
+- Shows attention items from the backend attention stream.
+- Lists GitLab merge requests assigned to you or waiting for your review.
+- Lists Jira tickets across For You, Literally Working On, and Frontend Releases filters.
+- Provides one-command refresh for active dashboard data.
+- Includes global search for Jira tickets and GitLab merge requests with `Cmd/Ctrl + K`.
 
-### Calendar Integration
+### Keyboard Shortcuts
 
-- View your upcoming Google Calendar events
-- See meeting details including attendees and status
-- Quick access to join links for virtual meetings
+Shortcuts only run when focus is not inside an input, textarea, select, or editable field.
 
-### Jira Ticket Management
+- `j` opens the Jira filter menu.
+- With Jira open: `f` selects For You, `l` selects Literally Working On, `r` selects Frontend Releases.
+- `g` opens the GitLab filter menu.
+- With GitLab open: `a` selects Assigned to me, `r` selects Review Requested.
+- The two-key forms also work directly: `j f`, `j l`, `j r`, `g a`, `g r`.
 
-- Track your assigned Jira tickets
-- Filter tickets by different statuses
-- Stay on top of your development tasks
+### Notes
 
-### GitLab Merge Requests
+- Stores local rich-text notes in extension storage.
+- Supports note filters, priorities, tags, linked Jira/GitLab work items, and task-list editing.
+- Surfaces saved work-item comments from the header.
 
-- Monitor your GitLab merge requests
-- See MR status, approvals, and comments
-- Filter MRs by project or status
-- Quickly identify MRs that need your attention
+### GitLab Page Tools
 
-### Rich Text Notes
+- Adds a merge-request thread panel on GitLab MR pages.
+- Highlights and jumps to MR discussions.
+- Shows Jira status helpers when a Jira key can be resolved from the MR.
+- Shows release/feature MR warnings based on the target branch.
+- Adds reviewer and reviewer-preset tooling to GitLab MR forms.
+- Adds MR form autofill helpers for release/sync workflows.
 
-- Create and manage notes with a powerful rich text editor
-- Support for formatting, lists, and task lists
-- Keep track of important information
+### Deployment Widget
 
-### Dark/Light Mode
+- Injects a deployment widget on configured deployment pages.
+- Reads deployment metadata from the page and fetches GitLab tag details from the backend.
+- Uses env vars for the content-script match pattern and GitLab project path, so deployment-specific hosts do not need to live in source code.
 
-- Switch between dark and light themes
-- Comfortable viewing experience in any environment
+## Requirements
 
-## Installation
+- Node.js compatible with the current WXT/Vite toolchain.
+- Yarn 1.x. The repo is pinned to Yarn `1.22.22`.
+- A backend compatible with the routes in `src/lib/endpoints.ts`.
+- Jira and GitLab access through that backend.
 
-1. Clone the repository
+## Environment
 
-   ```
-   git clone https://github.com/BraveHeart-tex/Hustle-Hub
-   cd hustle-hub
-   ```
+Create a local `.env` file with:
 
-2. Install dependencies
-
-   ```
-   yarn install
-   ```
-
-3. Add environment variables
-
-   ```
-     VITE_GITLAB_REDIRECT_URI='YOUR_GITLAB_REDIRECT_URI'
-     VITE_GOOGLE_CALENDAR_REDIRECT_URI='YOUR_GOOGLE_CALENDAR_REDIRECT_URI'
-     VITE_BASE_API_URL='YOUR_BASE_API_URL'
-     VITE_JIRA_BASE_URL='YOUR_JIRA_BASE_URL'
-     VITE_RELEASE_REVIEWER_USER_ID='YOUR_RELEASE_REVIEWER_USER_ID'
-   ```
-
-4. Start the development server
-   ```
-   yarn dev
-   ```
-
-## Building for Production
-
+```env
+VITE_BASE_API_URL="https://your-api.example.com"
+VITE_JIRA_BASE_URL="https://your-jira.example.com"
+VITE_GITLAB_USER_ID="123456"
+VITE_RELEASE_REVIEWER_USER_ID="123456"
 ```
+
+To enable the deployment widget, also set:
+
+```env
+VITE_DEPLOYMENT_WIDGET_MATCH="*://*.example.com/*"
+VITE_DEPLOYMENT_WIDGET_PROJECT_PATH="group/subgroup/project"
+```
+
+`VITE_GITLAB_USER_ID` and `VITE_RELEASE_REVIEWER_USER_ID` must be numeric user IDs. `VITE_DEPLOYMENT_WIDGET_MATCH` must be a valid browser-extension match pattern. WXT validates these values at startup/build time in `wxt.config.ts`. If the deployment widget vars are omitted, the widget is disabled.
+
+Match patterns are not secrets. They are removed from source code here, but they still appear in the built extension manifest because browsers require content-script matches there.
+
+## Development
+
+Install dependencies:
+
+```bash
+yarn install
+```
+
+Run Chrome development mode:
+
+```bash
+yarn dev
+```
+
+Run Firefox development mode:
+
+```bash
+yarn dev:firefox
+```
+
+Type-check:
+
+```bash
+yarn compile
+```
+
+Lint and auto-fix:
+
+```bash
+yarn lint
+```
+
+## Build
+
+Build for Chrome:
+
+```bash
 yarn build
 ```
 
-To build for Firefox:
+Build for Firefox:
 
-```
+```bash
 yarn build:firefox
 ```
 
-## Deployment
+Package extension zips:
 
-You can use the included script to deploy the extension locally:
-
+```bash
+yarn zip
+yarn zip:firefox
 ```
-./deploy-local.sh
+
+## Local Deploy
+
+The repo includes a local deployment script:
+
+```bash
+./scripts/deploy.sh
 ```
 
-This will create a folder on your Desktop with the built extension.
+Check the script before running it if your local browser/profile paths differ.
 
-## Technologies
+## Project Structure
 
-- WXT (Web Extension Tools)
+- `src/entrypoints/newtab` - dashboard and notes app entrypoint.
+- `src/entrypoints/*.content.tsx` - GitLab and deployment-page content scripts.
+- `src/components/newtab` - dashboard, notes, search, shortcuts, and settings UI.
+- `src/components/mr-thread-panel` - GitLab MR thread tooling.
+- `src/components/reviewer-presets` - GitLab reviewer and preset management.
+- `src/hooks` - API and page-state hooks.
+- `src/lib/endpoints.ts` - backend route definitions used by the extension.
+- `src/lib/storage` - extension-local storage helpers.
+
+## Tech Stack
+
+- WXT
 - React 19
-- TailwindCSS
-- Radix UI Components
-- TipTap Rich Text Editor
-- React Query
+- TypeScript
+- Tailwind CSS 4
+- Radix UI
+- TanStack Query
+- TipTap
+- cmdk
+- Lucide React

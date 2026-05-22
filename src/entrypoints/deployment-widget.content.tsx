@@ -3,6 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { DeploymentWidgetApp } from '@/components/deployment-widget/DeploymentWidgetApp';
 import { defineContentScript } from '#imports';
 
+const DEPLOYMENT_WIDGET_MATCH = import.meta.env.VITE_DEPLOYMENT_WIDGET_MATCH;
+const DEPLOYMENT_WIDGET_PROJECT_PATH = import.meta.env
+  .VITE_DEPLOYMENT_WIDGET_PROJECT_PATH;
+const DISABLED_DEPLOYMENT_WIDGET_MATCH = '*://example.invalid/*';
+
 function getDeploymentIdFromScripts(): string | null {
   const scripts = Array.from(document.scripts);
 
@@ -22,10 +27,14 @@ function getDeploymentIdFromScripts(): string | null {
 }
 
 export default defineContentScript({
-  matches: ['*://*.letgo.com/*'],
+  matches: [DEPLOYMENT_WIDGET_MATCH || DISABLED_DEPLOYMENT_WIDGET_MATCH],
   runAt: 'document_end',
   cssInjectionMode: 'ui',
   async main(ctx) {
+    if (!DEPLOYMENT_WIDGET_PROJECT_PATH) {
+      return;
+    }
+
     const deploymentId = getDeploymentIdFromScripts();
     if (!deploymentId) {
       return;
@@ -45,7 +54,7 @@ export default defineContentScript({
           <DeploymentWidgetApp
             container={container}
             deploymentId={deploymentId}
-            projectPath="letgo-turkey/classifieds/frontends/pwa/classified"
+            projectPath={DEPLOYMENT_WIDGET_PROJECT_PATH}
           />,
         );
 
