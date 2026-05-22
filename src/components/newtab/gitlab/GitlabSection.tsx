@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import GitlabIcon from '@/components/misc/GitlabIcon';
 import FilterButton from '@/components/newtab/FilterButton';
 import MRItem from '@/components/newtab/gitlab/MRItem';
+import KeyboardShortcutKey from '@/components/newtab/KeyboardShortcutKey';
+import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Collapsible,
@@ -27,8 +29,18 @@ import { cn } from '@/lib/utils';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
 const filterOptions = [
-  { label: 'Review Requested', value: GITLAB_FILTERS.REVIEW },
-  { label: 'Assigned to me', value: GITLAB_FILTERS.ASSIGNED },
+  {
+    label: 'Review Requested',
+    shortcutKeys: ['g', 'r'],
+    key: 'r',
+    value: GITLAB_FILTERS.REVIEW,
+  },
+  {
+    label: 'Assigned to me',
+    shortcutKeys: ['g', 'a'],
+    key: 'a',
+    value: GITLAB_FILTERS.ASSIGNED,
+  },
 ];
 
 const hasSyncLabel = (labels: { title: string }[]) =>
@@ -45,13 +57,42 @@ export default function GitlabSection() {
   const [selectedProjectName, setSelectedProjectName] = useState('');
   const [isDraftsOpen, setIsDraftsOpen] = useState(false);
   const [isSyncOpen, setIsSyncOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const handleFilterValueChange = (value: string) => {
-    if (isValueOf(GITLAB_FILTERS, value)) {
-      setSelectedProjectName('');
-      setFilter(value);
-    }
-  };
+  const handleFilterValueChange = useCallback(
+    (value: string) => {
+      if (isValueOf(GITLAB_FILTERS, value)) {
+        setSelectedProjectName('');
+        setFilter(value);
+      }
+    },
+    [setFilter],
+  );
+
+  const closeShortcutFilter = useCallback(() => {
+    setIsFilterOpen(false);
+  }, []);
+
+  const openShortcutFilter = useCallback(() => {
+    setIsFilterOpen(true);
+  }, []);
+
+  const handleShortcutFilterSelect = useCallback(
+    (value: string) => {
+      handleFilterValueChange(value);
+      setIsFilterOpen(false);
+    },
+    [handleFilterValueChange],
+  );
+
+  useTwoKeyFilterShortcuts({
+    disabled: isLoading,
+    options: filterOptions,
+    prefixKey: 'g',
+    onCancel: closeShortcutFilter,
+    onPrefix: openShortcutFilter,
+    onSelect: handleShortcutFilterSelect,
+  });
 
   const avilableProjectNames: string[] = useMemo(() => {
     if (!data) return [];
@@ -284,6 +325,8 @@ export default function GitlabSection() {
             <span>GitLab MRs</span>
           </div>
           <Select
+            open={isFilterOpen}
+            onOpenChange={setIsFilterOpen}
             value={filter}
             onValueChange={handleFilterValueChange}
             defaultValue={filter}
@@ -291,11 +334,18 @@ export default function GitlabSection() {
           >
             <SelectTrigger size="sm">
               <SelectValue />
+              <KeyboardShortcutKey>g</KeyboardShortcutKey>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
                 {filterOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem
+                    key={option.value}
+                    value={option.value}
+                    shortcut={option.shortcutKeys.map((key) => (
+                      <KeyboardShortcutKey key={key}>{key}</KeyboardShortcutKey>
+                    ))}
+                  >
                     {option.label}
                   </SelectItem>
                 ))}

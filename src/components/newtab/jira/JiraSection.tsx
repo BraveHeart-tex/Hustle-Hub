@@ -1,9 +1,11 @@
 import { AlertCircle, CheckSquare } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import JiraIcon from '@/components/misc/JiraIcon';
 import FilterButton from '@/components/newtab/FilterButton';
 import JiraItem from '@/components/newtab/jira/JiraItem';
+import KeyboardShortcutKey from '@/components/newtab/KeyboardShortcutKey';
+import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -22,9 +24,24 @@ import { getJiraForYouUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
 const filterOptions = [
-  { label: 'For You', value: JIRA_FILTERS.FOR_YOU },
-  { label: 'Literally Working On', value: JIRA_FILTERS.LITERALLY_WORKING_ON },
-  { label: 'Frontend Releases', value: JIRA_FILTERS.FRONTEND_RELEASES },
+  {
+    label: 'For You',
+    shortcutKeys: ['j', 'f'],
+    key: 'f',
+    value: JIRA_FILTERS.FOR_YOU,
+  },
+  {
+    label: 'Literally Working On',
+    shortcutKeys: ['j', 'l'],
+    key: 'l',
+    value: JIRA_FILTERS.LITERALLY_WORKING_ON,
+  },
+  {
+    label: 'Frontend Releases',
+    shortcutKeys: ['j', 'r'],
+    key: 'r',
+    value: JIRA_FILTERS.FRONTEND_RELEASES,
+  },
 ];
 
 interface JiraSectionProps {
@@ -35,6 +52,7 @@ export default function JiraSection({ className }: JiraSectionProps) {
   const [filter, setFilter] = useJiraFilter();
   const { data, isLoading, isError, error } = useJiraTickets(filter);
   const [selectedTaskStatus, setSelectedTaskStatus] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const taskStatuses: { label: string; count: number }[] = useMemo(() => {
     if (!data?.issues) return [];
@@ -106,12 +124,40 @@ export default function JiraSection({ className }: JiraSectionProps) {
     ));
   }, [filteredData, error?.message, isError, isLoading]);
 
-  const handleFilterValueChange = (filterValue: string) => {
-    if (isValueOf(JIRA_FILTERS, filterValue)) {
-      setFilter(filterValue);
-      setSelectedTaskStatus('');
-    }
-  };
+  const handleFilterValueChange = useCallback(
+    (filterValue: string) => {
+      if (isValueOf(JIRA_FILTERS, filterValue)) {
+        setFilter(filterValue);
+        setSelectedTaskStatus('');
+      }
+    },
+    [setFilter],
+  );
+
+  const closeShortcutFilter = useCallback(() => {
+    setIsFilterOpen(false);
+  }, []);
+
+  const openShortcutFilter = useCallback(() => {
+    setIsFilterOpen(true);
+  }, []);
+
+  const handleShortcutFilterSelect = useCallback(
+    (filterValue: string) => {
+      handleFilterValueChange(filterValue);
+      setIsFilterOpen(false);
+    },
+    [handleFilterValueChange],
+  );
+
+  useTwoKeyFilterShortcuts({
+    disabled: isLoading,
+    options: filterOptions,
+    prefixKey: 'j',
+    onCancel: closeShortcutFilter,
+    onPrefix: openShortcutFilter,
+    onSelect: handleShortcutFilterSelect,
+  });
 
   return (
     <Card className={cn('flex flex-col overflow-hidden', className)}>
@@ -124,6 +170,8 @@ export default function JiraSection({ className }: JiraSectionProps) {
             Jira Tickets
           </div>
           <Select
+            open={isFilterOpen}
+            onOpenChange={setIsFilterOpen}
             value={filter}
             onValueChange={handleFilterValueChange}
             defaultValue={filter}
@@ -131,11 +179,18 @@ export default function JiraSection({ className }: JiraSectionProps) {
           >
             <SelectTrigger size="sm">
               <SelectValue />
+              <KeyboardShortcutKey>j</KeyboardShortcutKey>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
                 {filterOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem
+                    key={option.value}
+                    value={option.value}
+                    shortcut={option.shortcutKeys.map((key) => (
+                      <KeyboardShortcutKey key={key}>{key}</KeyboardShortcutKey>
+                    ))}
+                  >
                     {option.label}
                   </SelectItem>
                 ))}

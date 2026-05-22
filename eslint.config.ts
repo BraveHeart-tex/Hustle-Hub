@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import { type ESLint } from 'eslint';
 import { defineConfig } from 'eslint/config';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
@@ -49,7 +50,7 @@ export default defineConfig([
   // ----------------------------------------------------------------
   pluginReact.configs.flat.recommended,
   {
-    plugins: { 'react-hooks': pluginReactHooks },
+    plugins: { 'react-hooks': pluginReactHooks as ESLint.Plugin },
     settings: {
       react: { version: 'detect' }, // auto-detect React version
     },
