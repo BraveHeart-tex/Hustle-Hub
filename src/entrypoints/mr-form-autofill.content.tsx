@@ -29,6 +29,7 @@ const OPTIONAL_ELEMENT_TIMEOUT = 2500;
 const DROPDOWN_OPTION_TIMEOUT = 3500;
 const DESCRIPTION_EDITOR_TIMEOUT = 3500;
 const FEREL_FALLBACK_KEY = 'FEREL-TASK_NUMBER_HERE';
+const JIRA_TASK_FALLBACK_KEY = 'JIRA-TASK_NUMBER_HERE';
 const SYNC_LABEL = 'sync';
 
 interface GitLabMergeRequestSearchResult {
@@ -268,7 +269,7 @@ const fillFeatureMergeRequestTitle = async (params: URLSearchParams) => {
   return true;
 };
 
-const getFeatureMergeRequestJiraId = async (params: URLSearchParams) => {
+const getMergeRequestJiraId = async (params: URLSearchParams) => {
   const sourceBranchJiraId = getSourceBranchJiraId(params);
   if (sourceBranchJiraId) return sourceBranchJiraId;
 
@@ -290,18 +291,14 @@ const getResolvedJiraIssueKey = async (jiraId: string) => {
 };
 
 const fillFeatureMergeRequestDescription = async (params: URLSearchParams) => {
-  const jiraId = await getFeatureMergeRequestJiraId(params);
+  const jiraId = await getMergeRequestJiraId(params);
 
   if (!jiraId) return false;
 
-  const jiraIssueKey = await getResolvedJiraIssueKey(jiraId);
-  return updateDescription(`Jira: ${getJiraTaskUrl(jiraIssueKey)}`);
+  return updateDescription(`Jira: ${getJiraTaskUrl(jiraId)}`);
 };
 
-const fillReleaseBasics = (params: URLSearchParams) => {
-  const jiraId =
-    extractJiraId(params.get('merge_request[source_branch]') ?? '') ?? '';
-
+const fillReleaseBasics = (jiraId: string) => {
   const ferelKeyPromise = jiraId
     ? fetchFerelKey(jiraId)
     : Promise.resolve(FEREL_FALLBACK_KEY);
@@ -317,6 +314,17 @@ const fillReleaseBasics = (params: URLSearchParams) => {
   })();
 
   return { ferelKeyPromise, titlePromise };
+};
+
+const getReleaseJiraIssueKey = async (jiraId: string | null) => {
+  if (!jiraId) return JIRA_TASK_FALLBACK_KEY;
+
+  return getResolvedJiraIssueKey(jiraId);
+};
+
+const getReleaseDescription = (ferelKey: string, jiraIssueKey: string) => {
+  return `FEREL: ${getJiraTaskUrl(ferelKey)}
+  Jira Task: ${getJiraTaskUrl(jiraIssueKey)}`;
 };
 
 const selectReleaseReviewer = async (reviewerId: string) => {
@@ -338,11 +346,15 @@ const selectReleaseReviewer = async (reviewerId: string) => {
 
 const applyProductionLabelAndDescription = async (
   ferelKeyPromise: Promise<string>,
+  jiraIssueKeyPromise: Promise<string>,
 ) => {
   await applyLabel('target::production');
 
-  const ferelKey = await ferelKeyPromise;
-  await updateDescription(getJiraTaskUrl(ferelKey));
+  const [ferelKey, jiraIssueKey] = await Promise.all([
+    ferelKeyPromise,
+    jiraIssueKeyPromise,
+  ]);
+  await updateDescription(getReleaseDescription(ferelKey, jiraIssueKey));
 };
 
 const getSyncSourceKey = (sourceBranch: string | null): string | null => {
@@ -471,7 +483,11 @@ export default defineContentScript({
       return;
     }
 
-    const { ferelKeyPromise, titlePromise } = fillReleaseBasics(params);
+    const releaseJiraId = await getMergeRequestJiraId(params);
+    const releaseJiraIssueKeyPromise = getReleaseJiraIssueKey(releaseJiraId);
+    const { ferelKeyPromise, titlePromise } = fillReleaseBasics(
+      releaseJiraId ?? '',
+    );
     const reviewerId = import.meta.env.VITE_RELEASE_REVIEWER_USER_ID;
 
     await Promise.allSettled([
@@ -480,7 +496,10 @@ export default defineContentScript({
       selectReleaseReviewer(reviewerId),
     ]);
 
-    await applyProductionLabelAndDescription(ferelKeyPromise);
+    await applyProductionLabelAndDescription(
+      ferelKeyPromise,
+      releaseJiraIssueKeyPromise,
+    );
   },
   runAt: 'document_end',
 });
