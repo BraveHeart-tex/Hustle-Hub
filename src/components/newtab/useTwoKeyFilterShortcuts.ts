@@ -7,6 +7,7 @@ interface ShortcutOption<TValue extends string> {
 
 interface UseTwoKeyFilterShortcutsParams<TValue extends string> {
   disabled?: boolean;
+  isOpen?: boolean;
   options: ShortcutOption<TValue>[];
   prefixKey: string;
   onCancel: () => void;
@@ -30,6 +31,7 @@ const isEditableTarget = (target: EventTarget | null): boolean => {
 
 export const useTwoKeyFilterShortcuts = <TValue extends string>({
   disabled = false,
+  isOpen = false,
   options,
   prefixKey,
   onCancel,
@@ -79,6 +81,16 @@ export const useTwoKeyFilterShortcuts = <TValue extends string>({
         return;
       }
 
+      const selectedOption = options.find((option) => option.key === key);
+
+      if (isOpen && selectedOption) {
+        event.preventDefault();
+        event.stopPropagation();
+        clearPendingShortcut();
+        onSelect(selectedOption.value);
+        return;
+      }
+
       if (!pendingPrefixRef.current) {
         if (key !== prefixKey) return;
 
@@ -90,8 +102,6 @@ export const useTwoKeyFilterShortcuts = <TValue extends string>({
 
       event.preventDefault();
       event.stopPropagation();
-
-      const selectedOption = options.find((option) => option.key === key);
 
       clearPendingShortcut();
 
@@ -109,5 +119,5 @@ export const useTwoKeyFilterShortcuts = <TValue extends string>({
       document.removeEventListener('keydown', handleKeyDown, { capture: true });
       clearPendingShortcut();
     };
-  }, [disabled, onCancel, onPrefix, onSelect, options, prefixKey]);
+  }, [disabled, isOpen, onCancel, onPrefix, onSelect, options, prefixKey]);
 };

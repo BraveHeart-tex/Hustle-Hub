@@ -87,6 +87,7 @@ export default function GitlabSection() {
 
   useTwoKeyFilterShortcuts({
     disabled: isLoading,
+    isOpen: isFilterOpen,
     options: filterOptions,
     prefixKey: 'g',
     onCancel: closeShortcutFilter,

@@ -152,6 +152,7 @@ export default function JiraSection({ className }: JiraSectionProps) {
 
   useTwoKeyFilterShortcuts({
     disabled: isLoading,
+    isOpen: isFilterOpen,
     options: filterOptions,
     prefixKey: 'j',
     onCancel: closeShortcutFilter,
