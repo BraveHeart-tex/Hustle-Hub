@@ -1,24 +1,12 @@
 import { CheckIcon, CopyIcon, TerminalIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+
+import {
+  renderTemplate,
+  useStrictReviewTemplate,
+} from '@/lib/storage/prompt-templates';
 
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-
-interface BranchInfo {
-  source: string;
-  target: string;
-}
-
-const codexReviewPrompt = ({ source, target }: BranchInfo) => {
-  return `$strict-review Run strict-review on ${window.location.href}.
-
-Source branch: ${source}
-Target branch: ${target}
-Scope: full diff from ${source} into ${target}
-Read existing MR discussions and dedupe.
-Do not fetch Jira.
-Output Turkish findings with severity, confidence, file:line, impact, and next step.`;
-};
 
 const getSourceBranch = (doc: Document): string =>
   doc.querySelector<HTMLButtonElement>('.js-source-branch-copy')?.dataset
@@ -39,6 +27,7 @@ export const CodeReviewCommandsShortcut = ({
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [branchInfo, setBranchInfo] = useState({ target: '', source: '' });
+  const { template } = useStrictReviewTemplate();
 
   useEffect(() => {
     setBranchInfo({
@@ -48,7 +37,11 @@ export const CodeReviewCommandsShortcut = ({
   }, [container]);
 
   const copyCodexPrompt = () => {
-    const text = codexReviewPrompt(branchInfo);
+    const text = renderTemplate(template, {
+      source: branchInfo.source,
+      target: branchInfo.target,
+      url: window.location.href,
+    });
 
     navigator.clipboard.writeText(text);
     setCopied(true);

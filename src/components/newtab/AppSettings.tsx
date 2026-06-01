@@ -1,4 +1,4 @@
-import { Settings } from 'lucide-react';
+import { Settings, Terminal } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -7,17 +7,21 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 import GitlabIcon from '../misc/GitlabIcon';
 import { GitlabReviewersDialog } from '../reviewer-presets/GitlabReviewersDialog';
 import { ReviewerPresetsDialog } from '../reviewer-presets/ReviewerPresetsDialog';
+import { StrictReviewTemplateDialog } from './StrictReviewTemplateDialog';
+
+type DialogType = 'reviewers' | 'presets' | 'strict-review-template';
 
 export const AppSettings = () => {
   const [dialog, setDialog] = useState<{
     isOpen: boolean;
-    type: 'reviewers' | 'presets' | null;
+    type: DialogType | null;
   }>({
     isOpen: false,
     type: null,
@@ -48,6 +52,20 @@ export const AppSettings = () => {
               Reviewer Presets
             </DropdownMenuItem>
           </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex items-center gap-1">
+              <Terminal className="size-4" />
+              Prompts
+            </DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() =>
+                setDialog({ isOpen: true, type: 'strict-review-template' })
+              }
+            >
+              Strict Review Template
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
       <GitlabReviewersDialog
@@ -60,6 +78,15 @@ export const AppSettings = () => {
         open={dialog.type === 'presets' && dialog.isOpen}
         onOpenChange={(isOpen) => {
           setDialog({ type: isOpen ? 'presets' : null, isOpen });
+        }}
+      />
+      <StrictReviewTemplateDialog
+        open={dialog.type === 'strict-review-template' && dialog.isOpen}
+        onOpenChange={(isOpen) => {
+          setDialog({
+            type: isOpen ? 'strict-review-template' : null,
+            isOpen,
+          });
         }}
       />
     </>
