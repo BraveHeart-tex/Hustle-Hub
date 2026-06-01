@@ -16,7 +16,51 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useUrlChange } from '@/hooks/useUrlChange';
 import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';
+
+const MERGE_REQUEST_AUTHOR_SELECTORS = [
+  '[data-testid="issuable-authored-by"] a[data-user-id]',
+  '.issuable-meta a.author-link[data-user-id]',
+  '.issuable-meta a.author-name-link[data-user-id]',
+  '.detail-page-header a.author-name-link[data-user-id]',
+  '.merge-request-details a.author-name-link[data-user-id]',
+];
+
+function getMergeRequestAuthorId(): string {
+  const authorLinks = document.querySelectorAll<HTMLAnchorElement>(
+    MERGE_REQUEST_AUTHOR_SELECTORS.join(', '),
+  );
+
+  for (const authorLink of authorLinks) {
+    const authorId = authorLink.dataset.userId;
+    if (authorId) {
+      return authorId;
+    }
+  }
+
+  const fallbackAuthorLink = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>(
+      'a.author-name-link[data-user-id]',
+    ),
+  ).find((authorLink) => !authorLink.closest('.discussion'));
+
+  return fallbackAuthorLink?.dataset.userId ?? '';
+}
+
+function isUserThread(discussion: HTMLElement, userId: string): boolean {
+  const authorLinks = discussion.querySelectorAll<HTMLAnchorElement>(
+    'a.author-name-link[data-user-id]',
+  );
+
+  for (const authorLink of authorLinks) {
+    if (authorLink.dataset.userId === userId) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 function extractReplies(
   discussion: HTMLElement,
@@ -70,41 +114,45 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
     new Set(),
   );
   const [copiedThreadId, setCopiedThreadId] = useState<string | null>(null);
+  const [isOwnMergeRequest, setIsOwnMergeRequest] = useState(false);
   const threadsRef = useRef<Thread[]>([]);
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Ref map for each thread li — used to scroll active item into view in the popover
   const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
   const collectThreads = useCallback(() => {
+    const mergeRequestAuthorId = getMergeRequestAuthorId();
+    const shouldShowAllThreads = mergeRequestAuthorId === userId;
     const discussions = document.querySelectorAll(
       `.discussion[data-testid="discussion-content"]`,
     );
 
-    const newUserThreads: Thread[] = [];
+    const newThreads: Thread[] = [];
 
     discussions.forEach((el) => {
       const discussion = el as HTMLElement;
 
-      const author = discussion.querySelector(
-        `a.author-name-link[data-user-id="${userId}"]`,
-      );
-      if (author) {
-        newUserThreads.push({
-          id: discussion.dataset.discussionId ?? '',
-          replies: extractReplies(discussion, userId),
-          resolved: discussion.dataset.discussionResolved === 'true',
-          promptData: extractPromptData(discussion),
-        });
+      if (!shouldShowAllThreads && !isUserThread(discussion, userId)) {
+        return;
       }
+
+      newThreads.push({
+        id: discussion.dataset.discussionId ?? '',
+        replies: extractReplies(discussion, userId),
+        resolved: discussion.dataset.discussionResolved === 'true',
+        promptData: extractPromptData(discussion),
+      });
     });
 
     const isDifferent =
-      JSON.stringify(newUserThreads) !== JSON.stringify(threadsRef.current);
+      JSON.stringify(newThreads) !== JSON.stringify(threadsRef.current);
 
     if (isDifferent) {
-      threadsRef.current = newUserThreads;
-      setThreads(newUserThreads);
+      threadsRef.current = newThreads;
+      setThreads(newThreads);
     }
+
+    setIsOwnMergeRequest(shouldShowAllThreads);
   }, [userId]);
 
   const copyPrompt = useCallback(async (thread: Thread) => {
@@ -182,6 +230,7 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
 
   if (threads.length === 0 || !isMergeRequestRoot) return null;
 
+  const title = isOwnMergeRequest ? 'MR Threads' : 'My Threads';
   const resolvedCount = threads.filter((t) => t.resolved).length;
   const unresolvedCount = threads.length - resolvedCount;
 
@@ -196,7 +245,7 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
         >
           <MessageSquareIcon className="h-3.5 w-3.5 shrink-0" />
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-xs">My Threads</span>
+            <span className="text-xs">{title}</span>
             <span className="text-[10px] text-muted-foreground font-medium">
               {unresolvedCount > 0 && `${unresolvedCount} open`}
               {unresolvedCount > 0 && resolvedCount > 0 && ' · '}
@@ -214,7 +263,7 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-2.5 border-b bg-muted/40">
           <MessageSquareIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-          <span className="text-sm font-medium">My Threads</span>
+          <span className="text-sm font-medium">{title}</span>
           <div className="ml-auto flex items-center gap-1.5">
             {unresolvedCount > 0 && (
               <span className="text-[10px] font-medium bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full">
