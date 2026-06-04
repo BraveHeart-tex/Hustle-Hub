@@ -54,19 +54,6 @@ const checkConflicts = (doc: Document): MrWarning | null => {
     : null;
 };
 
-const checkApprovals = (doc: Document): MrWarning | null => {
-  const missing = getMergeCheckTexts(doc).some((t) =>
-    t.includes('All required approvals must be given'),
-  );
-  return missing
-    ? {
-        id: 'missing-approvals',
-        severity: 'error',
-        message: 'All required approvals must be given.',
-      }
-    : null;
-};
-
 const checkBehindTarget =
   (severity: MrWarning['severity']) =>
   (doc: Document): MrWarning | null => {
@@ -126,7 +113,6 @@ export const mrWarningStrategies: Record<string, BranchStrategy> = {
             }
           : null;
       },
-      checkApprovals,
       checkConflicts,
       checkDraft,
       checkBehindTarget('error'),
@@ -144,7 +130,6 @@ export const mrWarningStrategies: Record<string, BranchStrategy> = {
             }
           : null;
       },
-      checkApprovals,
       checkConflicts,
       checkDraft,
       checkBehindTarget('warning'),
