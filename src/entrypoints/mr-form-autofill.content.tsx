@@ -16,10 +16,8 @@ const SELECTORS = {
   labelDropdown: '[data-testid="issuable-label-dropdown"]',
   labelList: '[data-testid="labels-list"]',
   closeLabels: '[data-testid="close-labels-dropdown-button"]',
-  richTextEditor:
-    '[data-testid="content_editor_editablebox"] [contenteditable="true"]',
   plainTextEditor: '#merge_request_description',
-  editorToggle: '#switch-to-rich-text-editor',
+  switchToPlainTextEditor: '#switch-to-plain-text-editor',
   reviewerDropdownCloseIcon: '[data-testid="close-icon"]',
   reviewerDropdownOption: (reviewerId: string) =>
     `li[data-user-id="${reviewerId}"] a`,
@@ -104,48 +102,29 @@ const applyLabel = async (label: string) => {
   return true;
 };
 
-const isRichTextEditorEnabled = async () => {
-  if (localStorage.getItem('gl-markdown-editor-mode') === 'contentEditor') {
-    return true;
-  }
+const switchToMarkdownField = async () => {
+  // Persist the preference so GitLab keeps showing the plain markdown field.
+  localStorage.setItem('gl-markdown-editor-mode', 'markdownField');
 
-  const editorToggle = await waitForOptionalElement<HTMLElement>(
-    SELECTORS.editorToggle,
+  // If the rich text editor is currently active, switch it back to plain text.
+  const switchButton = await waitForOptionalElement<HTMLElement>(
+    SELECTORS.switchToPlainTextEditor,
   );
-
-  return editorToggle?.textContent?.includes('plain text') ?? false;
+  switchButton?.click();
 };
 
 const updateDescription = async (content: string) => {
-  const isRichText = await isRichTextEditorEnabled();
-
-  if (isRichText) {
-    const el = await waitForOptionalElement<HTMLElement>(
-      SELECTORS.richTextEditor,
-      DESCRIPTION_EDITOR_TIMEOUT,
-    );
-
-    if (el) {
-      el.focus();
-
-      document.execCommand('selectAll');
-      document.execCommand('insertText', false, content);
-
-      el.blur();
-      return true;
-    }
-  }
+  await switchToMarkdownField();
 
   const el = await waitForOptionalElement<HTMLTextAreaElement>(
     SELECTORS.plainTextEditor,
     DESCRIPTION_EDITOR_TIMEOUT,
   );
-  if (el) {
-    setInputValue(el, content);
-    return true;
-  }
 
-  return false;
+  if (!el) return false;
+
+  setInputValue(el, content);
+  return true;
 };
 
 const mountReviewerControlsIfNeeded = async (
@@ -323,8 +302,10 @@ const getReleaseJiraIssueKey = async (jiraId: string | null) => {
 };
 
 const getReleaseDescription = (ferelKey: string, jiraIssueKey: string) => {
-  return `FEREL: ${getJiraTaskUrl(ferelKey)}
-  Jira Task: ${getJiraTaskUrl(jiraIssueKey)}`;
+  return [
+    `FEREL: ${getJiraTaskUrl(ferelKey)}`,
+    `Jira Task: ${getJiraTaskUrl(jiraIssueKey)}`,
+  ].join('\n');
 };
 
 const selectReleaseReviewer = async (reviewerId: string) => {
