@@ -105,11 +105,13 @@ const applyLabel = async (label: string) => {
 };
 
 const switchToMarkdownField = async () => {
-  // Persist the preference so GitLab keeps showing the plain markdown field.
   localStorage.setItem('gl-markdown-editor-mode', 'markdownField');
 
-  // If the rich text editor is currently active, switch it back to plain text.
-  const switchButton = await waitForOptionalElement<HTMLElement>(
+  await waitForOptionalElement(
+    `${SELECTORS.plainTextEditor}, ${SELECTORS.switchToPlainTextEditor}`,
+  );
+
+  const switchButton = document.querySelector<HTMLElement>(
     SELECTORS.switchToPlainTextEditor,
   );
   switchButton?.click();
