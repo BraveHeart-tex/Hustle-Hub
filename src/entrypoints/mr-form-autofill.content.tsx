@@ -1,7 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
 
+import { AutofillProgressApp } from '@/components/autofill-progress/AutofillProgressApp';
 import { ReviewerControlsApp } from '@/components/reviewer-presets/ReviewerControlsApp';
+import { progressStore, runStep } from '@/lib/autofill-progress/progressStore';
 import { waitForElement } from '@/lib/utils/dom/waitForElement';
 import { extractJiraId } from '@/lib/utils/misc/extractJiraId';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
@@ -157,6 +159,30 @@ const mountReviewerControlsIfNeeded = async (
   }
 };
 
+const mountAutofillProgress = async (ctx: ContentScriptContext) => {
+  try {
+    const ui = await createShadowRootUi(ctx, {
+      name: 'gitlab-autofill-progress-ui',
+      position: 'inline',
+      anchor: 'body',
+      append: 'last',
+      onMount: (container) => {
+        const app = document.createElement('div');
+        container.append(app);
+        const root = createRoot(app);
+        root.render(<AutofillProgressApp />);
+        return root;
+      },
+      onRemove: (root) => {
+        root?.unmount();
+      },
+    });
+    ui.mount();
+  } catch (error) {
+    console.error('failed to mount autofill progress', error);
+  }
+};
+
 const handleBranchRedirection = async () => {
   const input = await waitForOptionalElement<HTMLInputElement>(
     SELECTORS.sourceBranch,
@@ -190,7 +216,7 @@ const setupBranchRedirectionIfNeeded = async (isNewMR: boolean) => {
 };
 
 const assignCurrentUser = async () => {
-  await clickWhenAvailable(SELECTORS.assignMe);
+  return clickWhenAvailable(SELECTORS.assignMe);
 };
 
 const capitalizeFirstLetter = (value: string) => {
@@ -282,15 +308,16 @@ const fillReleaseBasics = (jiraId: string) => {
     ? fetchFerelKey(jiraId)
     : Promise.resolve(FEREL_FALLBACK_KEY);
 
-  const titlePromise = (async () => {
+  const titlePromise = runStep('title', async () => {
     const titleInput = await waitForOptionalElement<HTMLInputElement>(
       SELECTORS.title,
     );
 
-    if (titleInput) {
-      setInputValue(titleInput, `Production Release for ${jiraId}`);
-    }
-  })();
+    if (!titleInput) return false;
+
+    setInputValue(titleInput, `Production Release for ${jiraId}`);
+    return true;
+  });
 
   return { ferelKeyPromise, titlePromise };
 };
@@ -309,10 +336,10 @@ const getReleaseDescription = (ferelKey: string, jiraIssueKey: string) => {
 };
 
 const selectReleaseReviewer = async (reviewerId: string) => {
-  if (!reviewerId) return;
+  if (!reviewerId) return false;
 
   const openedDropdown = await clickWhenAvailable(SELECTORS.reviewerDropdown);
-  if (!openedDropdown) return;
+  if (!openedDropdown) return false;
 
   const selectedReviewer = await clickWhenAvailable(
     SELECTORS.reviewerDropdownOption(reviewerId),
@@ -323,19 +350,23 @@ const selectReleaseReviewer = async (reviewerId: string) => {
     await delay(150);
     await clickWhenAvailable(SELECTORS.reviewerDropdownCloseIcon);
   }
+
+  return selectedReviewer;
 };
 
 const applyProductionLabelAndDescription = async (
   ferelKeyPromise: Promise<string>,
   jiraIssueKeyPromise: Promise<string>,
 ) => {
-  await applyLabel('target::production');
+  await runStep('label', () => applyLabel('target::production'));
 
   const [ferelKey, jiraIssueKey] = await Promise.all([
     ferelKeyPromise,
     jiraIssueKeyPromise,
   ]);
-  await updateDescription(getReleaseDescription(ferelKey, jiraIssueKey));
+  await runStep('description', () =>
+    updateDescription(getReleaseDescription(ferelKey, jiraIssueKey)),
+  );
 };
 
 const getSyncSourceKey = (sourceBranch: string | null): string | null => {
@@ -400,7 +431,7 @@ const fetchRelatedReleaseMergeRequest = async (
 
 const fillSyncMergeRequest = async (
   params: URLSearchParams,
-  assignCurrentUserPromise: Promise<void>,
+  assignCurrentUserPromise: Promise<boolean | undefined>,
 ) => {
   const syncSourceKey = getSyncSourceKey(
     params.get('merge_request[source_branch]'),
@@ -410,19 +441,19 @@ const fillSyncMergeRequest = async (
 
   const relatedReleaseMergeRequestPromise =
     fetchRelatedReleaseMergeRequest(syncSourceKey);
-  const updateDescriptionPromise = relatedReleaseMergeRequestPromise.then(
-    (relatedReleaseMergeRequest) => {
+  const updateDescriptionPromise = runStep('description', () =>
+    relatedReleaseMergeRequestPromise.then((relatedReleaseMergeRequest) => {
       if (!relatedReleaseMergeRequest) return false;
 
       return updateDescription(
         `${relatedReleaseMergeRequest.web_url} için sync MR`,
       );
-    },
+    }),
   );
 
   await Promise.allSettled([
     assignCurrentUserPromise,
-    applyLabel(SYNC_LABEL),
+    runStep('label', () => applyLabel(SYNC_LABEL)),
     updateDescriptionPromise,
   ]);
 
@@ -443,26 +474,49 @@ export default defineContentScript({
 
     if (!isNewMR) return;
 
+    void mountAutofillProgress(ctx);
     void setupBranchRedirectionIfNeeded(isNewMR);
-    const assignCurrentUserPromise = assignCurrentUser();
 
-    const filledSyncMergeRequest = await fillSyncMergeRequest(
-      params,
-      assignCurrentUserPromise,
-    );
+    const sourceBranch = params.get('merge_request[source_branch]');
+    const isSync = Boolean(getSyncSourceKey(sourceBranch));
+    const isRelease = params.get('merge_request[target_branch]') === 'main';
 
-    if (filledSyncMergeRequest) {
+    if (isSync) {
+      progressStore.registerSteps([
+        { id: 'assign', label: 'Assign to me' },
+        { id: 'label', label: 'Apply sync label' },
+        { id: 'description', label: 'Link release MR' },
+      ]);
+
+      const assignCurrentUserPromise = runStep('assign', assignCurrentUser);
+      await fillSyncMergeRequest(params, assignCurrentUserPromise);
       return;
     }
 
-    if (params.get('merge_request[target_branch]') !== 'main') {
+    if (!isRelease) {
+      progressStore.registerSteps([
+        { id: 'assign', label: 'Assign to me' },
+        { id: 'title', label: 'Set title' },
+        { id: 'description', label: 'Add Jira link' },
+      ]);
+
       await Promise.allSettled([
-        assignCurrentUserPromise,
-        fillFeatureMergeRequestTitle(params),
-        fillFeatureMergeRequestDescription(params),
+        runStep('assign', assignCurrentUser),
+        runStep('title', () => fillFeatureMergeRequestTitle(params)),
+        runStep('description', () =>
+          fillFeatureMergeRequestDescription(params),
+        ),
       ]);
       return;
     }
+
+    progressStore.registerSteps([
+      { id: 'assign', label: 'Assign to me' },
+      { id: 'title', label: 'Set title' },
+      { id: 'reviewer', label: 'Select reviewer' },
+      { id: 'label', label: 'Apply production label' },
+      { id: 'description', label: 'Add FEREL + Jira links' },
+    ]);
 
     const releaseJiraId = await getMergeRequestJiraId(params);
     const releaseJiraIssueKeyPromise = getReleaseJiraIssueKey(releaseJiraId);
@@ -472,9 +526,9 @@ export default defineContentScript({
     const reviewerId = import.meta.env.VITE_RELEASE_REVIEWER_USER_ID;
 
     await Promise.allSettled([
-      assignCurrentUserPromise,
+      runStep('assign', assignCurrentUser),
       titlePromise,
-      selectReleaseReviewer(reviewerId),
+      runStep('reviewer', () => selectReleaseReviewer(reviewerId)),
     ]);
 
     await applyProductionLabelAndDescription(
