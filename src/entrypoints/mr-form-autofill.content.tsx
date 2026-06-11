@@ -136,6 +136,9 @@ const mountReviewerControlsIfNeeded = async (
 ) => {
   if (!isNewMR && !isEditMode) return;
 
+  const creationFormReady = await waitForOptionalElement(SELECTORS.title);
+  if (!creationFormReady) return;
+
   try {
     const ui = await createShadowRootUi(ctx, {
       name: 'gitlab-reviewers-popover-ui',
