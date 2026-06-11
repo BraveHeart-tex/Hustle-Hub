@@ -474,8 +474,12 @@ export default defineContentScript({
 
     if (!isNewMR) return;
 
-    void mountAutofillProgress(ctx);
     void setupBranchRedirectionIfNeeded(isNewMR);
+
+    const creationFormReady = await waitForOptionalElement(SELECTORS.title);
+    if (!creationFormReady) return;
+
+    void mountAutofillProgress(ctx);
 
     const sourceBranch = params.get('merge_request[source_branch]');
     const isSync = Boolean(getSyncSourceKey(sourceBranch));
