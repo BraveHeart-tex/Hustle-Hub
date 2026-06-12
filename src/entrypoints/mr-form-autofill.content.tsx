@@ -55,8 +55,16 @@ const clickWhenAvailable = async (
   timeout = OPTIONAL_ELEMENT_TIMEOUT,
 ) => {
   const el = await waitForOptionalElement<HTMLElement>(selector, timeout);
-  el?.click();
-  return Boolean(el);
+  if (!el) return false;
+
+  try {
+    el.click();
+  } catch (error) {
+    console.warn(`failed to click: ${selector}`, error);
+    return false;
+  }
+
+  return true;
 };
 
 const delay = (ms: number) =>
