@@ -7,14 +7,11 @@ import {
   type JiraFilter,
 } from '@/lib/constants';
 
-export const jiraFilterStorage = storage.defineItem<JiraFilter>(
-  'local:jiraFilter',
-  {
-    fallback: JIRA_FILTERS.LITERALLY_WORKING_ON,
-  },
-);
+const jiraFilterStorage = storage.defineItem<JiraFilter>('local:jiraFilter', {
+  fallback: JIRA_FILTERS.LITERALLY_WORKING_ON,
+});
 
-export const gitlabFilterStorage = storage.defineItem<GitlabFilter>(
+const gitlabFilterStorage = storage.defineItem<GitlabFilter>(
   'local:gitlabFilter',
   {
     fallback: GITLAB_FILTERS.REVIEW,

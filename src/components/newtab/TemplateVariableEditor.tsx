@@ -100,7 +100,7 @@ const parseLineToNodes = (line: string): JSONContent[] => {
   return nodes;
 };
 
-export const templateStringToDoc = (text: string): JSONContent => ({
+const templateStringToDoc = (text: string): JSONContent => ({
   type: 'doc',
   content: text.split('\n').map((line) => {
     const content = parseLineToNodes(line);
@@ -110,7 +110,7 @@ export const templateStringToDoc = (text: string): JSONContent => ({
   }),
 });
 
-export const editorToTemplateString = (editor: Editor): string => {
+const editorToTemplateString = (editor: Editor): string => {
   const lines: string[] = [];
   editor.state.doc.forEach((paragraph) => {
     let line = '';

@@ -1,5 +1,3 @@
-import { type ApiResponse } from '@/types/api';
-
 export interface JiraIssue {
   expand: string;
   id: string;
@@ -48,5 +46,3 @@ export interface JiraIssue {
     };
   };
 }
-
-export type JiraApiResponse = ApiResponse<{ issues: JiraIssue[] }>;

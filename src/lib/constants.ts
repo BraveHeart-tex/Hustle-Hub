@@ -29,12 +29,6 @@ export const GITLAB_FILTERS = {
 } as const;
 export type GitlabFilter = (typeof GITLAB_FILTERS)[keyof typeof GITLAB_FILTERS];
 
-export const NOTE_PRIORITIES = {
-  LOW: 'low',
-  MEDIUM: 'medium',
-  HIGH: 'high',
-} as const;
-export type NotePriority =
-  (typeof NOTE_PRIORITIES)[keyof typeof NOTE_PRIORITIES];
+export type NotePriority = 'low' | 'medium' | 'high';
 
 export const GITLAB_HIGHLIGHTED_THREAD_CLASS = '__hb-gitlab-highlighted-thread';

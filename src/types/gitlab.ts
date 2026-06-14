@@ -37,7 +37,7 @@ export interface GitlabTagDetails {
   authorAvatar: string;
 }
 
-export type PipelineStatus =
+type PipelineStatus =
   /** Pipeline was canceled before completion. */
   | 'CANCELED'
   /** Pipeline is in the process of canceling. */
@@ -74,5 +74,4 @@ export type MergeStatus =
   | 'approved'
   | string;
 
-export type GitlabApiResponse = ApiResponse<{ data: GitlabMergeRequest[] }>;
 export type GitlabTagDetailsApiResponse = ApiResponse<GitlabTagDetails>;

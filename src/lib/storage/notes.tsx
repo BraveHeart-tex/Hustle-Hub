@@ -20,10 +20,6 @@ export const addNote = async (note: Note) => {
   ]);
 };
 
-export const getNotes = async (): Promise<Note[]> => {
-  return await noteList.getValue();
-};
-
 export const removeNote = async (id: string) => {
   const currentTasks = await noteList.getValue();
   await noteList.setValue(currentTasks.filter((task) => task.id !== id));

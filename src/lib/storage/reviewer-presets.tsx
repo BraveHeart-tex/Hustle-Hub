@@ -15,7 +15,7 @@ const reviewerPresets = storage.defineItem<ReviewerPreset[]>(
   },
 );
 
-export const getGitlabReviewers = async () => {
+const getGitlabReviewers = async () => {
   return (await gitlabReviewers.getValue()).toSorted((a, b) =>
     a.name.localeCompare(b.name),
   );
@@ -50,7 +50,7 @@ export const updateGitlabReviewer = async (
   );
 };
 
-export const getReviewerPresets = async () => {
+const getReviewerPresets = async () => {
   const [reviewers, presets] = await Promise.all([
     getGitlabReviewers(),
     reviewerPresets.getValue(),

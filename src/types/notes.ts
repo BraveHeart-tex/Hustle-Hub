@@ -15,7 +15,7 @@ export interface Note {
   linkedItems?: NoteLinkedWorkItem[];
 }
 
-export interface NoteTask {
+interface NoteTask {
   id: string;
   label: string;
   completed: boolean;

@@ -33,9 +33,6 @@ const strictReviewTemplate = storage.defineItem<string>(
   { fallback: DEFAULT_STRICT_REVIEW_TEMPLATE },
 );
 
-export const getStrictReviewTemplate = async () =>
-  strictReviewTemplate.getValue();
-
 export const setStrictReviewTemplate = async (value: string) =>
   strictReviewTemplate.setValue(value);
 

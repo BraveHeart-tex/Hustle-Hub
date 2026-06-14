@@ -10,7 +10,6 @@ import {
   type Comment,
   type CommentItemType,
   type CreateCommentPayload,
-  type UpdateCommentPayload,
 } from '@/types/comments';
 
 const commentList = storage.defineItem<Comment[]>('local:comments', {
@@ -36,18 +35,6 @@ export const removeComment = async (commentId: string) => {
   );
 };
 
-export const updateComment = async (
-  commentId: string,
-  changes: UpdateCommentPayload,
-) => {
-  const currentComments = await commentList.getValue();
-  await commentList.setValue(
-    currentComments.map((comment) =>
-      comment.id === commentId ? { ...comment, ...changes } : comment,
-    ),
-  );
-};
-
 interface CommentsContextType {
   getCommentsByItemIdAndType: (
     itemId: string,
@@ -56,7 +43,7 @@ interface CommentsContextType {
   comments: Comment[];
 }
 
-export const CommentsContext = createContext<CommentsContextType | null>(null);
+const CommentsContext = createContext<CommentsContextType | null>(null);
 
 export const CommentsProvider = ({
   children,

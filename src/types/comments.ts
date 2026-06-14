@@ -13,5 +13,3 @@ export interface Comment {
 export type CommentItemType = 'jira' | 'gitlab';
 
 export type CreateCommentPayload = Omit<Comment, 'id' | 'createdAt'>;
-
-export type UpdateCommentPayload = Pick<Comment, 'content'>;
