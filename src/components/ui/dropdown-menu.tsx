@@ -1,19 +1,27 @@
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import * as React from 'react';
+import {
+  Content as DropdownMenuPrimitiveContent,
+  Group as DropdownMenuPrimitiveGroup,
+  Item as DropdownMenuPrimitiveItem,
+  Label as DropdownMenuPrimitiveLabel,
+  Portal as DropdownMenuPrimitivePortal,
+  Root as DropdownMenuPrimitiveRoot,
+  Trigger as DropdownMenuPrimitiveTrigger,
+} from '@radix-ui/react-dropdown-menu';
+import { type ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils';
 
 function DropdownMenu({
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
-  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
+}: ComponentProps<typeof DropdownMenuPrimitiveRoot>) {
+  return <DropdownMenuPrimitiveRoot data-slot="dropdown-menu" {...props} />;
 }
 
 function DropdownMenuTrigger({
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
+}: ComponentProps<typeof DropdownMenuPrimitiveTrigger>) {
   return (
-    <DropdownMenuPrimitive.Trigger
+    <DropdownMenuPrimitiveTrigger
       data-slot="dropdown-menu-trigger"
       {...props}
     />
@@ -24,10 +32,10 @@ function DropdownMenuContent({
   className,
   sideOffset = 4,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+}: ComponentProps<typeof DropdownMenuPrimitiveContent>) {
   return (
-    <DropdownMenuPrimitive.Portal>
-      <DropdownMenuPrimitive.Content
+    <DropdownMenuPrimitivePortal>
+      <DropdownMenuPrimitiveContent
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
@@ -36,15 +44,15 @@ function DropdownMenuContent({
         )}
         {...props}
       />
-    </DropdownMenuPrimitive.Portal>
+    </DropdownMenuPrimitivePortal>
   );
 }
 
 function DropdownMenuGroup({
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Group>) {
+}: ComponentProps<typeof DropdownMenuPrimitiveGroup>) {
   return (
-    <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
+    <DropdownMenuPrimitiveGroup data-slot="dropdown-menu-group" {...props} />
   );
 }
 
@@ -53,12 +61,12 @@ function DropdownMenuItem({
   inset,
   variant = 'default',
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
+}: ComponentProps<typeof DropdownMenuPrimitiveItem> & {
   inset?: boolean;
   variant?: 'default' | 'destructive';
 }) {
   return (
-    <DropdownMenuPrimitive.Item
+    <DropdownMenuPrimitiveItem
       data-slot="dropdown-menu-item"
       data-inset={inset}
       data-variant={variant}
@@ -75,11 +83,11 @@ function DropdownMenuLabel({
   className,
   inset,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Label> & {
+}: ComponentProps<typeof DropdownMenuPrimitiveLabel> & {
   inset?: boolean;
 }) {
   return (
-    <DropdownMenuPrimitive.Label
+    <DropdownMenuPrimitiveLabel
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(

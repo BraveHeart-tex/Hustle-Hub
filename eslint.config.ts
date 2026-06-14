@@ -111,6 +111,24 @@ export default defineConfig([
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       // No var
       'no-var': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportNamespaceSpecifier',
+          message: 'Use named imports instead of wildcard imports.',
+        },
+      ],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^\\.',
+              message: 'Use an absolute import with the @/ alias instead.',
+            },
+          ],
+        },
+      ],
     },
   },
 

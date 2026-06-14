@@ -1,18 +1,22 @@
-import * as PopoverPrimitive from '@radix-ui/react-popover';
-import * as React from 'react';
+import {
+  Anchor as PopoverPrimitiveAnchor,
+  Content as PopoverPrimitiveContent,
+  Portal as PopoverPrimitivePortal,
+  Root as PopoverPrimitiveRoot,
+  Trigger as PopoverPrimitiveTrigger,
+} from '@radix-ui/react-popover';
+import { type ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils';
 
-function Popover({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
+function Popover({ ...props }: ComponentProps<typeof PopoverPrimitiveRoot>) {
+  return <PopoverPrimitiveRoot data-slot="popover" {...props} />;
 }
 
 function PopoverTrigger({
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
+}: ComponentProps<typeof PopoverPrimitiveTrigger>) {
+  return <PopoverPrimitiveTrigger data-slot="popover-trigger" {...props} />;
 }
 
 function PopoverContent({
@@ -21,12 +25,12 @@ function PopoverContent({
   sideOffset = 4,
   container,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content> & {
+}: ComponentProps<typeof PopoverPrimitiveContent> & {
   container?: HTMLElement | null;
 }) {
   return (
-    <PopoverPrimitive.Portal container={container ?? document.body}>
-      <PopoverPrimitive.Content
+    <PopoverPrimitivePortal container={container ?? document.body}>
+      <PopoverPrimitiveContent
         data-slot="popover-content"
         align={align}
         sideOffset={sideOffset}
@@ -36,14 +40,14 @@ function PopoverContent({
         )}
         {...props}
       />
-    </PopoverPrimitive.Portal>
+    </PopoverPrimitivePortal>
   );
 }
 
 function PopoverAnchor({
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />;
+}: ComponentProps<typeof PopoverPrimitiveAnchor>) {
+  return <PopoverPrimitiveAnchor data-slot="popover-anchor" {...props} />;
 }
 
 export { Popover, PopoverAnchor, PopoverContent, PopoverTrigger };

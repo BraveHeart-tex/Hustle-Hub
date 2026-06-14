@@ -4,7 +4,6 @@
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
-    "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
   },
   "[typescript]": {
