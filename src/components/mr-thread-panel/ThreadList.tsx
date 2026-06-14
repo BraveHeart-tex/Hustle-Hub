@@ -2,10 +2,6 @@ import { MessageSquareIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  buildCodexPromptForThread,
-  extractPromptData,
-} from '@/components/mr-thread-panel/mr-thread-helpers';
-import {
   type Thread,
   type ThreadReply,
 } from '@/components/mr-thread-panel/mr-thread-panel.types';
@@ -113,10 +109,8 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(
     new Set(),
   );
-  const [copiedThreadId, setCopiedThreadId] = useState<string | null>(null);
   const [isOwnMergeRequest, setIsOwnMergeRequest] = useState(false);
   const threadsRef = useRef<Thread[]>([]);
-  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Ref map for each thread li — used to scroll active item into view in the popover
   const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
@@ -140,7 +134,6 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
         id: discussion.dataset.discussionId ?? '',
         replies: extractReplies(discussion, userId),
         resolved: discussion.dataset.discussionResolved === 'true',
-        promptData: extractPromptData(discussion),
       });
     });
 
@@ -154,21 +147,6 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
 
     setIsOwnMergeRequest(shouldShowAllThreads);
   }, [userId]);
-
-  const copyPrompt = useCallback(async (thread: Thread) => {
-    const prompt = buildCodexPromptForThread(thread);
-    await navigator.clipboard.writeText(prompt);
-    setCopiedThreadId(thread.id);
-
-    if (copiedTimeoutRef.current) {
-      clearTimeout(copiedTimeoutRef.current);
-    }
-
-    copiedTimeoutRef.current = setTimeout(() => {
-      setCopiedThreadId(null);
-      copiedTimeoutRef.current = null;
-    }, 1500);
-  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -185,14 +163,6 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
       clearTimeout(debounceTimer);
     };
   }, [userId, collectThreads]);
-
-  useEffect(() => {
-    return () => {
-      if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const scrollToDiscussion = useCallback((id: string, index: number) => {
     // Scroll the page to the GitLab discussion
@@ -284,11 +254,9 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
             <MrThreadItem
               key={thread.id}
               active={index === activeIndex}
-              copied={copiedThreadId === thread.id}
               expanded={expandedReplies.has(thread.id)}
               index={index}
               thread={thread}
-              onCopyPrompt={(thread) => void copyPrompt(thread)}
               onScrollToDiscussion={scrollToDiscussion}
               onSetItemRef={setItemRef}
               onToggleReplies={toggleReplies}

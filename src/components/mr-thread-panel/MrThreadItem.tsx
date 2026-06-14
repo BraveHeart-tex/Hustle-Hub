@@ -1,21 +1,13 @@
-import {
-  BotIcon,
-  CheckCircle2Icon,
-  CheckIcon,
-  MessageSquareIcon,
-  XCircleIcon,
-} from 'lucide-react';
+import { CheckCircle2Icon, MessageSquareIcon, XCircleIcon } from 'lucide-react';
 
 import { type Thread } from '@/components/mr-thread-panel/mr-thread-panel.types';
 import { cn } from '@/lib/utils';
 
 interface MrThreadItemProps {
   active: boolean;
-  copied: boolean;
   expanded: boolean;
   index: number;
   thread: Thread;
-  onCopyPrompt: (thread: Thread) => void;
   onScrollToDiscussion: (id: string, index: number) => void;
   onSetItemRef: (id: string, el: HTMLLIElement | null) => void;
   onToggleReplies: (id: string) => void;
@@ -23,11 +15,9 @@ interface MrThreadItemProps {
 
 export const MrThreadItem = ({
   active,
-  copied,
   expanded,
   index,
   thread,
-  onCopyPrompt,
   onScrollToDiscussion,
   onSetItemRef,
   onToggleReplies,
@@ -85,22 +75,6 @@ export const MrThreadItem = ({
           {hasUnreadReply && (
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
           )}
-
-          <button
-            type="button"
-            title={copied ? 'Copied Codex prompt' : 'Copy Codex prompt'}
-            onClick={(e) => {
-              e.stopPropagation();
-              onCopyPrompt(thread);
-            }}
-            className="flex items-center justify-center h-6 w-6 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {copied ? (
-              <CheckIcon className="h-3.5 w-3.5 text-green-500" />
-            ) : (
-              <BotIcon className="h-3.5 w-3.5" />
-            )}
-          </button>
 
           {replyCount > 0 && (
             <div
