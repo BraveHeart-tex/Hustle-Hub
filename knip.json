@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreUnresolved": ["#imports"],
+  "tags": ["-lintignore"],
+  "wxt": {
+    "config": ["wxt.config.ts", "wxt.config.js"],
+    "entry": ["src/entrypoints/**/*.{ts,js,tsx,jsx}"]
+  }
+}
