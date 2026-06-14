@@ -3,12 +3,14 @@ import path from 'path';
 import { defineConfig } from 'wxt';
 import { z } from 'zod';
 
-export const viteEnvSchema = z.object({
+const viteEnvSchema = z.object({
   VITE_RELEASE_REVIEWER_USER_ID: z
     .string()
     .regex(/^\d+$/, 'Must be a numeric user ID'),
   VITE_BASE_API_URL: z.url().describe('Base API endpoint URL'),
-  VITE_JIRA_BASE_URL: z.url().describe('Jira base URL'),
+  VITE_JIRA_BASE_URL: z
+    .url()
+    .describe('Jira base URL used to generate task urls'),
   VITE_GITLAB_USER_ID: z.string().regex(/^\d+$/, 'Must be a numeric user ID'),
   VITE_DEPLOYMENT_WIDGET_MATCH: z
     .string()
@@ -31,7 +33,22 @@ export default defineConfig({
     name: 'Hustle Hub',
   },
   vite: () => {
-    viteEnvSchema.parse(import.meta.env);
+    const result = viteEnvSchema.safeParse(import.meta.env);
+
+    if (!result.success) {
+      console.error('\n ❌ Environment variable validation failed:\n');
+      console.error(
+        result.error.issues
+          .map((issue) => {
+            const path = issue.path.join('.') || 'unknown';
+            return `  • ${path}: ${issue.message}`;
+          })
+          .join('\n'),
+      );
+
+      process.exit(1);
+    }
+
     return {
       plugins: [tailwindcss()],
       resolve: {
