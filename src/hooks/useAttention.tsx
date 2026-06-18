@@ -5,11 +5,10 @@
 // is populated immediately, then kept live by push events.
 // ============================================================
 import { useApi } from '@/hooks/useApi';
+import { useAttentionStream } from '@/hooks/useAttentionStream';
 import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
 import { type AttentionItem } from '@/types/attention';
-
-import { useAttentionStream } from './useAttentionStream';
 
 export function useAttention() {
   // Open SSE stream — syncs cache in background

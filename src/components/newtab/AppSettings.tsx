@@ -1,6 +1,6 @@
 import { Settings, Terminal } from 'lucide-react';
 
-import GitlabIcon from '@/components/misc/GitlabIcon';
+import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { StrictReviewTemplateDialog } from '@/components/newtab/StrictReviewTemplateDialog';
 import { GitlabReviewersDialog } from '@/components/reviewer-presets/GitlabReviewersDialog';
 import { ReviewerPresetsDialog } from '@/components/reviewer-presets/ReviewerPresetsDialog';

@@ -1,4 +1,4 @@
-const GitlabIcon = (props: React.SVGProps<SVGSVGElement>) => {
+export const GitlabIcon = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
       width="20"
@@ -34,4 +34,3 @@ const GitlabIcon = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   );
 };
-export default GitlabIcon;

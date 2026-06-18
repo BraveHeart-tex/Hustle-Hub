@@ -5,8 +5,8 @@ import {
 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 
-import GitlabIcon from '@/components/misc/GitlabIcon';
-import JiraIcon from '@/components/misc/JiraIcon';
+import { GitlabIcon } from '@/components/misc/GitlabIcon';
+import { JiraIcon } from '@/components/misc/JiraIcon';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,

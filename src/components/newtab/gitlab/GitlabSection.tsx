@@ -1,10 +1,10 @@
 import { AlertCircle, ChevronDown, GitMerge } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
-import GitlabIcon from '@/components/misc/GitlabIcon';
-import FilterButton from '@/components/newtab/FilterButton';
-import MRItem from '@/components/newtab/gitlab/MRItem';
-import KeyboardShortcutKey from '@/components/newtab/KeyboardShortcutKey';
+import { GitlabIcon } from '@/components/misc/GitlabIcon';
+import { FilterButton } from '@/components/newtab/FilterButton';
+import { MRItem } from '@/components/newtab/gitlab/MRItem';
+import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
 import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -49,7 +49,7 @@ const hasSyncLabel = (labels: { title: string }[]) =>
 const isSyncBranch = (sourceBranch: string): boolean =>
   sourceBranch.startsWith('sync/');
 
-export default function GitlabSection() {
+export function GitlabSection() {
   const { mutate: approveSyncMrs, isPending: isApprovingSyncMrs } =
     useApproveSyncMrs();
   const [filter, setFilter] = useGitlabFilter();

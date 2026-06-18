@@ -1,7 +1,7 @@
 import { Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 
-import GitlabIcon from '@/components/misc/GitlabIcon';
+import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

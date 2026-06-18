@@ -9,21 +9,20 @@ import {
   WorkflowIcon,
 } from 'lucide-react';
 
-import GitlabUserAvatar from '@/components/newtab/gitlab/GitlabUserAvatar';
-import MrStatusBadge from '@/components/newtab/gitlab/MrStatusBadge';
-import MRStatusIcon from '@/components/newtab/gitlab/MRStatusIcon';
-import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
+import { GitlabUserAvatar } from '@/components/newtab/gitlab/GitlabUserAvatar';
+import { MrLabel } from '@/components/newtab/gitlab/MRLabel';
+import { MrStatusBadge } from '@/components/newtab/gitlab/MrStatusBadge';
+import { MRStatusIcon } from '@/components/newtab/gitlab/MRStatusIcon';
+import { WorkItemComments } from '@/components/newtab/misc/WorkItemComments';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { type GitlabMergeRequest } from '@/types/gitlab';
-
-import MrLabel from './MRLabel';
 
 interface MRItemProps {
   mr: GitlabMergeRequest;
 }
 
-const MRItem = ({ mr }: MRItemProps) => {
+export const MRItem = ({ mr }: MRItemProps) => {
   const hasProblem = mr.conflicts || mr.headPipelineStatus === 'FAILED';
   const shouldHighlightProblem = hasProblem && !mr.draft;
   const draftProblemLabel = mr.conflicts ? 'Conflicts' : 'Failed pipeline';
@@ -168,5 +167,3 @@ const MRItem = ({ mr }: MRItemProps) => {
     </a>
   );
 };
-
-export default MRItem;

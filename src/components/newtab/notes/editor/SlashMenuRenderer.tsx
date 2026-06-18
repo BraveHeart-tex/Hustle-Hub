@@ -22,14 +22,13 @@ import {
   useState,
 } from 'react';
 
+import { type SlashMenuItem } from '@/components/newtab/notes/editor/SlashMenuItem';
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-
-import { type SlashMenuItem } from './SlashMenuItem';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   'Heading 1': Heading1Icon,
@@ -55,7 +54,7 @@ export interface SlashMenuRendererRef {
   onKeyDown: (props: { event: KeyboardEvent }) => boolean;
 }
 
-const SlashMenuRenderer = forwardRef<
+export const SlashMenuRenderer = forwardRef<
   SlashMenuRendererRef,
   SlashMenuRendererProps
 >(({ items, clientRect, command }, ref) => {
@@ -192,5 +191,3 @@ const SlashMenuRenderer = forwardRef<
 });
 
 SlashMenuRenderer.displayName = 'SlashMenuRenderer';
-
-export default SlashMenuRenderer;

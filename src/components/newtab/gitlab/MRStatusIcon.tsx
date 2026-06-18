@@ -23,7 +23,7 @@ const mrStatusIconVariants = cva(
   },
 );
 
-const MRStatusIcon = ({
+export const MRStatusIcon = ({
   title,
   icon,
   variant,
@@ -45,5 +45,3 @@ const MRStatusIcon = ({
     </div>
   );
 };
-
-export default MRStatusIcon;

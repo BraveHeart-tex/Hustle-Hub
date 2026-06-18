@@ -5,8 +5,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import GitlabIcon from '@/components/misc/GitlabIcon';
-import JiraIcon from '@/components/misc/JiraIcon';
+import { GitlabIcon } from '@/components/misc/GitlabIcon';
+import { JiraIcon } from '@/components/misc/JiraIcon';
 import {
   CommandDialog,
   CommandEmpty,
@@ -99,7 +99,7 @@ const WorkItemRow = ({
   );
 };
 
-const NoteWorkItemPicker = ({
+export const NoteWorkItemPicker = ({
   open,
   linkedItems,
   onOpenChange,
@@ -207,5 +207,3 @@ const NoteWorkItemPicker = ({
     </CommandDialog>
   );
 };
-
-export default NoteWorkItemPicker;

@@ -1,10 +1,10 @@
 import { AlertCircle, CheckSquare } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import JiraIcon from '@/components/misc/JiraIcon';
-import FilterButton from '@/components/newtab/FilterButton';
-import JiraItem from '@/components/newtab/jira/JiraItem';
-import KeyboardShortcutKey from '@/components/newtab/KeyboardShortcutKey';
+import { JiraIcon } from '@/components/misc/JiraIcon';
+import { FilterButton } from '@/components/newtab/FilterButton';
+import { JiraItem } from '@/components/newtab/jira/JiraItem';
+import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
 import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -48,7 +48,7 @@ interface JiraSectionProps {
   className?: string;
 }
 
-export default function JiraSection({ className }: JiraSectionProps) {
+export function JiraSection({ className }: JiraSectionProps) {
   const [filter, setFilter] = useJiraFilter();
   const { data, isLoading, isError, error } = useJiraTickets(filter);
   const [selectedTaskStatus, setSelectedTaskStatus] = useState('');

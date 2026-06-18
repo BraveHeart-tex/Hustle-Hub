@@ -7,7 +7,7 @@ interface FilterButtonProps extends ComponentProps<typeof Button> {
   active: boolean;
 }
 
-const FilterButton = ({
+export const FilterButton = ({
   active,
   className,
   children,
@@ -28,4 +28,3 @@ const FilterButton = ({
     </Button>
   );
 };
-export default FilterButton;

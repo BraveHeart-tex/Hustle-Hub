@@ -380,7 +380,7 @@ function AttentionSkeleton() {
 // Main section
 // ------------------------------------------------------------
 
-export default function AttentionSection() {
+export function AttentionSection() {
   const { data: items, isLoading, isError } = useAttention();
 
   const criticalItems = useMemo(

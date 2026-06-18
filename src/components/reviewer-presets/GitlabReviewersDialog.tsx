@@ -1,6 +1,8 @@
 import { Loader2, Pencil, PlusIcon, UserIcon } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 
+import { GitlabIcon } from '@/components/misc/GitlabIcon';
+import { ReviewerActions } from '@/components/reviewer-presets/ReviewerActions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,9 +21,6 @@ import {
 } from '@/lib/storage/reviewer-presets';
 import { cn } from '@/lib/utils';
 import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
-
-import GitlabIcon from '../misc/GitlabIcon';
-import { ReviewerActions } from './ReviewerActions';
 
 type FormMode = 'add' | 'edit';
 const EMPTY_FORM = { gitlabId: '', name: '' };

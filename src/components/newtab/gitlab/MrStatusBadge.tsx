@@ -76,8 +76,6 @@ interface MRStatusBadgeProps {
   draft?: boolean;
 }
 
-const MrStatusBadge = ({ status, draft }: MRStatusBadgeProps) => {
+export const MrStatusBadge = ({ status, draft }: MRStatusBadgeProps) => {
   return getStatusBadge({ status, draft });
 };
-
-export default MrStatusBadge;

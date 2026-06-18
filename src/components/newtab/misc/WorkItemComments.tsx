@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 import { Button } from '@/components/ui/button';
-import EditorSkeleton from '@/components/ui/editor-skeleton';
+import { EditorSkeleton } from '@/components/ui/editor-skeleton';
 import {
   Popover,
   PopoverContent,
@@ -21,7 +21,11 @@ import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import { type CommentItemType } from '@/types/comments';
 
-const RichTextEditor = lazy(() => import('@/components/ui/rich-text-editor'));
+const RichTextEditor = lazy(() =>
+  import('@/components/ui/rich-text-editor').then((module) => ({
+    default: module.RichTextEditor,
+  })),
+);
 
 interface WorkItemCommentsProps {
   preventDefaultOnClick?: boolean;
@@ -33,7 +37,7 @@ interface WorkItemCommentsProps {
   };
 }
 
-const WorkItemComments = ({
+export const WorkItemComments = ({
   itemMeta,
   preventDefaultOnClick = false,
 }: WorkItemCommentsProps) => {
@@ -267,5 +271,3 @@ const WorkItemComments = ({
     </Popover>
   );
 };
-
-export default WorkItemComments;

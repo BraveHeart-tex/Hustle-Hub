@@ -1,7 +1,7 @@
 import { ExternalLinkIcon, Loader2Icon, SparklesIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import JiraIcon from '@/components/misc/JiraIcon';
+import { JiraIcon } from '@/components/misc/JiraIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {

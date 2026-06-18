@@ -1,13 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
-import AttentionSection from '@/components/newtab/attention/AttentionSection';
-import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
-import GlobalStatusIndicator from '@/components/newtab/GlobalStatusIndicator.tsx';
-import Header from '@/components/newtab/Header';
-import JiraSection from '@/components/newtab/jira/JiraSection';
-import NotesPage from '@/components/newtab/notes/NotesPage';
-import SearchDialog from '@/components/newtab/SearchDialog';
+import { AttentionSection } from '@/components/newtab/attention/AttentionSection';
+import { GitlabSection } from '@/components/newtab/gitlab/GitlabSection';
+import { GlobalStatusIndicator } from '@/components/newtab/GlobalStatusIndicator.tsx';
+import { Header } from '@/components/newtab/Header';
+import { JiraSection } from '@/components/newtab/jira/JiraSection';
+import { NotesPage } from '@/components/newtab/notes/NotesPage';
+import { SearchDialog } from '@/components/newtab/SearchDialog';
 import { useHashRoute } from '@/lib/router';
 import { CommentsProvider } from '@/lib/storage/comments';
 
@@ -22,7 +22,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const NewTab = () => {
+export const NewTab = () => {
   const { route } = useHashRoute();
 
   return (
@@ -64,5 +64,3 @@ const DashboardPage = () => {
     </>
   );
 };
-
-export default NewTab;

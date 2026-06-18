@@ -1,8 +1,8 @@
 import { SearchIcon } from 'lucide-react';
 
-import { useNotesPage } from './useNotesPage';
+import { useNotesPage } from '@/components/newtab/notes/useNotesPage';
 
-const NotesToolbar = () => {
+export const NotesToolbar = () => {
   const { searchQuery, setSearchQuery } = useNotesPage();
 
   return (
@@ -19,5 +19,3 @@ const NotesToolbar = () => {
     </div>
   );
 };
-
-export default NotesToolbar;

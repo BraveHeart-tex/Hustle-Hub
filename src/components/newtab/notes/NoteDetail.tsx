@@ -18,8 +18,12 @@ import {
   useState,
 } from 'react';
 
-import GitlabIcon from '@/components/misc/GitlabIcon';
-import JiraIcon from '@/components/misc/JiraIcon';
+import { GitlabIcon } from '@/components/misc/GitlabIcon';
+import { JiraIcon } from '@/components/misc/JiraIcon';
+import { createEditorExtensions } from '@/components/newtab/notes/editor/editorExtensions';
+import { FloatingToolbar } from '@/components/newtab/notes/editor/FloatingToolbar';
+import { NoteWorkItemPicker } from '@/components/newtab/notes/NoteWorkItemPicker';
+import { useNotesPage } from '@/components/newtab/notes/useNotesPage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,11 +49,6 @@ import {
 import { removeNote, updateNote } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
 import { type Note, type NoteLinkedWorkItem } from '@/types/notes';
-
-import { createEditorExtensions } from './editor/editorExtensions';
-import FloatingToolbar from './editor/FloatingToolbar';
-import NoteWorkItemPicker from './NoteWorkItemPicker';
-import { useNotesPage } from './useNotesPage';
 
 const priorityConfig: Record<Note['priority'], { label: string; dot: string }> =
   {
@@ -480,7 +479,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
   );
 };
 
-const NoteDetail = () => {
+export const NoteDetail = () => {
   const { selectedNote } = useNotesPage();
 
   if (!selectedNote) {
@@ -500,5 +499,3 @@ const NoteDetail = () => {
     </section>
   );
 };
-
-export default NoteDetail;

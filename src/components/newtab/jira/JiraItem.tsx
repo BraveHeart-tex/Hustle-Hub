@@ -1,7 +1,7 @@
 import { CheckSquare, ClipboardCopyIcon } from 'lucide-react';
 import { type MouseEvent, useState } from 'react';
 
-import WorkItemComments from '@/components/newtab/misc/WorkItemComments';
+import { WorkItemComments } from '@/components/newtab/misc/WorkItemComments';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
@@ -22,7 +22,7 @@ interface JiraItemProps {
   issue: JiraIssue;
 }
 
-const JiraItem = ({ issue }: JiraItemProps) => {
+export const JiraItem = ({ issue }: JiraItemProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const { fields } = issue;
 
@@ -92,5 +92,3 @@ const JiraItem = ({ issue }: JiraItemProps) => {
     </div>
   );
 };
-
-export default JiraItem;

@@ -1,9 +1,9 @@
-import NoteDetail from './NoteDetail';
-import NotesList from './NotesList';
-import NotesSidebar from './NotesSidebar';
-import { NotesPageProvider } from './useNotesPage';
+import { NoteDetail } from '@/components/newtab/notes/NoteDetail';
+import { NotesList } from '@/components/newtab/notes/NotesList';
+import { NotesSidebar } from '@/components/newtab/notes/NotesSidebar';
+import { NotesPageProvider } from '@/components/newtab/notes/useNotesPage';
 
-const NotesPage = () => {
+export const NotesPage = () => {
   return (
     <NotesPageProvider>
       <div className="flex h-[calc(100vh-110px)] gap-0 overflow-hidden rounded-xl border border-border bg-card">
@@ -14,5 +14,3 @@ const NotesPage = () => {
     </NotesPageProvider>
   );
 };
-
-export default NotesPage;

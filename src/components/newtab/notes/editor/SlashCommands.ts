@@ -2,11 +2,15 @@ import { Extension, type Range } from '@tiptap/core';
 import { ReactRenderer } from '@tiptap/react';
 import { Suggestion, type SuggestionKeyDownProps } from '@tiptap/suggestion';
 
-import { type SlashCommandOptions, type SlashMenuItem } from './SlashMenuItem';
-import SlashMenuRenderer, {
+import {
+  type SlashCommandOptions,
+  type SlashMenuItem,
+} from '@/components/newtab/notes/editor/SlashMenuItem';
+import {
+  SlashMenuRenderer,
   type SlashMenuRendererProps,
   type SlashMenuRendererRef,
-} from './SlashMenuRenderer';
+} from '@/components/newtab/notes/editor/SlashMenuRenderer';
 
 const deleteRange = (range: Range) => {
   return {

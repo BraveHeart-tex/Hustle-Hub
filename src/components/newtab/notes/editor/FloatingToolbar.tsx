@@ -39,7 +39,7 @@ const ToolbarButton = ({ active, children, onClick }: ToolbarButtonProps) => (
   </button>
 );
 
-const FloatingToolbar = ({ editor }: FloatingToolbarProps) => {
+export const FloatingToolbar = ({ editor }: FloatingToolbarProps) => {
   if (!editor) {
     return null;
   }
@@ -96,5 +96,3 @@ const FloatingToolbar = ({ editor }: FloatingToolbarProps) => {
     </BubbleMenu>
   );
 };
-
-export default FloatingToolbar;

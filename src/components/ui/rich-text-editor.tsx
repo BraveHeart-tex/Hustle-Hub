@@ -39,7 +39,7 @@ export interface TiptapRef {
   editor: Editor | null;
 }
 
-const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
+export const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
   (
     {
       content = '',
@@ -332,5 +332,3 @@ const ToolbarButton = ({
     {children}
   </Button>
 );
-
-export default RichTextEditor;

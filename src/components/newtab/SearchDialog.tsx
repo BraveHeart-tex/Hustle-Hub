@@ -6,8 +6,8 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import GitlabIcon from '@/components/misc/GitlabIcon';
-import JiraIcon from '@/components/misc/JiraIcon';
+import { GitlabIcon } from '@/components/misc/GitlabIcon';
+import { JiraIcon } from '@/components/misc/JiraIcon';
 import {
   CommandDialog,
   CommandEmpty,
@@ -35,7 +35,7 @@ function getStatusStyle(statusName: string): string {
   );
 }
 
-const SearchDialog = () => {
+export const SearchDialog = () => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const { gitlab: filteredMRs, jira: filteredIssues } =
@@ -254,5 +254,3 @@ const SearchDialog = () => {
     </CommandDialog>
   );
 };
-
-export default SearchDialog;

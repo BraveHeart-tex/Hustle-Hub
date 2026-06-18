@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-const GlobalStatusIndicator = () => {
+export const GlobalStatusIndicator = () => {
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
   const isActive = isFetching > 0 || isMutating > 0;
@@ -31,5 +31,3 @@ const GlobalStatusIndicator = () => {
     </div>
   );
 };
-
-export default GlobalStatusIndicator;

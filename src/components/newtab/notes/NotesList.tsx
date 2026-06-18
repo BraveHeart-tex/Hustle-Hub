@@ -1,5 +1,9 @@
 import { ChevronDownIcon, PinIcon, PlusIcon } from 'lucide-react';
 
+import {
+  type NotesSort,
+  useNotesPage,
+} from '@/components/newtab/notes/useNotesPage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,8 +15,6 @@ import {
 import { addNote } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
 import { type Note } from '@/types/notes';
-
-import { type NotesSort, useNotesPage } from './useNotesPage';
 
 const priorityDot: Record<Note['priority'], string> = {
   high: 'bg-red-500',
@@ -68,7 +70,7 @@ const formatRelativeTime = (value?: string) => {
   return `${count} ${interval.unit}${count === 1 ? '' : 's'} ago`;
 };
 
-const NotesList = () => {
+export const NotesList = () => {
   const {
     filteredNotes,
     selectedNoteId,
@@ -209,5 +211,3 @@ const NotesList = () => {
     </section>
   );
 };
-
-export default NotesList;

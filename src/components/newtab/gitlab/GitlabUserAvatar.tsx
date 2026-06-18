@@ -5,7 +5,11 @@ interface GitlabUserAvatar
   src: string;
 }
 
-const GitlabUserAvatar = ({ src, className, ...props }: GitlabUserAvatar) => {
+export const GitlabUserAvatar = ({
+  src,
+  className,
+  ...props
+}: GitlabUserAvatar) => {
   return (
     <img
       src={src}
@@ -18,4 +22,3 @@ const GitlabUserAvatar = ({ src, className, ...props }: GitlabUserAvatar) => {
     />
   );
 };
-export default GitlabUserAvatar;

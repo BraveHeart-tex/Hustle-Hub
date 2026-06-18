@@ -29,7 +29,7 @@ function lighten(hex: string, amount: number): string {
   return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
 }
 
-const MrLabel = ({
+export const MrLabel = ({
   label,
 }: {
   label: GitlabMergeRequest['labels'][number];
@@ -60,5 +60,3 @@ const MrLabel = ({
     </span>
   );
 };
-
-export default MrLabel;

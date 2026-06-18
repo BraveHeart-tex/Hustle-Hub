@@ -4,7 +4,7 @@ interface JiraIconProps {
   height?: number;
 }
 
-const JiraIcon = ({
+export const JiraIcon = ({
   className = 'text-blue-600',
   width = 20,
   height = 20,
@@ -22,5 +22,3 @@ const JiraIcon = ({
     />
   </svg>
 );
-
-export default JiraIcon;

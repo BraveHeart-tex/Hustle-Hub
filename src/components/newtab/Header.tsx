@@ -14,7 +14,7 @@ import { useHashRoute } from '@/lib/router';
 import { useNotes } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
 
-export default function Header() {
+export function Header() {
   const queryClient = useQueryClient();
   const isFetching = useIsFetching();
   const { notes } = useNotes();

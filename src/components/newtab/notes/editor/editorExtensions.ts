@@ -3,8 +3,8 @@ import TaskList from '@tiptap/extension-task-list';
 import { Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
 
-import { SlashCommands } from './SlashCommands';
-import { type SlashCommandOptions } from './SlashMenuItem';
+import { SlashCommands } from '@/components/newtab/notes/editor/SlashCommands';
+import { type SlashCommandOptions } from '@/components/newtab/notes/editor/SlashMenuItem';
 
 export const createEditorExtensions = (options: SlashCommandOptions = {}) => [
   StarterKit.configure({

@@ -6,11 +6,13 @@ import {
 } from 'lucide-react';
 import { type ReactNode } from 'react';
 
+import { NotesToolbar } from '@/components/newtab/notes/NotesToolbar';
+import {
+  type NotesFilter,
+  useNotesPage,
+} from '@/components/newtab/notes/useNotesPage';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
-import NotesToolbar from './NotesToolbar';
-import { type NotesFilter, useNotesPage } from './useNotesPage';
 
 interface FilterItem {
   value: NotesFilter;
@@ -27,7 +29,7 @@ const filters: FilterItem[] = [
   { value: 'archived', label: 'Archived', icon: ArchiveIcon },
 ];
 
-const NotesSidebar = () => {
+export const NotesSidebar = () => {
   const {
     activeFilter,
     activeTag,
@@ -132,5 +134,3 @@ const NotesSidebar = () => {
     </aside>
   );
 };
-
-export default NotesSidebar;
