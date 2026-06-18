@@ -1,14 +1,13 @@
-import { type usePresets } from '@/lib/storage/reviewer-presets';
-import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
-import { type GitlabReviewer } from '@/types/reviewer-presets';
-
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Button } from '../ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from '../ui/hover-card';
+} from '@/components/ui/hover-card';
+import { type usePresets } from '@/lib/storage/reviewer-presets';
+import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
+import { type GitlabReviewer } from '@/types/reviewer-presets';
 
 interface ReviewerChipWithPreviewProps {
   preset: ReturnType<typeof usePresets>['presets'][number];

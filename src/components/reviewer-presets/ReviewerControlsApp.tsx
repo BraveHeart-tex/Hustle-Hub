@@ -3,15 +3,18 @@ import '@/assets/tailwind.css';
 import { UsersIcon } from 'lucide-react';
 import { StrictMode } from 'react';
 
+import { BottomRightPanel } from '@/components/mr-thread-panel/BottomRightPanel';
+import { ReviewerChipWithPreview } from '@/components/reviewer-presets/ReviewerChipWithPreview';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { usePresets, useReviewers } from '@/lib/storage/reviewer-presets';
 import { getGitlabUserAvatar } from '@/lib/utils/misc/getGitlabUserAvatar';
 import { type GitlabReviewer } from '@/types/reviewer-presets';
-
-import { BottomRightPanel } from '../mr-thread-panel/BottomRightPanel';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Button } from '../ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { ReviewerChipWithPreview } from './ReviewerChipWithPreview';
 
 const getCurrentReviewers = (
   reviewersContainer: HTMLElement | null,

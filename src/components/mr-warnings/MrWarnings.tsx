@@ -4,10 +4,20 @@ import {
   InfoIcon,
   TriangleAlertIcon,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Button } from '../ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { type MrWarning, mrWarningStrategies } from './mr-warning-strategies';
+import {
+  type MrWarning,
+  mrWarningStrategies,
+} from '@/components/mr-warnings/mr-warning-strategies';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { useTargetBranch } from '@/hooks/useTargetBranch';
+import { useUrlChange } from '@/hooks/useUrlChange';
 
 const severityConfig = {
   error: {
@@ -29,11 +39,6 @@ const severityConfig = {
     badgeClassName: 'bg-blue-100 text-blue-700',
   },
 } as const;
-
-import { useEffect, useState } from 'react';
-
-import { useTargetBranch } from '@/hooks/useTargetBranch';
-import { useUrlChange } from '@/hooks/useUrlChange';
 
 export const MrWarnings = ({
   container,

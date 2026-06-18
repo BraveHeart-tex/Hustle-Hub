@@ -1,6 +1,10 @@
 import { Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 
+import GitlabIcon from '@/components/misc/GitlabIcon';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -10,6 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   addReviewerPreset,
   removeReviewerPreset,
@@ -22,13 +28,6 @@ import {
   type GitlabReviewer,
   type ReviewerPreset,
 } from '@/types/reviewer-presets';
-
-import GitlabIcon from '../misc/GitlabIcon';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 
 type FormMode = 'add' | 'edit';
 const EMPTY_FORM = { name: '', users: [] as string[] };

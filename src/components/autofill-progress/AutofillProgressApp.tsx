@@ -10,13 +10,12 @@ import {
 } from 'lucide-react';
 import { StrictMode, useSyncExternalStore } from 'react';
 
+import { Button } from '@/components/ui/button';
 import {
   type ProgressStep,
   progressStore,
   type StepStatus,
 } from '@/lib/autofill-progress/progressStore';
-
-import { Button } from '../ui/button';
 
 const StepStatusIcon = ({ status }: { status: StepStatus }) => {
   switch (status) {
