@@ -1,5 +1,9 @@
 import { Settings, Terminal } from 'lucide-react';
 
+import GitlabIcon from '@/components/misc/GitlabIcon';
+import { StrictReviewTemplateDialog } from '@/components/newtab/StrictReviewTemplateDialog';
+import { GitlabReviewersDialog } from '@/components/reviewer-presets/GitlabReviewersDialog';
+import { ReviewerPresetsDialog } from '@/components/reviewer-presets/ReviewerPresetsDialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,11 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-import GitlabIcon from '../misc/GitlabIcon';
-import { GitlabReviewersDialog } from '../reviewer-presets/GitlabReviewersDialog';
-import { ReviewerPresetsDialog } from '../reviewer-presets/ReviewerPresetsDialog';
-import { StrictReviewTemplateDialog } from './StrictReviewTemplateDialog';
 
 type DialogType = 'reviewers' | 'presets' | 'strict-review-template';
 

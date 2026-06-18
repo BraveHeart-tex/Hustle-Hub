@@ -5,6 +5,7 @@ import {
   Label as DropdownMenuPrimitiveLabel,
   Portal as DropdownMenuPrimitivePortal,
   Root as DropdownMenuPrimitiveRoot,
+  Separator as DropdownMenuPrimitiveSeparator,
   Trigger as DropdownMenuPrimitiveTrigger,
 } from '@radix-ui/react-dropdown-menu';
 import { type ComponentProps } from 'react';
@@ -99,11 +100,25 @@ function DropdownMenuLabel({
   );
 }
 
+function DropdownMenuSeparator({
+  className,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitiveSeparator>) {
+  return (
+    <DropdownMenuPrimitiveSeparator
+      data-slot="dropdown-menu-separator"
+      className={cn('-mx-1 my-1 h-px bg-border', className)}
+      {...props}
+    />
+  );
+}
+
 export {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 };

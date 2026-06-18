@@ -141,7 +141,7 @@ export default defineConfig([
       'node_modules/**',
       '**/*.generated.*',
       'src/generated/**',
-      '.ouput/**',
+      '.output/**',
       '.wxt/**',
       'public/**',
     ],
