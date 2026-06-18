@@ -5,20 +5,20 @@ import {
   RefreshCwIcon,
   ZapIcon,
 } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
 
+import { AppSettings } from '@/components/newtab/AppSettings';
+import { AllCommentsWidget } from '@/components/newtab/misc/AllCommentsWidget';
 import { ModeToggle } from '@/components/newtab/ModeToggle';
 import { Button } from '@/components/ui/button';
+import { useHashRoute } from '@/lib/router';
 import { useNotes } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
-
-import { AppSettings } from './AppSettings';
-import AllCommentsWidget from './misc/AllCommentsWidget';
 
 export default function Header() {
   const queryClient = useQueryClient();
   const isFetching = useIsFetching();
   const { notes } = useNotes();
+  const { route, navigate } = useHashRoute();
 
   const handleRefreshData = () => {
     void queryClient.refetchQueries({ type: 'active' });
@@ -38,39 +38,37 @@ export default function Header() {
             <h1 className="text-xl font-bold text-foreground">Hustle Hub</h1>
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                cn(
-                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                  isActive
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
-                )
-              }
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className={cn(
+                'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                route === '/'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
+              )}
             >
               <LayoutDashboardIcon className="h-4 w-4" />
               Dashboard
-            </NavLink>
-            <NavLink
-              to="/notes"
-              className={({ isActive }) =>
-                cn(
-                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                  isActive
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
-                )
-              }
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/notes')}
+              className={cn(
+                'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                route === '/notes'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
+              )}
             >
               <NotebookTextIcon className="h-4 w-4" />
               Notes
               <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold leading-5 text-primary-foreground">
                 {notes.length}
               </span>
-            </NavLink>
+            </button>
           </div>
           <div className="flex items-center space-x-3">
             <AllCommentsWidget />

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { HashRouter, Outlet, Route, Routes } from 'react-router-dom';
+import type { ReactNode } from 'react';
 
 import AttentionSection from '@/components/newtab/attention/AttentionSection';
 import GitlabSection from '@/components/newtab/gitlab/GitlabSection';
@@ -8,39 +8,33 @@ import Header from '@/components/newtab/Header';
 import JiraSection from '@/components/newtab/jira/JiraSection';
 import NotesPage from '@/components/newtab/notes/NotesPage';
 import SearchDialog from '@/components/newtab/SearchDialog';
+import { useHashRoute } from '@/lib/router';
 import { CommentsProvider } from '@/lib/storage/comments';
 
 const queryClient = new QueryClient();
 
-const AppLayout = () => {
+const AppLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <>
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="min-w-0 flex-1 px-4 py-6">
-          <Outlet />
-        </main>
-      </div>
-    </>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="min-w-0 flex-1 px-4 py-6">{children}</main>
+    </div>
   );
 };
 
 const NewTab = () => {
-  return (
-    <HashRouter>
-      <QueryClientProvider client={queryClient}>
-        <CommentsProvider>
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="notes" element={<NotesPage />} />
-            </Route>
-          </Routes>
+  const { route } = useHashRoute();
 
-          <GlobalStatusIndicator />
-        </CommentsProvider>
-      </QueryClientProvider>
-    </HashRouter>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <CommentsProvider>
+        <AppLayout>
+          {route === '/notes' ? <NotesPage /> : <DashboardPage />}
+        </AppLayout>
+
+        <GlobalStatusIndicator />
+      </CommentsProvider>
+    </QueryClientProvider>
   );
 };
 

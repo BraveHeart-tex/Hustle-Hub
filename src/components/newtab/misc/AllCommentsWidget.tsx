@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
 import type { Comment } from '@/types/comments';
 
-const AllCommentsWidget = () => {
+export const AllCommentsWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { comments } = useComments();
   const [submitting, setSubmitting] = useState<Set<string>>(new Set());
@@ -180,5 +180,3 @@ const AllCommentsWidget = () => {
     </Sheet>
   );
 };
-
-export default AllCommentsWidget;
