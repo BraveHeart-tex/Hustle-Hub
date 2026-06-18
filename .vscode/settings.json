@@ -17,6 +17,7 @@
     "**/node_modules": true,
     "**/bower_components": true,
     "**/*.code-search": true,
-    "**/.output": true
+    "**/.output": true,
+    "**/.wxt": true
   }
 }
