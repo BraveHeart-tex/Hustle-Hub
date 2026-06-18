@@ -133,6 +133,35 @@ export default defineConfig([
   },
 
   // ----------------------------------------------------------------
+  // Ban default exports — prefer named exports everywhere.
+  // The WXT entrypoint exception below re-enables them where the
+  // framework requires `export default define*()`.
+  // ----------------------------------------------------------------
+  {
+    rules: {
+      'no-restricted-exports': [
+        'error',
+        { restrictDefaultExports: { direct: true, named: true } },
+      ],
+    },
+  },
+
+  {
+    files: [
+      'src/entrypoints/background.{ts,js}',
+      'src/entrypoints/background/index.{ts,js}',
+      'src/entrypoints/content.{ts,tsx,js,jsx}',
+      'src/entrypoints/content/index.{ts,tsx,js,jsx}',
+      'src/entrypoints/*.content.{ts,tsx,js,jsx}',
+      'src/entrypoints/*.content/index.{ts,tsx,js,jsx}',
+      '*.config.{js,ts,mjs,cjs}',
+    ],
+    rules: {
+      'no-restricted-exports': 'off',
+    },
+  },
+
+  // ----------------------------------------------------------------
   // Ignore patterns
   // ----------------------------------------------------------------
   {
