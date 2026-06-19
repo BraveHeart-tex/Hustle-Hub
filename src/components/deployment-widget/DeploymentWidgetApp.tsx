@@ -343,7 +343,7 @@ export const DeploymentWidgetApp = ({
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                       Commit message
                     </p>
-                    <p className="whitespace-pre-wrap text-xs leading-5 text-foreground/80">
+                    <p className="whitespace-pre-wrap text-xs leading-5 text-foreground/80 overflow-y-auto max-h-[12.5rem]">
                       {messageBody}
                     </p>
                   </div>
