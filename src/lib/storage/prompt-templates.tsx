@@ -52,7 +52,7 @@ const getTemplates = async (): Promise<StrictReviewTemplate[]> => {
   return seeded;
 };
 
-export const getProjectPath = (url: string): string => {
+const getProjectPath = (url: string): string => {
   try {
     const { pathname } = new URL(url);
     const markerIndex = pathname.indexOf('/-/');
@@ -69,10 +69,7 @@ const termToRegex = (term: string): RegExp => {
   return new RegExp(withWildcard, 'i');
 };
 
-export const matchesUrlPattern = (
-  pattern: string,
-  projectPath: string,
-): boolean => {
+const matchesUrlPattern = (pattern: string, projectPath: string): boolean => {
   const terms = pattern
     .split(/[\n,]/)
     .map((term) => term.trim())
