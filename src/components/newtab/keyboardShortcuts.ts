@@ -1,22 +1,22 @@
-import { GITLAB_FILTERS, JIRA_FILTERS } from '@/lib/constants';
+import { GITLAB_CATEGORIES, JIRA_FILTERS } from '@/lib/constants';
 
 export const SEARCH_SHORTCUT = {
   ariaKeyShortcuts: 'Meta+K Control+K',
   keys: ['Cmd/Ctrl', 'K'],
 } as const;
 
-export const GITLAB_FILTER_SHORTCUTS = [
+export const GITLAB_CATEGORY_SHORTCUTS = [
   {
-    label: 'Review Requested',
+    label: 'Review requested',
     shortcutKeys: ['g', 'r'],
     key: 'r',
-    value: GITLAB_FILTERS.REVIEW,
+    value: GITLAB_CATEGORIES.REVIEW_REQUESTED,
   },
   {
-    label: 'Assigned to me',
-    shortcutKeys: ['g', 'a'],
-    key: 'a',
-    value: GITLAB_FILTERS.ASSIGNED,
+    label: 'Draft merge requests',
+    shortcutKeys: ['g', 'd'],
+    key: 'd',
+    value: GITLAB_CATEGORIES.DRAFTS,
   },
 ] as const;
 

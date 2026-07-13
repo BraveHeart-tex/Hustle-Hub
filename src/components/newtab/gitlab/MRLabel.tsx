@@ -29,6 +29,12 @@ function lighten(hex: string, amount: number): string {
   return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
 }
 
+function darken(hex: string, amount: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  const mix = (colorChannel: number) => Math.round(colorChannel * (1 - amount));
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+}
+
 export const MrLabel = ({
   label,
 }: {
@@ -39,10 +45,9 @@ export const MrLabel = ({
 
   const isTooDark = brightness(label.color) < 80;
 
-  // In dark mode: lighten very dark colors so they're visible,
-  // otherwise use the existing darkenHexColor logic for muted bg.
-  const textColor =
-    isDark && isTooDark ? lighten(label.color, 0.55) : label.color;
+  const textColor = isDark
+    ? lighten(label.color, isTooDark ? 0.65 : 0.45)
+    : darken(label.color, 0.35);
 
   const bgOpacity = isDark ? '33' : '26'; // 20% dark / 15% light
   const borderOpacity = isDark ? '55' : '40'; // 33% dark / 25% light

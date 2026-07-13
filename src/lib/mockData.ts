@@ -222,7 +222,6 @@ const reviewer = (id: number, avatarUrl: string, hasApproved = false) => ({
 
 const commonMergeRequestFields = {
   targetBranch: 'main',
-  approvedByCurrentUser: false,
   autoMergeEnabled: false,
 } as const;
 
@@ -298,29 +297,6 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
     projectName: 'storefront',
     projectId: '101',
     diffStatsSummary: { additions: 96, deletions: 34 },
-  },
-  {
-    ...commonMergeRequestFields,
-    iid: '845',
-    title: 'Sync translations from localization platform',
-    createdAt: hoursAgo(9),
-    sourceBranch: 'sync/translations-2026-07-13',
-    draft: false,
-    mergeStatus: 'can_be_merged',
-    webUrl:
-      'https://gitlab.example.com/commerce/storefront/-/merge_requests/845',
-    userNotesCount: 0,
-    author: { username: 'localization-bot', avatarUrl: '' },
-    approvedBy: 0,
-    approvalsRequired: 1,
-    labels: [{ color: '#bfd4f2', title: 'sync' }],
-    reviewers: [reviewer(12, avatars.alex)],
-    needsCurrentUserAction: true,
-    conflicts: false,
-    headPipelineStatus: 'SUCCESS',
-    projectName: 'storefront',
-    projectId: '101',
-    diffStatsSummary: { additions: 37, deletions: 29 },
   },
 ];
 

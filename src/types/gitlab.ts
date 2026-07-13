@@ -11,7 +11,6 @@ export interface GitlabMergeRequest {
   webUrl: string;
   userNotesCount: number;
   author: { username: string; avatarUrl: string };
-  approvedByCurrentUser?: boolean;
   approvedBy: number;
   approvalsRequired: number;
   labels: { color: string; title: string }[];

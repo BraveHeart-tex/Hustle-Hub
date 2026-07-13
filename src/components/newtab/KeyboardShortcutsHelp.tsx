@@ -2,7 +2,7 @@ import { CircleHelpIcon } from 'lucide-react';
 
 import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
 import {
-  GITLAB_FILTER_SHORTCUTS,
+  GITLAB_CATEGORY_SHORTCUTS,
   JIRA_FILTER_SHORTCUTS,
   SEARCH_SHORTCUT,
 } from '@/components/newtab/keyboardShortcuts';
@@ -65,7 +65,7 @@ export function KeyboardShortcutsHelp() {
             Dashboard filters
           </h3>
           <ul className="mt-1">
-            {GITLAB_FILTER_SHORTCUTS.map((shortcut) => (
+            {GITLAB_CATEGORY_SHORTCUTS.map((shortcut) => (
               <ShortcutRow
                 key={shortcut.value}
                 label={`GitLab: ${shortcut.label}`}

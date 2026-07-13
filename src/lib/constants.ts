@@ -29,6 +29,13 @@ export const GITLAB_FILTERS = {
 } as const;
 export type GitlabFilter = (typeof GITLAB_FILTERS)[keyof typeof GITLAB_FILTERS];
 
+export const GITLAB_CATEGORIES = {
+  REVIEW_REQUESTED: 'review_requested',
+  DRAFTS: 'drafts',
+} as const;
+export type GitlabCategory =
+  (typeof GITLAB_CATEGORIES)[keyof typeof GITLAB_CATEGORIES];
+
 export type NotePriority = 'low' | 'medium' | 'high';
 
 export const GITLAB_HIGHLIGHTED_THREAD_CLASS = '__hb-gitlab-highlighted-thread';

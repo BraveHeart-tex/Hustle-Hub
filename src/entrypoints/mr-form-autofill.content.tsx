@@ -30,13 +30,6 @@ const DROPDOWN_OPTION_TIMEOUT = 3500;
 const DESCRIPTION_EDITOR_TIMEOUT = 3500;
 const FEREL_FALLBACK_KEY = 'FEREL-TASK_NUMBER_HERE';
 const JIRA_TASK_FALLBACK_KEY = 'JIRA-TASK_NUMBER_HERE';
-const SYNC_LABEL = 'sync';
-
-interface GitLabMergeRequestSearchResult {
-  iid: number;
-  web_url: string;
-  reference: string;
-}
 
 const waitForOptionalElement = async <T extends Element>(
   selector: string,
@@ -382,97 +375,6 @@ const applyProductionLabelAndDescription = async (
   );
 };
 
-const getSyncSourceKey = (sourceBranch: string | null): string | null => {
-  if (!sourceBranch?.startsWith('sync/')) return null;
-
-  const syncSourceKey = sourceBranch.slice('sync/'.length).trim();
-  return syncSourceKey || null;
-};
-
-const getGitLabProjectPathFromUrl = (url: string): string | null => {
-  const { pathname } = new URL(url);
-
-  const marker = '/-/';
-  const markerIndex = pathname.indexOf(marker);
-
-  if (markerIndex === -1) return null;
-
-  return decodeURIComponent(pathname.slice(1, markerIndex));
-};
-
-const fetchRelatedReleaseMergeRequest = async (
-  syncSourceKey: string,
-): Promise<GitLabMergeRequestSearchResult | null> => {
-  const projectPath = getGitLabProjectPathFromUrl(window.location.href);
-
-  if (!projectPath) {
-    console.error('Failed to extract project path from url');
-    return null;
-  }
-
-  const gitlabRequestParams = new URLSearchParams({
-    state: 'opened',
-    search: `Production Release for ${syncSourceKey}`,
-    in: 'title',
-    order_by: 'updated_at',
-    sort: 'desc',
-    per_page: '20',
-    scope: 'assigned_to_me',
-  });
-
-  const response = await fetch(
-    `https://gitlab.com/api/v4/projects/${encodeURIComponent(
-      projectPath,
-    )}/merge_requests?${gitlabRequestParams.toString()}`,
-  );
-
-  if (!response.ok) {
-    console.warn('Gitlab request for release MR details failed');
-    return null;
-  }
-
-  const mergeRequests =
-    (await response.json()) as GitLabMergeRequestSearchResult[];
-
-  if (!Array.isArray(mergeRequests) || mergeRequests.length === 0) {
-    console.warn('MR data for sync merge request base was not found.');
-    return null;
-  }
-
-  return mergeRequests[0];
-};
-
-const fillSyncMergeRequest = async (
-  params: URLSearchParams,
-  assignCurrentUserPromise: Promise<boolean | undefined>,
-) => {
-  const syncSourceKey = getSyncSourceKey(
-    params.get('merge_request[source_branch]'),
-  );
-
-  if (!syncSourceKey) return false;
-
-  const relatedReleaseMergeRequestPromise =
-    fetchRelatedReleaseMergeRequest(syncSourceKey);
-  const updateDescriptionPromise = runStep('description', () =>
-    relatedReleaseMergeRequestPromise.then((relatedReleaseMergeRequest) => {
-      if (!relatedReleaseMergeRequest) return false;
-
-      return updateDescription(
-        `${relatedReleaseMergeRequest.web_url} için sync MR`,
-      );
-    }),
-  );
-
-  await Promise.allSettled([
-    assignCurrentUserPromise,
-    runStep('label', () => applyLabel(SYNC_LABEL)),
-    updateDescriptionPromise,
-  ]);
-
-  return true;
-};
-
 export default defineContentScript({
   matches: ['*://*.gitlab.com/*/merge_requests/*'],
   cssInjectionMode: 'ui',
@@ -494,21 +396,7 @@ export default defineContentScript({
 
     void mountAutofillProgress(ctx);
 
-    const sourceBranch = params.get('merge_request[source_branch]');
-    const isSync = Boolean(getSyncSourceKey(sourceBranch));
     const isRelease = params.get('merge_request[target_branch]') === 'main';
-
-    if (isSync) {
-      progressStore.registerSteps([
-        { id: 'assign', label: 'Assign to me' },
-        { id: 'label', label: 'Apply sync label' },
-        { id: 'description', label: 'Link release MR' },
-      ]);
-
-      const assignCurrentUserPromise = runStep('assign', assignCurrentUser);
-      await fillSyncMergeRequest(params, assignCurrentUserPromise);
-      return;
-    }
 
     if (!isRelease) {
       progressStore.registerSteps([
