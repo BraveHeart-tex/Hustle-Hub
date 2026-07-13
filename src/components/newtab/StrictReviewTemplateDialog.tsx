@@ -1,4 +1,4 @@
-import { Loader2, Plus, RotateCcw, Star, Trash2 } from 'lucide-react';
+import { Plus, RotateCcw, Star, Trash2 } from 'lucide-react';
 import {
   type FormEvent,
   Fragment,
@@ -357,9 +357,8 @@ export const StrictReviewTemplateDialog = ({
                     Close
                   </Button>
                 </DialogClose>
-                <Button type="submit" disabled={isSaving || !isDirty}>
-                  {isSaving && <Loader2 className="animate-spin" />}
-                  {isSaving ? 'Saving...' : 'Save'}
+                <Button type="submit" disabled={!isDirty} loading={isSaving}>
+                  Save
                 </Button>
               </div>
             </DialogFooter>

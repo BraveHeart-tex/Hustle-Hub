@@ -1,4 +1,4 @@
-import { Loader2, Pencil, PlusIcon, UserIcon } from 'lucide-react';
+import { Pencil, PlusIcon, UserIcon } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
@@ -277,14 +277,10 @@ export const GitlabReviewersDialog = ({
               type="submit"
               size="sm"
               className="h-8 min-w-24"
-              disabled={!formData.gitlabId || !formData.name || isLoading}
+              disabled={!formData.gitlabId || !formData.name}
+              loading={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  {mode === 'add' ? 'Adding...' : 'Saving...'}
-                </>
-              ) : mode === 'add' ? (
+              {mode === 'add' ? (
                 <>
                   <PlusIcon className="h-3.5 w-3.5" />
                   Add

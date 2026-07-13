@@ -1,4 +1,4 @@
-import { Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Pencil, Plus, Trash2, X } from 'lucide-react';
 import { type FormEvent, useRef, useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
@@ -332,15 +332,12 @@ export const ReviewerPresetsDialog = ({
                 Cancel Edit
               </Button>
             )}
-            <Button type="submit" disabled={!formData.name.trim() || isLoading}>
-              {isLoading && <Loader2 className="animate-spin" />}
-              {isLoading
-                ? mode === 'add'
-                  ? 'Adding...'
-                  : 'Saving...'
-                : mode === 'add'
-                  ? 'Add Preset'
-                  : 'Save Changes'}
+            <Button
+              type="submit"
+              disabled={!formData.name.trim()}
+              loading={isLoading}
+            >
+              {mode === 'add' ? 'Add Preset' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </form>

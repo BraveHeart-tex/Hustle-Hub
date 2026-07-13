@@ -237,6 +237,31 @@ Components are compact and precise. Shared shape, state, focus, and density rule
 - **Focus:** A visible `3px` ring and ring-colored border; focus must never depend on color alone when a shape or outline can reinforce it.
 - **Error / Disabled:** Critical Red marks invalid boundaries; disabled fields reduce opacity and retain their label.
 
+#### Asynchronous field states
+
+`Input` and `Select` intentionally have no generic loading prop. Put `aria-busy` on the smallest containing form, field, or results region whose content is being updated. Keep the current value visible during refresh, and disable a field only while interaction is genuinely unavailable. Asynchronous selection and validation must also expose status text so progress and results are announced without replacing the field value.
+
+```tsx
+<form aria-busy={isValidating}>
+  <Label htmlFor="project">Project</Label>
+  <Select
+    value={projectId}
+    onValueChange={setProjectId}
+    disabled={!canChangeProject}
+  >
+    <SelectTrigger id="project" aria-describedby="project-status">
+      <SelectValue />
+    </SelectTrigger>
+    <SelectContent>
+      {/* Keep the current options visible while refreshing. */}
+    </SelectContent>
+  </Select>
+  <p id="project-status" role="status" aria-live="polite">
+    {isValidating ? 'Checking project access…' : validationMessage}
+  </p>
+</form>
+```
+
 ### Navigation
 
 - **Style:** A compact segmented control in the top bar. Active destinations use the main background, strongest text, and a small structural shadow; inactive destinations remain muted until hover or focus.
