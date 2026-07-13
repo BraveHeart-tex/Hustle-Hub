@@ -9,6 +9,8 @@ colors:
   border-mist: 'oklch(0.922 0 0)'
   action-blue: 'oklch(0.62 0.16 250)'
   critical-red: 'oklch(0.6 0.25 27.325)'
+  warning-amber: 'oklch(0.68 0.15 75)'
+  positive-green: 'oklch(0.62 0.14 155)'
   night-field: 'oklch(0.145 0 0)'
   night-surface: 'oklch(0.205 0 0)'
   night-muted: 'oklch(0.269 0 0)'
@@ -16,14 +18,14 @@ colors:
 typography:
   headline:
     fontFamily: 'ui-sans-serif, system-ui, sans-serif'
-    fontSize: '1.875rem'
+    fontSize: '1.5rem'
     fontWeight: 600
     lineHeight: 1.25
     letterSpacing: '-0.025em'
   title:
     fontFamily: 'ui-sans-serif, system-ui, sans-serif'
-    fontSize: '1.25rem'
-    fontWeight: 700
+    fontSize: '1.125rem'
+    fontWeight: 600
     lineHeight: 1.4
     letterSpacing: 'normal'
   body:
@@ -45,10 +47,10 @@ typography:
     lineHeight: 1
     letterSpacing: 'normal'
 rounded:
-  sm: '0.75rem'
-  md: '0.875rem'
-  lg: '1rem'
-  xl: '1.25rem'
+  sm: '0.25rem'
+  md: '0.375rem'
+  lg: '0.5rem'
+  xl: '0.75rem'
   pill: '9999px'
 spacing:
   xs: '0.25rem'
@@ -82,7 +84,7 @@ components:
     backgroundColor: '{colors.white-field}'
     textColor: '{colors.signal-ink}'
     rounded: '{rounded.xl}'
-    padding: '1.5rem'
+    padding: '1rem'
   badge:
     backgroundColor: '{colors.quiet-gray}'
     textColor: '{colors.signal-ink}'
@@ -109,17 +111,20 @@ The system explicitly rejects the feel of a generic list app with little attenti
 - Compact, repeated alignment patterns that reward fast scanning.
 - Keyboard-visible focus states and shortcuts treated as first-class UI.
 - Flat surfaces at rest, with light depth only where interaction or layering requires it.
+- One shared shape, state, and elevation vocabulary across extension pages and host-mounted controls.
 - Structural responsiveness rather than fluid display typography.
 
 ## 2. Colors
 
-Signal Ink and White Field establish a high-contrast working canvas. Quiet Gray separates secondary surfaces, Action Blue communicates information, and Critical Red is reserved for destructive or failed states. Dark mode inverts the hierarchy without introducing a new accent vocabulary.
+Signal Ink and White Field establish a high-contrast working canvas. Quiet Gray separates secondary surfaces, Action Blue communicates information, and Critical Red is reserved for destructive or failed states. Warning Amber and Positive Green are narrow operational exceptions for warning and completed/success states. Dark mode remaps the same semantic roles rather than introducing a new accent vocabulary.
 
 ### Primary
 
 - **Signal Ink** (`oklch(0.205 0 0)`): Primary actions, selected controls, and the strongest light-theme emphasis.
 - **Action Blue** (`oklch(0.62 0.16 250)`): Informational tokens and states that require recognition without alarm.
 - **Critical Red** (`oklch(0.6 0.25 27.325)`): Errors, destructive actions, and invalid input only.
+- **Warning Amber** (`oklch(0.68 0.15 75)`): Blocking caution or pending-risk states only.
+- **Positive Green** (`oklch(0.62 0.14 155)`): Successful, approved, resolved, or completed states only.
 
 ### Neutral
 
@@ -130,9 +135,24 @@ Signal Ink and White Field establish a high-contrast working canvas. Quiet Gray 
 - **Night Field** (`oklch(0.145 0 0)`), **Night Surface** (`oklch(0.205 0 0)`), and **Night Muted** (`oklch(0.269 0 0)`): Dark-theme depth layers.
 - **Night Text** (`oklch(0.985 0 0)`): Primary content on dark surfaces.
 
+### Canonical Semantic Token Contract
+
+Components consume semantic roles, never palette utilities or raw color values. The canonical CSS roles are:
+
+- **Surfaces and content:** `background`, `foreground`, `card`, `card-foreground`, `popover`, `popover-foreground`, `muted`, `muted-foreground`, `border`, and `input`.
+- **Actions and selection:** `primary`, `primary-foreground`, `secondary`, `secondary-foreground`, `accent`, `accent-foreground`, and `ring`.
+- **Operational states:** `info`, `info-foreground`, `warning`, `warning-foreground`, `success`, `success-foreground`, `destructive`, and `destructive-foreground`.
+- **Layering:** `overlay` for scrims plus named shadow and z-index tokens from the Elevation section.
+
+Every foreground/background pair must be mapped and contrast-checked independently in light and dark themes. Selected, hover, pressed, disabled, and focus-visible states require parity across both themes.
+
 ### Named Rules
 
 **The Semantic Color Rule.** Saturated color must communicate information, status, selection, or risk. It is never ambient decoration.
+
+**The Provider Color Exception.** Official Jira and GitLab marks may retain their brand colors. Provider color does not set surrounding component chrome, text, borders, or hover states.
+
+**The No Palette Utilities Rule.** Product UI must not encode meaning with utilities such as `blue-500`, `green-600`, or raw hex/HSL values. Map the meaning to a semantic role first. Dynamic colors supplied by an external system, such as GitLab labels, are data and must include a readable fallback treatment.
 
 **The One Active Voice Rule.** Signal Ink marks the dominant action or selected state. Competing active controls on the same surface are prohibited.
 
@@ -146,8 +166,8 @@ Signal Ink and White Field establish a high-contrast working canvas. Quiet Gray 
 
 ### Hierarchy
 
-- **Headline** (600, `1.875rem`, `1.25`): Editable note titles and the rare screen-level heading.
-- **Title** (700, `1.25rem`, `1.4`): Product identity and major page anchors.
+- **Headline** (600, `1.5rem`, `1.25`): Editable note titles and the rare screen-level heading.
+- **Title** (600, `1.125rem`, `1.4`): Product identity and major page anchors.
 - **Section title** (600, `1.125rem`, `1.4`): Dashboard source headings and dialog titles.
 - **Body** (400–500, `0.875rem`, `1.5`): Work-item titles, controls, and supporting content.
 - **Label** (500, `0.75rem`, `1.25`): Metadata, statuses, and compact secondary information.
@@ -159,15 +179,26 @@ Signal Ink and White Field establish a high-contrast working canvas. Quiet Gray 
 
 **The Functional Mono Rule.** Monospace may identify keys, issue IDs, code, or variables. It must never replace the interface's body voice.
 
+**The Editor Scale Rule.** Note prose uses a readable `1rem` body with a `1.65–1.75` line height and a `65–75ch` measure. Editor headings use the restrained sequence `1.5rem`, `1.25rem`, `1.125rem`, and `1rem`; the note title remains the only display-sized text on the page.
+
 ## 4. Elevation
 
-The system is flat by default. Borders and tonal shifts establish most structure; small shadows sharpen interactive edges, cards, and selected segmented controls. Large elevation belongs only to true overlays such as dialogs.
+The system is flat by default. Borders and tonal shifts establish resting structure. Small shadows may sharpen a pressed/selected control or a floating control that must separate from a host page. Large elevation belongs only to true overlays such as dialogs.
 
 ### Shadow Vocabulary
 
-- **Interactive edge** (`0 1px 2px 0 rgb(0 0 0 / 0.05)`): Buttons, inputs, and keyboard caps.
-- **Surface separation** (`0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)`): Cards and selected navigation states.
+- **Resting surface** (`none`): Cards, rows, fields, and section containers at rest.
+- **Interactive edge** (`0 1px 2px 0 rgb(0 0 0 / 0.05)`): Selected controls, pressed controls, keyboard caps, and host-page launchers where a border alone is insufficient.
+- **Floating surface** (`0 4px 10px rgb(0 0 0 / 0.12)`): Menus, popovers, and floating toolbars.
 - **Overlay lift** (`0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)`): Dialogs and sheets only.
+
+### Layer Order
+
+- **Base content:** `0`
+- **Sticky page chrome:** `10`
+- **Menus, popovers, and editor toolbars:** `50`
+- **Dialogs, sheets, and scrims:** `100`
+- **Host-page injected UI:** one documented integration layer above GitLab chrome; avoid arbitrary maximum z-index values inside individual components.
 
 ### Named Rules
 
@@ -179,7 +210,7 @@ Components are compact and precise. Shared shape, state, focus, and density rule
 
 ### Buttons
 
-- **Shape:** Gently curved (`0.875rem`) with a compact default height (`2.25rem`). Icon-only controls use a square (`2rem`) footprint.
+- **Shape:** Compact (`0.375rem`) with a default height of `2.25rem`. Icon-only controls use a square (`2rem`) visual footprint with a clear accessible name; expand the hit area when the control is isolated or used on a host page.
 - **Primary:** Signal Ink background, White Field text, medium `0.875rem` label, and `0.5rem 1rem` padding.
 - **Hover / Focus:** Hover changes tone rather than geometry. Keyboard focus uses a visible `3px` ring at 50% ring color.
 - **Secondary / Ghost:** Secondary controls use quiet tonal fills; outline controls use a boundary and White Field; ghost controls reveal their fill on hover or focus.
@@ -187,16 +218,18 @@ Components are compact and precise. Shared shape, state, focus, and density rule
 
 ### Chips
 
-- **Style:** Compact `0.75rem` labels with `0.125rem 0.5rem` padding. Status color is semantic; neutral metadata uses Quiet Gray.
+- **Style:** Compact `0.75rem` labels with `0.125rem 0.5rem` padding. Status color is semantic; neutral metadata uses Quiet Gray. Full pills are reserved for terse statuses, counts, and tags—not general actions or containers.
 - **State:** Active filter chips use Signal Ink. Inactive filters use the outline-button treatment.
 
 ### Cards / Containers
 
-- **Corner Style:** Broad but controlled (`1.25rem`) on primary cards; nested list rows use smaller radii.
+- **Corner Style:** `0.75rem` on the few primary section containers; list rows and nested controls use `0.375–0.5rem`.
 - **Background:** White Field in light mode and Night Surface in dark mode.
-- **Shadow Strategy:** Surface separation only; overlays use the stronger overlay token.
+- **Shadow Strategy:** No shadow at rest. Menus, popovers, and dialogs use their corresponding layer token.
 - **Border:** One-pixel Border Mist boundary.
-- **Internal Padding:** `1.5rem` for canonical cards, reduced to `1rem` in dense work-item groups.
+- **Internal Padding:** `1rem` for section containers and `0.5–0.75rem` for dense work-item rows.
+
+**The Row-Before-Card Rule.** Repeated work items are rows within one section container. Do not place each result, skeleton, empty state, or metadata group in its own elevated card.
 
 ### Inputs / Fields
 
@@ -215,6 +248,23 @@ Components are compact and precise. Shared shape, state, focus, and density rule
 - **Style:** A `1.25rem`-high monospace cap with a Quiet Gray fill, Border Mist outline, small shadow, and centered `0.625rem` text.
 - **Behavior:** Shortcut hints support discoverability; they never replace accessible names or standard focus navigation.
 
+### Notes and TipTap
+
+- **Structure:** The sidebar, note list, and editor are panes within one bounded workspace, separated by dividers rather than individual cards or shadows.
+- **Narrow widths:** Below the width needed for three useful panes, show one or two panes at a time with an explicit back path. Fixed sidebar widths must not force horizontal scrolling or collapse the editor measure.
+- **Editor focus:** The editor canvas uses a `focus-within` boundary or equally visible structural indicator. Individual toolbar actions retain the shared focus ring and expose accessible names, pressed state, and shortcuts where applicable.
+- **Formatting UI:** The selection toolbar and slash menu use Popover-level elevation and the shared radius scale. Formatting buttons use the shared Button primitive or reproduce its focus, disabled, and active-state contract exactly.
+- **Autosave:** Saving should remain quiet during normal operation; expose a compact saving, saved, or error message when persistence is delayed or fails. Never rely on silent debounce as the only feedback for failure.
+
+### GitLab-Mounted Controls
+
+- **Host coexistence:** Injected controls are an extension layer inside Shadow DOM, but they still use the same semantic tokens, typography, radii, and primitives as the new-tab workspace.
+- **Launcher group:** Multiple bottom-right actions form one compact, ordered control group with consistent height and shape. Avoid a row of unrelated floating pills with separate shadows.
+- **Shape and depth:** A host-page launcher may use a pill only when it includes a terse state label; icon launchers remain compact circles or squares. Popover internals are flat rows and sections—never nested `1rem+` rounded cards, blur, or decorative shadows.
+- **Motion:** Host-page controls must not move on hover. Use color, border, or elevation changes so GitLab content remains spatially stable.
+- **Layering:** Blur is reserved for a modal scrim if needed, not launcher or popover decoration. One integration-layer token governs the mounted group and its overlays.
+- **Status color:** Translate GitLab/Jira workflow values into the operational semantic roles. Keep the provider's exact color only when displaying provider-owned label data, with text or an icon carrying the same meaning.
+
 ## 6. Do's and Don'ts
 
 ### Do:
@@ -223,6 +273,8 @@ Components are compact and precise. Shared shape, state, focus, and density rule
 - **Do** preserve `0.875rem` as the primary dense-content size and reserve `0.625–0.75rem` for metadata and keyboard hints.
 - **Do** use the `3px` focus ring consistently so every interactive workflow is fully operable by keyboard.
 - **Do** reserve Action Blue and Critical Red for semantic information and state.
+- **Do** use Warning Amber and Positive Green only for operational warning and success/completion states.
+- **Do** use rows, dividers, and tonal changes before introducing another card or shadow.
 - **Do** keep routine state transitions at `150ms` and overlay transitions at `200ms`.
 
 ### Don't:
@@ -231,4 +283,6 @@ Components are compact and precise. Shared shape, state, focus, and density rule
 - **Don't** rely on color alone to communicate status, priority, or selection; pair it with text, icons, or structure.
 - **Don't** hide focus indicators or create mouse-only actions.
 - **Don't** add decorative motion, page-load choreography, or delays that interrupt the work loop.
+- **Don't** use blur, oversized pills, maximum z-index values, or nested rounded panels to make injected controls feel separate from GitLab.
+- **Don't** remove focus rings from custom inputs, editor controls, or icon buttons without replacing them with an equally visible focus treatment.
 - **Don't** introduce a new component shape or interaction vocabulary when an existing button, field, chip, menu, or dialog already fits.

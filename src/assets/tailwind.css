@@ -29,7 +29,15 @@
   --color-input: var(--input);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-overlay: var(--overlay);
   --color-ring: var(--ring);
+  --shadow-interactive: var(--elevation-interactive);
+  --shadow-floating: var(--elevation-floating);
+  --shadow-overlay: var(--elevation-overlay);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -46,7 +54,7 @@
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 0.5rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -63,7 +71,16 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --info: oklch(0.62 0.16 250);
-  --info-foreground: oklch(0.985 0 0);
+  --info-foreground: oklch(0.145 0 0);
+  --success: oklch(0.62 0.14 155);
+  --success-foreground: oklch(0.145 0 0);
+  --warning: oklch(0.68 0.15 75);
+  --warning-foreground: oklch(0.145 0 0);
+  --overlay: oklch(0 0 0 / 50%);
+  --elevation-interactive: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --elevation-floating: 0 4px 10px rgb(0 0 0 / 0.12);
+  --elevation-overlay:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -82,7 +99,7 @@
   --muted: oklch(0.88 0 0);
   --muted-foreground: oklch(0.45 0 0);
   --destructive: oklch(0.6 0.25 27.325);
-  --destructive-foreground: oklch(0.98 0 27.325);
+  --destructive-foreground: oklch(0.1 0 0);
 }
 
 .dark {
@@ -102,6 +119,10 @@
   --input: oklch(1 0 0 / 15%);
   --info: oklch(0.72 0.14 250);
   --info-foreground: oklch(0.145 0 0);
+  --success: oklch(0.75 0.12 155);
+  --success-foreground: oklch(0.145 0 0);
+  --warning: oklch(0.78 0.13 75);
+  --warning-foreground: oklch(0.145 0 0);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
@@ -117,9 +138,9 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.55 0 0);
-  --destructive: oklch(0.6 0.2 22.216);
-  --destructive-foreground: oklch(0.98 0 22.216);
+  --muted-foreground: oklch(0.72 0 0);
+  --destructive: oklch(0.72 0.16 22.216);
+  --destructive-foreground: oklch(0.145 0 0);
 }
 
 @layer base {
@@ -130,56 +151,9 @@
     @apply bg-background text-foreground;
   }
 
-  html {
-    scroll-behavior: smooth !important;
-  }
-
   html > body[data-scroll-locked] {
     overflow: visible !important;
     margin-right: 0 !important;
-  }
-
-  /* Webkit browsers (Chrome, Safari, Edge) */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: hsl(0 0% 97%);
-    border-radius: 1rem;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: hsl(0 0% 20% / 0.7);
-    border-radius: 1rem;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(0 0% 20% / 0.8);
-  }
-
-  /* Dark mode scrollbar */
-  .dark ::-webkit-scrollbar-track {
-    background: hsl(0 0% 27%);
-  }
-
-  .dark ::-webkit-scrollbar-thumb {
-    background: hsl(0 0% 92% / 0.7);
-  }
-
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background: hsl(0 0% 92% / 0.8);
-  }
-
-  /* Firefox */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(0 0% 20% / 0.7) hsl(0 0% 97%);
-  }
-
-  .dark * {
-    scrollbar-color: hsl(0 0% 92% / 0.7) hsl(0 0% 27%);
   }
 
   [data-radix-scroll-area-viewport] {
@@ -189,11 +163,6 @@
   [data-radix-scroll-area-viewport] > div {
     max-width: 100% !important;
     display: block !important;
-  }
-
-  /* For Internet Explorer and Edge (older versions) */
-  body {
-    -ms-overflow-style: -ms-autohiding-scrollbar;
   }
 
   button:not([disabled]),
