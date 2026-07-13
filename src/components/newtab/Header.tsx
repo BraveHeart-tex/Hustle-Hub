@@ -8,6 +8,9 @@ import {
 } from 'lucide-react';
 
 import { AppSettings } from '@/components/newtab/AppSettings';
+import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
+import { SEARCH_SHORTCUT } from '@/components/newtab/keyboardShortcuts';
+import { KeyboardShortcutsHelp } from '@/components/newtab/KeyboardShortcutsHelp';
 import { AllCommentsWidget } from '@/components/newtab/misc/AllCommentsWidget';
 import { ModeToggle } from '@/components/newtab/ModeToggle';
 import { OPEN_SEARCH_EVENT } from '@/components/newtab/SearchDialog';
@@ -92,16 +95,19 @@ export function Header() {
               type="button"
               variant="outline"
               onClick={handleOpenSearch}
-              className="hidden h-9 min-w-48 justify-between text-muted-foreground md:inline-flex"
-              aria-label="Search work. Command or Control K"
+              className="h-9 justify-between px-2 text-muted-foreground lg:min-w-48 lg:px-3"
+              aria-label="Search work"
+              aria-keyshortcuts={SEARCH_SHORTCUT.ariaKeyShortcuts}
             >
               <span className="flex items-center gap-2">
                 <SearchIcon aria-hidden="true" className="size-4" />
-                Search work
+                <span className="hidden lg:inline">Search work</span>
               </span>
-              <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium leading-none text-muted-foreground">
-                ⌘/Ctrl K
-              </kbd>
+              <span className="flex items-center gap-1" aria-hidden="true">
+                {SEARCH_SHORTCUT.keys.map((key) => (
+                  <KeyboardShortcutKey key={key}>{key}</KeyboardShortcutKey>
+                ))}
+              </span>
             </Button>
           </div>
           <div className="flex items-center gap-2">
@@ -131,6 +137,7 @@ export function Header() {
               </Tooltip>
             </TooltipProvider>
             <div className="flex items-center divide-x divide-border overflow-hidden rounded-md border border-border bg-background [&_[data-slot=button]]:rounded-none [&_[data-slot=button]]:border-0">
+              <KeyboardShortcutsHelp />
               <ModeToggle />
               <AppSettings />
             </div>

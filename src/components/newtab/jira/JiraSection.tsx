@@ -5,6 +5,7 @@ import { JiraIcon } from '@/components/misc/JiraIcon';
 import { FilterButton } from '@/components/newtab/FilterButton';
 import { JiraItem } from '@/components/newtab/jira/JiraItem';
 import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
+import { JIRA_FILTER_SHORTCUTS } from '@/components/newtab/keyboardShortcuts';
 import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,27 +24,6 @@ import { useJiraFilter } from '@/lib/storage/filters';
 import { cn } from '@/lib/utils';
 import { getJiraForYouUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
-
-const filterOptions = [
-  {
-    label: 'For You',
-    shortcutKeys: ['j', 'f'],
-    key: 'f',
-    value: JIRA_FILTERS.FOR_YOU,
-  },
-  {
-    label: 'Literally Working On',
-    shortcutKeys: ['j', 'l'],
-    key: 'l',
-    value: JIRA_FILTERS.LITERALLY_WORKING_ON,
-  },
-  {
-    label: 'Frontend Releases',
-    shortcutKeys: ['j', 'r'],
-    key: 'r',
-    value: JIRA_FILTERS.FRONTEND_RELEASES,
-  },
-];
 
 interface JiraSectionProps {
   className?: string;
@@ -202,7 +182,7 @@ export function JiraSection({ className }: JiraSectionProps) {
   useTwoKeyFilterShortcuts({
     disabled: isLoading,
     isOpen: isFilterOpen,
-    options: filterOptions,
+    options: JIRA_FILTER_SHORTCUTS,
     prefixKey: 'j',
     onCancel: closeShortcutFilter,
     onPrefix: openShortcutFilter,
@@ -247,16 +227,21 @@ export function JiraSection({ className }: JiraSectionProps) {
             defaultValue={filter}
             disabled={isLoading}
           >
-            <SelectTrigger size="sm">
+            <SelectTrigger
+              size="sm"
+              aria-label="Filter Jira tickets"
+              aria-keyshortcuts="J"
+            >
               <SelectValue />
               <KeyboardShortcutKey>j</KeyboardShortcutKey>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {filterOptions.map((option) => (
+                {JIRA_FILTER_SHORTCUTS.map((option) => (
                   <SelectItem
                     key={option.value}
                     value={option.value}
+                    aria-keyshortcuts={option.key.toUpperCase()}
                     shortcut={option.shortcutKeys.map((key) => (
                       <KeyboardShortcutKey key={key}>{key}</KeyboardShortcutKey>
                     ))}

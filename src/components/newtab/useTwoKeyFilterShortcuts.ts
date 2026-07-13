@@ -8,7 +8,7 @@ interface ShortcutOption<TValue extends string> {
 interface UseTwoKeyFilterShortcutsParams<TValue extends string> {
   disabled?: boolean;
   isOpen?: boolean;
-  options: ShortcutOption<TValue>[];
+  options: readonly ShortcutOption<TValue>[];
   prefixKey: string;
   onCancel: () => void;
   onPrefix: () => void;

@@ -32,6 +32,7 @@ export const NewTab = () => {
           {route === '/notes' ? <NotesPage /> : <DashboardPage />}
         </AppLayout>
 
+        <SearchDialog />
         <GlobalStatusIndicator />
       </CommentsProvider>
     </QueryClientProvider>
@@ -54,7 +55,6 @@ const DashboardPage = () => {
           <JiraSection className="h-full" />
         </div>
       </div>
-      <SearchDialog />
     </>
   );
 };

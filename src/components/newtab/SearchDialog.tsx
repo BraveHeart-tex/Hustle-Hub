@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { JiraIcon } from '@/components/misc/JiraIcon';
+import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
+import { SEARCH_SHORTCUT } from '@/components/newtab/keyboardShortcuts';
 import {
   CommandDialog,
   CommandEmpty,
@@ -40,8 +42,10 @@ function getStatusStyle(statusName: string): string {
 export const SearchDialog = () => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const { gitlab: filteredMRs, jira: filteredIssues } =
-    useWorkItemSearch(query);
+  const { gitlab: filteredMRs, jira: filteredIssues } = useWorkItemSearch(
+    query,
+    isOpen,
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -79,13 +83,16 @@ export const SearchDialog = () => {
         <input
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
           placeholder="Search MRs, tickets…"
+          aria-label="Search work"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
         />
-        <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground/60">
-          <span>⌘</span>K
-        </kbd>
+        <span className="hidden items-center gap-1 sm:flex" aria-hidden="true">
+          {SEARCH_SHORTCUT.keys.map((key) => (
+            <KeyboardShortcutKey key={key}>{key}</KeyboardShortcutKey>
+          ))}
+        </span>
       </div>
 
       <CommandList className="max-h-[420px] overflow-y-auto py-1.5">
@@ -240,21 +247,15 @@ export const SearchDialog = () => {
       {/* Footer hint */}
       <div className="border-t px-4 py-2 flex items-center gap-3">
         <span className="text-[10px] text-muted-foreground/70 flex items-center gap-1">
-          <kbd className="inline-flex h-4 items-center rounded border border-border bg-muted px-1 text-[10px]">
-            ↵
-          </kbd>
+          <KeyboardShortcutKey>↵</KeyboardShortcutKey>
           open
         </span>
         <span className="text-[10px] text-muted-foreground/70 flex items-center gap-1">
-          <kbd className="inline-flex h-4 items-center rounded border border-border bg-muted px-1 text-[10px]">
-            ↑↓
-          </kbd>
+          <KeyboardShortcutKey>↑↓</KeyboardShortcutKey>
           navigate
         </span>
         <span className="text-[10px] text-muted-foreground/70 flex items-center gap-1">
-          <kbd className="inline-flex h-4 items-center rounded border border-border bg-muted px-1 text-[10px]">
-            esc
-          </kbd>
+          <KeyboardShortcutKey>esc</KeyboardShortcutKey>
           close
         </span>
       </div>

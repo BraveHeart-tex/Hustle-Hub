@@ -5,6 +5,7 @@ import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { FilterButton } from '@/components/newtab/FilterButton';
 import { MRItem } from '@/components/newtab/gitlab/MRItem';
 import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
+import { GITLAB_FILTER_SHORTCUTS } from '@/components/newtab/keyboardShortcuts';
 import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,21 +29,6 @@ import { GITLAB_FILTERS } from '@/lib/constants';
 import { useGitlabFilter } from '@/lib/storage/filters';
 import { cn } from '@/lib/utils';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
-
-const filterOptions = [
-  {
-    label: 'Review Requested',
-    shortcutKeys: ['g', 'r'],
-    key: 'r',
-    value: GITLAB_FILTERS.REVIEW,
-  },
-  {
-    label: 'Assigned to me',
-    shortcutKeys: ['g', 'a'],
-    key: 'a',
-    value: GITLAB_FILTERS.ASSIGNED,
-  },
-];
 
 const hasSyncLabel = (labels: { title: string }[]) =>
   labels.some((label) => label.title.trim().toLowerCase() === 'sync');
@@ -113,7 +99,7 @@ export function GitlabSection() {
   useTwoKeyFilterShortcuts({
     disabled: isLoading,
     isOpen: isFilterOpen,
-    options: filterOptions,
+    options: GITLAB_FILTER_SHORTCUTS,
     prefixKey: 'g',
     onCancel: closeShortcutFilter,
     onPrefix: openShortcutFilter,
@@ -426,16 +412,21 @@ export function GitlabSection() {
             defaultValue={filter}
             disabled={isLoading}
           >
-            <SelectTrigger size="sm">
+            <SelectTrigger
+              size="sm"
+              aria-label="Filter GitLab merge requests"
+              aria-keyshortcuts="G"
+            >
               <SelectValue />
               <KeyboardShortcutKey>g</KeyboardShortcutKey>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {filterOptions.map((option) => (
+                {GITLAB_FILTER_SHORTCUTS.map((option) => (
                   <SelectItem
                     key={option.value}
                     value={option.value}
+                    aria-keyshortcuts={option.key.toUpperCase()}
                     shortcut={option.shortcutKeys.map((key) => (
                       <KeyboardShortcutKey key={key}>{key}</KeyboardShortcutKey>
                     ))}
