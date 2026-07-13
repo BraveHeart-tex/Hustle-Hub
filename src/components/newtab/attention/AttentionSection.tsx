@@ -10,7 +10,7 @@ import {
   Ticket,
   Zap,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -132,6 +132,7 @@ function AttentionRow({
   nested?: boolean;
 }) {
   const [showSnooze, setShowSnooze] = useState(false);
+  const snoozeOptionsId = useId();
   const cfg = PRIORITY_CONFIG[item.priority];
 
   return (
@@ -158,7 +159,7 @@ function AttentionRow({
             href={item.entityUrl}
             target="_blank"
             rel="noreferrer noopener"
-            className="flex items-center gap-1.5 text-sm font-medium leading-snug hover:underline underline-offset-2 truncate"
+            className="flex items-center gap-1.5 rounded text-sm font-medium leading-snug hover:underline underline-offset-2 truncate outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
           >
             <SourceIcon item={item} />
             <span className="truncate">{item.title}</span>
@@ -169,21 +170,27 @@ function AttentionRow({
           </a>
 
           <div
-            className={`flex items-center gap-1 shrink-0 transition-opacity ${showSnooze ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+            className={`flex items-center gap-1 shrink-0 transition-opacity ${showSnooze ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'}`}
           >
             <button
+              type="button"
               onClick={() => setShowSnooze((v) => !v)}
-              className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              aria-label={`Snooze ${item.title}`}
+              aria-expanded={showSnooze}
+              aria-controls={snoozeOptionsId}
               title="Snooze"
             >
-              <Clock size={12} />
+              <Clock aria-hidden="true" size={12} />
             </button>
             <button
+              type="button"
               onClick={() => onDismiss(item.id)}
-              className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              aria-label={`Dismiss ${item.title}`}
               title="Dismiss"
             >
-              <CheckCheck size={12} />
+              <CheckCheck aria-hidden="true" size={12} />
             </button>
           </div>
         </div>
@@ -201,16 +208,20 @@ function AttentionRow({
         )}
 
         {showSnooze && (
-          <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+          <div
+            id={snoozeOptionsId}
+            className="mt-2 flex items-center gap-1.5 flex-wrap"
+          >
             <span className="text-xs text-muted-foreground">Snooze for:</span>
             {SNOOZE_OPTIONS.map((opt) => (
               <button
+                type="button"
                 key={opt.value}
                 onClick={() => {
                   onSnooze(item.id, opt.value);
                   setShowSnooze(false);
                 }}
-                className="rounded border border-border px-2 py-0.5 text-xs hover:bg-muted hover:text-foreground text-muted-foreground transition-colors"
+                className="rounded border border-border px-2 py-0.5 text-xs hover:bg-muted hover:text-foreground text-muted-foreground transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
               >
                 {opt.label}
               </button>
@@ -232,6 +243,7 @@ function AttentionEntityRow({
   onSnooze: (id: string, duration: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const contentId = useId();
   const representativeItem = group.items[0];
 
   if (group.items.length === 1) {
@@ -250,8 +262,16 @@ function AttentionEntityRow({
       onOpenChange={setOpen}
       className="border border-border/70 bg-muted/15"
     >
-      <CollapsibleTrigger asChild>
-        <div className="flex w-full items-start justify-between gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/30">
+      <div className="relative px-3 py-3 transition-colors hover:bg-muted/30">
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            aria-label={`${open ? 'Collapse' : 'Expand'} ${group.entityTitle || representativeItem.title}`}
+            aria-controls={contentId}
+            className="absolute inset-0 w-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+          />
+        </CollapsibleTrigger>
+        <div className="pointer-events-none relative flex w-full items-start justify-between gap-3 text-left">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 text-sm font-medium leading-snug">
               <SourceIcon item={representativeItem} />
@@ -259,7 +279,7 @@ function AttentionEntityRow({
                 href={group.entityUrl}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="truncate hover:underline underline-offset-2"
+                className="pointer-events-auto relative z-10 rounded truncate hover:underline underline-offset-2 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 onClick={(event) => event.stopPropagation()}
               >
                 {group.entityTitle || representativeItem.title}
@@ -285,8 +305,11 @@ function AttentionEntityRow({
             />
           </div>
         </div>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+      </div>
+      <CollapsibleContent
+        id={contentId}
+        className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0"
+      >
         <div className="grid gap-2 border-t border-border/60 px-3 py-3">
           {group.items.map((item) => (
             <AttentionRow

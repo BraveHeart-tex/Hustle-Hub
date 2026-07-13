@@ -28,16 +28,24 @@ export const MRItem = ({ mr }: MRItemProps) => {
   const draftProblemLabel = mr.conflicts ? 'Conflicts' : 'Failed pipeline';
 
   return (
-    <a href={mr.webUrl} target="_blank" rel="noopener noreferrer">
-      <div
-        className={cn(
-          'px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer relative',
-          mr.needsCurrentUserAction &&
-            !hasProblem &&
-            'border-yellow-500 dark:border-yellow-700 border-2',
-          shouldHighlightProblem && 'border-destructive border-2',
-        )}
-      >
+    <div
+      className={cn(
+        'group px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors relative',
+        mr.needsCurrentUserAction &&
+          !hasProblem &&
+          'border-yellow-500 dark:border-yellow-700 border-2',
+        shouldHighlightProblem && 'border-destructive border-2',
+      )}
+    >
+      <a
+        href={mr.webUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Open merge request !${mr.iid}: ${mr.title}`}
+        className="absolute inset-0 rounded-lg outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+      />
+
+      <div className="pointer-events-none relative">
         {mr.needsCurrentUserAction && !hasProblem && (
           <MRStatusIcon
             title="Action required"
@@ -143,7 +151,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
             )}
           </div>
 
-          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+          <div className="pointer-events-auto relative z-10 flex items-center gap-2.5 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <ThumbsUp className="size-3" />
               {mr.approvedBy}/{mr.approvalsRequired}
@@ -159,11 +167,10 @@ export const MRItem = ({ mr }: MRItemProps) => {
                 title: mr.title,
                 url: mr.webUrl,
               }}
-              preventDefaultOnClick
             />
           </div>
         </div>
       </div>
-    </a>
+    </div>
   );
 };

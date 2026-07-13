@@ -10,6 +10,12 @@ import { AppSettings } from '@/components/newtab/AppSettings';
 import { AllCommentsWidget } from '@/components/newtab/misc/AllCommentsWidget';
 import { ModeToggle } from '@/components/newtab/ModeToggle';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useHashRoute } from '@/lib/router';
 import { useNotes } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
@@ -37,10 +43,14 @@ export function Header() {
             </div>
             <h1 className="text-xl font-bold text-foreground">Hustle Hub</h1>
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
+          <nav
+            aria-label="Primary"
+            className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1"
+          >
             <button
               type="button"
               onClick={() => navigate('/')}
+              aria-current={route === '/' ? 'page' : undefined}
               className={cn(
                 'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
                 'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
@@ -55,6 +65,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => navigate('/notes')}
+              aria-current={route === '/notes' ? 'page' : undefined}
               className={cn(
                 'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
                 'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
@@ -69,20 +80,34 @@ export function Header() {
                 {notes.length}
               </span>
             </button>
-          </div>
+          </nav>
           <div className="flex items-center space-x-3">
             <AllCommentsWidget />
             <ModeToggle />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleRefreshData}
-              disabled={isFetching > 0}
-            >
-              <RefreshCwIcon
-                className={cn('h-5 w-5', isFetching > 0 && 'animate-spin')}
-              />
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleRefreshData}
+                    disabled={isFetching > 0}
+                    aria-label={
+                      isFetching > 0 ? 'Refreshing data' : 'Refresh data'
+                    }
+                  >
+                    <RefreshCwIcon
+                      aria-hidden="true"
+                      className={cn(
+                        'h-5 w-5',
+                        isFetching > 0 && 'animate-spin',
+                      )}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Refresh data</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <AppSettings />
           </div>
         </div>

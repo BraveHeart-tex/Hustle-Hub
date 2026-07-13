@@ -1,8 +1,14 @@
 import { CheckSquare, ClipboardCopyIcon } from 'lucide-react';
-import { type MouseEvent, useState } from 'react';
+import { useState } from 'react';
 
 import { WorkItemComments } from '@/components/newtab/misc/WorkItemComments';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { type JiraIssue } from '@/types/jira';
@@ -25,15 +31,11 @@ interface JiraItemProps {
 export const JiraItem = ({ issue }: JiraItemProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const { fields } = issue;
+  const issueUrl = getJiraTaskUrl(issue.key);
 
-  const handleIssueClick = () => {
-    window.open(getJiraTaskUrl(issue.key), '_blank');
-  };
-
-  const copyTaskLinkToClipboard = async (e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
+  const copyTaskLinkToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(getJiraTaskUrl(issue.key));
+      await navigator.clipboard.writeText(issueUrl);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
@@ -43,11 +45,16 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
   };
 
   return (
-    <div
-      className="px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors cursor-pointer"
-      onClick={handleIssueClick}
-    >
-      <div className="flex items-center justify-between gap-2 mb-1">
+    <div className="group relative px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors">
+      <a
+        href={issueUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Open Jira issue ${issue.key}: ${fields.summary}`}
+        className="absolute inset-0 rounded-lg outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+      />
+
+      <div className="pointer-events-none relative flex items-center justify-between gap-2 mb-1">
         <span className="text-xs font-mono text-muted-foreground shrink-0">
           {issue.key}
         </span>
@@ -61,16 +68,16 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
         </span>
       </div>
 
-      <h3 className="text-sm font-medium leading-snug mb-1.5">
+      <h3 className="pointer-events-none relative text-sm font-medium leading-snug mb-1.5">
         {fields.summary}
       </h3>
 
-      <div className="flex items-center justify-between gap-2 transition-opacity">
+      <div className="pointer-events-none relative flex items-center justify-between gap-2 transition-opacity">
         <span className="text-xs text-muted-foreground flex items-center gap-1">
           <img src={fields.priority.iconUrl} alt="" width={12} height={12} />
           {fields.priority.name}
         </span>
-        <div className="flex items-center gap-2">
+        <div className="pointer-events-auto relative z-10 flex items-center gap-2">
           <WorkItemComments
             itemMeta={{
               itemId: issue.id,
@@ -79,14 +86,32 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
               url: getJiraTaskUrl(issue.key),
             }}
           />
-          <Button
-            size="icon"
-            variant="ghost"
-            className="size-4 relative text-muted-foreground"
-            onClick={copyTaskLinkToClipboard}
-          >
-            {isCopied ? <CheckSquare /> : <ClipboardCopyIcon />}
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="size-4 relative text-muted-foreground"
+                  onClick={() => void copyTaskLinkToClipboard()}
+                  aria-label={
+                    isCopied
+                      ? `Copied link for Jira issue ${issue.key}`
+                      : `Copy link for Jira issue ${issue.key}`
+                  }
+                >
+                  {isCopied ? (
+                    <CheckSquare aria-hidden="true" />
+                  ) : (
+                    <ClipboardCopyIcon aria-hidden="true" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isCopied ? 'Link copied' : 'Copy Jira link'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </div>

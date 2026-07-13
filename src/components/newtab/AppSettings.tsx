@@ -1,4 +1,5 @@
 import { Settings, Terminal } from 'lucide-react';
+import { useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { StrictReviewTemplateDialog } from '@/components/newtab/StrictReviewTemplateDialog';
@@ -14,6 +15,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type DialogType = 'reviewers' | 'presets' | 'strict-review-template';
 
@@ -27,13 +34,18 @@ export const AppSettings = () => {
   });
 
   return (
-    <>
+    <TooltipProvider>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
-            <Settings />
-          </Button>
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Settings">
+                <Settings aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Settings</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent>
           <DropdownMenuGroup>
             <DropdownMenuLabel className="flex items-center gap-1">
@@ -88,6 +100,6 @@ export const AppSettings = () => {
           });
         }}
       />
-    </>
+    </TooltipProvider>
   );
 };

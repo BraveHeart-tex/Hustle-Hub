@@ -4,6 +4,7 @@ import {
   type MouseEventHandler,
   Suspense,
   useCallback,
+  useId,
   useRef,
   useState,
 } from 'react';
@@ -28,7 +29,6 @@ const RichTextEditor = lazy(() =>
 );
 
 interface WorkItemCommentsProps {
-  preventDefaultOnClick?: boolean;
   itemMeta: {
     itemId: string;
     itemType: CommentItemType;
@@ -37,10 +37,9 @@ interface WorkItemCommentsProps {
   };
 }
 
-export const WorkItemComments = ({
-  itemMeta,
-  preventDefaultOnClick = false,
-}: WorkItemCommentsProps) => {
+export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
+  const popoverId = useId();
+  const editorId = useId();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { getCommentsByItemIdAndType } = useComments();
   const comments = getCommentsByItemIdAndType(
@@ -106,13 +105,11 @@ export const WorkItemComments = ({
   };
 
   const handleTriggerClick: MouseEventHandler = (event) => {
-    if (preventDefaultOnClick) event.preventDefault();
     event.stopPropagation();
     setIsPopoverOpen((prev) => !prev);
   };
 
   const handleContentClick: MouseEventHandler = (event) => {
-    if (preventDefaultOnClick) event.preventDefault();
     event.stopPropagation();
   };
 
@@ -127,8 +124,12 @@ export const WorkItemComments = ({
           variant="ghost"
           className="size-4 relative text-muted-foreground hover:text-foreground transition-colors"
           onClick={handleTriggerClick}
+          aria-label={`Comments for ${itemMeta.title}`}
+          aria-expanded={isPopoverOpen}
+          aria-controls={popoverId}
+          title="Comments"
         >
-          <MessageSquareIcon />
+          <MessageSquareIcon aria-hidden="true" />
           {hasComments && (
             <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground rounded-full min-w-[14px] h-[14px] px-[3px] text-[8px] leading-none flex items-center justify-center font-medium">
               {comments.length}
@@ -138,6 +139,7 @@ export const WorkItemComments = ({
       </PopoverTrigger>
 
       <PopoverContent
+        id={popoverId}
         side="bottom"
         align="end"
         className="w-72 p-0 overflow-hidden shadow-lg"
@@ -158,12 +160,16 @@ export const WorkItemComments = ({
             size="icon"
             variant="ghost"
             className="h-5 w-5 text-muted-foreground hover:text-foreground"
+            aria-label={showEditor ? 'Hide comment editor' : 'Add comment'}
+            aria-expanded={showEditor}
+            aria-controls={editorId}
+            title={showEditor ? 'Hide comment editor' : 'Add comment'}
             onClick={() => {
               setShowEditor((v) => !v);
               if (!showEditor) setTimeout(focusEditor, 50);
             }}
           >
-            <PlusIcon className="h-3.5 w-3.5" />
+            <PlusIcon aria-hidden="true" className="h-3.5 w-3.5" />
           </Button>
         </div>
 
@@ -187,15 +193,17 @@ export const WorkItemComments = ({
                     onClick={() => void handleResolveComment(comment.id)}
                     disabled={resolvingIds.has(comment.id)}
                     className={cn(
-                      'opacity-0 group-hover:opacity-100 transition-opacity',
+                      'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity',
                       'h-4 w-4 rounded flex items-center justify-center',
                       'text-muted-foreground hover:text-green-500 hover:bg-green-500/10',
+                      'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                       resolvingIds.has(comment.id) &&
                         'opacity-50 cursor-not-allowed',
                     )}
+                    aria-label="Resolve comment"
                     title="Resolve"
                   >
-                    <CheckIcon className="h-3 w-3" />
+                    <CheckIcon aria-hidden="true" className="h-3 w-3" />
                   </button>
                 </div>
                 {/* Content */}
@@ -231,7 +239,10 @@ export const WorkItemComments = ({
 
         {/* Editor — toggled by + button */}
         {showEditor && (
-          <div className="border-t border-border/50 p-2 space-y-2 bg-muted/10">
+          <div
+            id={editorId}
+            className="border-t border-border/50 p-2 space-y-2 bg-muted/10"
+          >
             <Suspense fallback={<EditorSkeleton className="h-20" />}>
               <RichTextEditor
                 ref={tiptapRef}
@@ -260,6 +271,7 @@ export const WorkItemComments = ({
                 className="h-6 px-2.5 text-xs gap-1.5"
                 onClick={() => void handleSubmit()}
                 disabled={isEditorEmpty || isSubmitting}
+                aria-keyshortcuts="Meta+Enter Control+Enter"
               >
                 <SendIcon className="h-3 w-3" />
                 Save

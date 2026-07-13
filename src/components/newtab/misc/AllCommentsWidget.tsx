@@ -3,7 +3,7 @@ import {
   MessageSquareIcon,
   MessageSquareTextIcon,
 } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { JiraIcon } from '@/components/misc/JiraIcon';
@@ -21,6 +21,7 @@ import { formatDate } from '@/lib/utils/formatters/formatDate';
 import type { Comment } from '@/types/comments';
 
 export const AllCommentsWidget = () => {
+  const sheetId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const { comments } = useComments();
   const [submitting, setSubmitting] = useState<Set<string>>(new Set());
@@ -58,7 +59,15 @@ export const AllCommentsWidget = () => {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button size="icon" variant="outline" className="relative">
+        <Button
+          size="icon"
+          variant="outline"
+          className="relative"
+          aria-label="Comments"
+          aria-expanded={isOpen}
+          aria-controls={sheetId}
+          title="Comments"
+        >
           {comments.length > 0 ? (
             <>
               <MessageSquareTextIcon className="size-4" />
@@ -72,7 +81,10 @@ export const AllCommentsWidget = () => {
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="sm:max-w-lg p-0 flex flex-col gap-0">
+      <SheetContent
+        id={sheetId}
+        className="sm:max-w-lg p-0 flex flex-col gap-0"
+      >
         {/* Header */}
         <SheetHeader className="px-5 py-4 border-b shrink-0">
           <SheetTitle className="flex items-center gap-2.5">
@@ -149,12 +161,14 @@ export const AllCommentsWidget = () => {
                               }
                               disabled={submitting.has(comment.id)}
                               className={cn(
-                                'opacity-0 group-hover:opacity-100 transition-opacity',
+                                'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity',
                                 'flex items-center gap-1 text-[10px] text-muted-foreground',
                                 'hover:text-green-500 transition-colors',
+                                'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                                 submitting.has(comment.id) &&
                                   'opacity-50 cursor-not-allowed',
                               )}
+                              aria-label={`Resolve comment on ${item.title}`}
                             >
                               <CheckIcon className="h-3 w-3" />
                               Resolve
