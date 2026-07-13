@@ -199,7 +199,7 @@ export const TemplateVariableEditor = ({
     editorProps: {
       attributes: {
         class: cn(
-          'min-h-40 max-h-64 overflow-auto rounded-md border bg-background px-3 py-2 font-mono text-xs leading-snug focus:outline-none focus:ring-2 focus:ring-ring whitespace-pre-wrap',
+          'min-h-40 max-h-64 overflow-auto px-3 py-2 font-mono text-xs leading-snug outline-none whitespace-pre-wrap',
           '[&_p]:my-0 [&_p+p]:mt-1',
           className,
         ),
@@ -312,6 +312,7 @@ export const TemplateVariableEditor = ({
   return (
     <div className="relative" ref={containerRef}>
       <div
+        className="rounded-md border bg-background transition-[color,box-shadow] motion-reduce:transition-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]"
         onKeyDownCapture={(event) => {
           if (!slash.open || filteredVariables.length === 0) return;
           if (event.key === 'ArrowDown') {

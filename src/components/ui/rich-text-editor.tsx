@@ -114,7 +114,7 @@ export const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
       <>
         <div
           className={cn(
-            'overflow-hidden border border-border border-l-0 bg-transparent transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30',
+            'overflow-hidden border border-border border-l-0 bg-transparent transition-colors motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30',
             className,
           )}
         >

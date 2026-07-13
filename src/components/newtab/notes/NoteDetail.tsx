@@ -313,7 +313,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
               editor?.commands.focus();
             }
           }}
-          className="min-h-12 w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-3xl font-semibold leading-tight text-foreground outline-none placeholder:text-muted-foreground"
+          className="min-h-12 w-full resize-none overflow-hidden rounded-sm border-0 bg-transparent p-0 text-3xl font-semibold leading-tight text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
           placeholder="Untitled"
         />
 
@@ -322,7 +322,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-md px-1 py-0.5 transition-colors hover:bg-accent hover:text-accent-foreground"
+                className="flex items-center gap-2 rounded-md px-1 py-0.5 outline-none transition-colors motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
               >
                 <span
                   className={cn(
@@ -340,7 +340,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
                     key={priority}
                     type="button"
                     onClick={() => void saveNote({ priority })}
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none hover:bg-accent focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                   >
                     <span
                       className={cn(
@@ -362,7 +362,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
-                  className="rounded-sm text-muted-foreground hover:text-foreground"
+                  className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 >
                   <XIcon className="h-3 w-3" />
                 </button>
@@ -379,7 +379,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
                 }
               }}
               placeholder="+ tag"
-              className="h-7 w-24 border-0 bg-transparent px-1 text-xs shadow-none focus-visible:ring-0"
+              className="h-7 w-24 border-0 bg-transparent px-1 text-xs shadow-none"
             />
           </div>
 
@@ -408,7 +408,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
                         onClick={() =>
                           window.open(item.url, '_blank', 'noopener,noreferrer')
                         }
-                        className="flex min-w-0 items-center gap-1 rounded-sm hover:text-foreground"
+                        className="flex min-w-0 items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                       >
                         <span className="shrink-0 font-mono">
                           {linkedItemLabel(item)}
@@ -419,7 +419,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
                       <button
                         type="button"
                         onClick={(event) => removeLinkedItem(item, event)}
-                        className="rounded-sm text-muted-foreground hover:text-foreground"
+                        className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                       >
                         <XIcon className="h-3 w-3" />
                       </button>
@@ -436,7 +436,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           </span>
         </div>
 
-        <div className="min-h-[300px] rounded-md border border-transparent transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+        <div className="min-h-[300px] rounded-md border border-transparent transition-colors motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
           <FloatingToolbar editor={editor} />
           <EditorContent editor={editor} />
         </div>

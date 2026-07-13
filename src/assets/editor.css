@@ -198,6 +198,12 @@
     width: 1rem;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .tiptap ul[data-type='taskList'] input[type='checkbox'] {
+      transition: none;
+    }
+  }
+
   .tiptap ul[data-type='taskList'] input[type='checkbox']:focus-visible {
     border-color: var(--ring);
     outline: 3px solid color-mix(in oklab, var(--ring) 50%, transparent);

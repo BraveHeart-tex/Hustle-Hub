@@ -43,7 +43,7 @@ export function Header() {
               onClick={() => navigate('/')}
               className={cn(
                 'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                 route === '/'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
@@ -57,7 +57,7 @@ export function Header() {
               onClick={() => navigate('/notes')}
               className={cn(
                 'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                 route === '/notes'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
