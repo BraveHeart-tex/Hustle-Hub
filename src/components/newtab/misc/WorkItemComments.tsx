@@ -131,7 +131,7 @@ export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
         >
           <MessageSquareIcon aria-hidden="true" />
           {hasComments && (
-            <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground rounded-full min-w-[14px] h-[14px] px-[3px] text-[8px] leading-none flex items-center justify-center font-medium">
+            <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium leading-none text-primary-foreground">
               {comments.length}
             </span>
           )}
@@ -151,7 +151,7 @@ export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
             <MessageSquareIcon className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-xs font-medium">Notes</span>
             {hasComments && (
-              <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-1.5 py-px">
+              <span className="rounded-full bg-muted px-1.5 py-px text-xs text-muted-foreground">
                 {comments.length}
               </span>
             )}
@@ -186,7 +186,7 @@ export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
               >
                 {/* Meta row */}
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] text-muted-foreground/70">
+                  <span className="text-xs text-muted-foreground/70">
                     {comment.createdAt ? formatDate(comment.createdAt) : 'You'}
                   </span>
                   <button

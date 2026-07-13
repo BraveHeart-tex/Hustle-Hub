@@ -41,22 +41,16 @@ export const NewTab = () => {
 const DashboardPage = () => {
   return (
     <>
-      <div
-        className="
-      grid grid-cols-1 gap-6
-      xl:grid-cols-[minmax(280px,1fr)_minmax(0,1fr)_minmax(280px,1fr)]
-      xl:items-start
-    "
-      >
-        <div className="xl:sticky xl:top-6">
+      <div className="dashboard-sections grid grid-cols-1 items-start gap-6 xl:flex">
+        <div className="dashboard-section xl:sticky xl:top-6">
           <AttentionSection />
         </div>
 
-        <div className="xl:sticky xl:top-6">
+        <div className="dashboard-section dashboard-section-gitlab xl:sticky xl:top-6">
           <GitlabSection />
         </div>
 
-        <div className="xl:sticky xl:top-6">
+        <div className="dashboard-section xl:sticky xl:top-6">
           <JiraSection className="h-full" />
         </div>
       </div>

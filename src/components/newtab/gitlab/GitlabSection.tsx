@@ -203,14 +203,26 @@ export function GitlabSection() {
   const renderContent = useCallback(() => {
     if (isLoading) {
       return (
-        <div className="grid gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="p-4 animate-pulse">
-              <CardContent>
-                <Skeleton className="h-6 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardContent>
-            </Card>
+        <div className="grid gap-3" aria-hidden="true">
+          {[
+            'gitlab-loading-primary',
+            'gitlab-loading-secondary',
+            'gitlab-loading-tertiary',
+          ].map((rowId) => (
+            <div
+              key={rowId}
+              className="rounded-lg border border-border px-3 py-2"
+            >
+              <div className="mb-2 flex items-center gap-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="ml-auto h-3 w-10" />
+              </div>
+              <Skeleton className="h-4 w-4/5" />
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <Skeleton className="h-3 w-1/3" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
           ))}
         </div>
       );
@@ -239,9 +251,13 @@ export function GitlabSection() {
 
     if (data?.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-          <GitMerge size={22} className="text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 py-2">
+          <GitMerge
+            aria-hidden="true"
+            size={16}
+            className="shrink-0 text-muted-foreground/40"
+          />
+          <p className="text-xs text-muted-foreground">
             {filter === GITLAB_FILTERS.REVIEW
               ? 'No review requests waiting for you.'
               : 'No MRs assigned to you.'}
@@ -260,9 +276,9 @@ export function GitlabSection() {
           <Collapsible
             open={isDraftsOpen}
             onOpenChange={setIsDraftsOpen}
-            className="rounded-xl border border-dashed border-border/80 bg-muted/20"
+            className="border-t border-border"
           >
-            <CollapsibleTrigger className="rounded-xl flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-all hover:bg-muted/20 data-[state=open]:rounded-b-none dark:hover:bg-accent/50">
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-muted/30 dark:hover:bg-accent/50">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">
                   Draft merge requests
@@ -272,7 +288,7 @@ export function GitlabSection() {
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                   {draftMrs.length}
                 </span>
                 <ChevronDown
@@ -296,9 +312,9 @@ export function GitlabSection() {
           <Collapsible
             open={isSyncOpen}
             onOpenChange={setIsSyncOpen}
-            className="rounded-xl border border-dashed border-border/80 bg-muted/20"
+            className="border-t border-border"
           >
-            <div className="flex items-center gap-2 px-4 py-3">
+            <div className="flex items-center gap-2 px-2 py-2">
               {/* Left: text */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">
@@ -316,7 +332,7 @@ export function GitlabSection() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-7 text-[11px]"
+                  className="h-7 text-xs"
                   onClick={(e) => {
                     e.stopPropagation();
                     void approveAllSyncMrs();
@@ -327,7 +343,7 @@ export function GitlabSection() {
                 </Button>
 
                 <CollapsibleTrigger className="flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-muted/20 dark:hover:bg-accent/50">
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                     {syncMrs.length}
                   </span>
                   <ChevronDown
@@ -369,8 +385,25 @@ export function GitlabSection() {
     retryGitlab,
   ]);
 
+  const hasUrgentMr = activeMrs.some(
+    (mr) =>
+      mr.needsCurrentUserAction ||
+      mr.conflicts ||
+      mr.headPipelineStatus === 'FAILED',
+  );
+  const sectionState = isLoading
+    ? 'loading'
+    : data?.length === 0
+      ? 'empty'
+      : hasUrgentMr
+        ? 'urgent'
+        : 'populated';
+
   return (
-    <Card className="max-h-[calc(100vh-110px)] flex flex-col">
+    <Card
+      data-section-state={sectionState}
+      className="max-h-[calc(100vh-110px)] flex flex-col"
+    >
       <CardHeader className="pb-1 shrink-0">
         <CardTitle className="w-full flex items-center justify-between">
           <div className="flex items-center gap-2 text-lg">
@@ -415,11 +448,13 @@ export function GitlabSection() {
           </Select>
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
-        {isRefreshing && (
-          <p className="text-xs text-muted-foreground" role="status">
-            Refreshing GitLab merge requests…
-          </p>
-        )}
+        <div className="min-h-4">
+          {isRefreshing && (
+            <p className="text-xs text-muted-foreground" role="status">
+              Refreshing GitLab merge requests…
+            </p>
+          )}
+        </div>
         {hasProviderError && hasData && (
           <div className="flex items-center justify-between gap-2 text-xs text-destructive">
             <span>

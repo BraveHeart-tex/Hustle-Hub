@@ -270,7 +270,7 @@ export const StrictReviewTemplateDialog = ({
                     }
                     placeholder="e.g. group/project, !group/legacy"
                   />
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Matched against the MR project path. Comma or new-line
                     separated terms; <code>*</code> is a wildcard, and{' '}
                     <code>!</code> or <code>NOT</code> negates a term. Leave

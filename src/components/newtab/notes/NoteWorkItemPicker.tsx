@@ -74,7 +74,7 @@ const WorkItemRow = ({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+          <span className="shrink-0 font-mono text-xs text-muted-foreground">
             {item.key ?? item.id}
           </span>
           {item.status && (
@@ -90,7 +90,7 @@ const WorkItemRow = ({
         </div>
         <p className="mt-0.5 truncate text-sm font-medium">{item.title}</p>
         {item.projectName && (
-          <p className="mt-1 truncate text-[11px] text-muted-foreground">
+          <p className="mt-1 truncate text-xs text-muted-foreground">
             {item.projectName}
           </p>
         )}

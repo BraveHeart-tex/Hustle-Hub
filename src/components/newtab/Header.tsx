@@ -3,12 +3,14 @@ import {
   LayoutDashboardIcon,
   NotebookTextIcon,
   RefreshCwIcon,
+  SearchIcon,
   ZapIcon,
 } from 'lucide-react';
 
 import { AppSettings } from '@/components/newtab/AppSettings';
 import { AllCommentsWidget } from '@/components/newtab/misc/AllCommentsWidget';
 import { ModeToggle } from '@/components/newtab/ModeToggle';
+import { OPEN_SEARCH_EVENT } from '@/components/newtab/SearchDialog';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -30,10 +32,14 @@ export function Header() {
     void queryClient.refetchQueries({ type: 'active' });
   };
 
+  const handleOpenSearch = () => {
+    document.dispatchEvent(new Event(OPEN_SEARCH_EVENT));
+  };
+
   return (
     <header className="border-b border-border bg-card">
       <div className="px-4 py-3">
-        <div className="flex items-center justify-between">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <ZapIcon
@@ -43,47 +49,63 @@ export function Header() {
             </div>
             <h1 className="text-xl font-bold text-foreground">Hustle Hub</h1>
           </div>
-          <nav
-            aria-label="Primary"
-            className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1"
-          >
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              aria-current={route === '/' ? 'page' : undefined}
-              className={cn(
-                'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
-                'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-                route === '/'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
-              )}
+          <div className="flex items-center justify-self-center gap-3">
+            <nav
+              aria-label="Primary"
+              className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1"
             >
-              <LayoutDashboardIcon className="h-4 w-4" />
-              Dashboard
-            </button>
-            <button
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                aria-current={route === '/' ? 'page' : undefined}
+                className={cn(
+                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
+                  'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                  route === '/'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
+                )}
+              >
+                <LayoutDashboardIcon className="h-4 w-4" />
+                Dashboard
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/notes')}
+                aria-current={route === '/notes' ? 'page' : undefined}
+                className={cn(
+                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
+                  'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                  route === '/notes'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
+                )}
+              >
+                <NotebookTextIcon className="h-4 w-4" />
+                Notes
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold leading-5 text-primary-foreground">
+                  {notes.length}
+                </span>
+              </button>
+            </nav>
+            <Button
               type="button"
-              onClick={() => navigate('/notes')}
-              aria-current={route === '/notes' ? 'page' : undefined}
-              className={cn(
-                'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
-                'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-                route === '/notes'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
-              )}
+              variant="outline"
+              onClick={handleOpenSearch}
+              className="hidden h-9 min-w-48 justify-between text-muted-foreground md:inline-flex"
+              aria-label="Search work. Command or Control K"
             >
-              <NotebookTextIcon className="h-4 w-4" />
-              Notes
-              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold leading-5 text-primary-foreground">
-                {notes.length}
+              <span className="flex items-center gap-2">
+                <SearchIcon aria-hidden="true" className="size-4" />
+                Search work
               </span>
-            </button>
-          </nav>
-          <div className="flex items-center space-x-3">
+              <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium leading-none text-muted-foreground">
+                ⌘/Ctrl K
+              </kbd>
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
             <AllCommentsWidget />
-            <ModeToggle />
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -108,7 +130,10 @@ export function Header() {
                 <TooltipContent>Refresh data</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <AppSettings />
+            <div className="flex items-center divide-x divide-border overflow-hidden rounded-md border border-border bg-background [&_[data-slot=button]]:rounded-none [&_[data-slot=button]]:border-0">
+              <ModeToggle />
+              <AppSettings />
+            </div>
           </div>
         </div>
       </div>

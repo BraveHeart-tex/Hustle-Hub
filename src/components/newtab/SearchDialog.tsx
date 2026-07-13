@@ -28,6 +28,8 @@ const STATUS_CATEGORY_CONFIG: Record<string, string> = {
   Testing: 'bg-info/10 text-info border-info/20',
 };
 
+export const OPEN_SEARCH_EVENT = 'hustle-hub:open-search';
+
 function getStatusStyle(statusName: string): string {
   return (
     STATUS_CATEGORY_CONFIG[statusName] ??
@@ -48,8 +50,13 @@ export const SearchDialog = () => {
         setIsOpen((v) => !v);
       }
     };
+    const handleOpenSearch = () => setIsOpen(true);
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener(OPEN_SEARCH_EVENT, handleOpenSearch);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener(OPEN_SEARCH_EVENT, handleOpenSearch);
+    };
   }, []);
 
   const hasResults = filteredMRs.length > 0 || filteredIssues.length > 0;
@@ -77,7 +84,7 @@ export const SearchDialog = () => {
           autoFocus
         />
         <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground/60">
-          <span className="text-[11px]">⌘</span>K
+          <span>⌘</span>K
         </kbd>
       </div>
 
@@ -133,7 +140,7 @@ export const SearchDialog = () => {
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono text-muted-foreground shrink-0">
+                    <span className="shrink-0 font-mono text-xs text-muted-foreground">
                       {mr.key ?? mr.id}
                     </span>
                     <span className="text-sm font-medium truncate">
@@ -141,7 +148,7 @@ export const SearchDialog = () => {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[11px] text-muted-foreground truncate">
+                    <span className="truncate text-xs text-muted-foreground">
                       {mr.projectName}
                     </span>
                     {mr.draft && (
@@ -204,7 +211,7 @@ export const SearchDialog = () => {
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] font-mono font-medium text-foreground/70 shrink-0">
+                    <span className="shrink-0 font-mono text-xs font-medium text-foreground/70">
                       {issue.key ?? issue.id}
                     </span>
                     {issue.status && (

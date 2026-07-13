@@ -104,14 +104,23 @@ export function JiraSection({ className }: JiraSectionProps) {
   const renderContent = useCallback(() => {
     if (isLoading) {
       return (
-        <div className="grid gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="p-4 animate-pulse">
-              <CardContent>
-                <Skeleton className="h-6 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardContent>
-            </Card>
+        <div className="grid gap-3" aria-hidden="true">
+          {[
+            'jira-loading-primary',
+            'jira-loading-secondary',
+            'jira-loading-tertiary',
+          ].map((rowId) => (
+            <div
+              key={rowId}
+              className="rounded-lg border border-border px-3 py-2"
+            >
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="mt-2 h-3 w-16" />
+            </div>
           ))}
         </div>
       );
@@ -140,9 +149,13 @@ export function JiraSection({ className }: JiraSectionProps) {
 
     if (filteredData?.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-          <CheckSquare size={22} className="text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">No tickets found.</p>
+        <div className="flex items-center gap-2 py-2">
+          <CheckSquare
+            aria-hidden="true"
+            size={16}
+            className="shrink-0 text-muted-foreground/40"
+          />
+          <p className="text-xs text-muted-foreground">No tickets found.</p>
         </div>
       );
     }
@@ -196,8 +209,26 @@ export function JiraSection({ className }: JiraSectionProps) {
     onSelect: handleShortcutFilterSelect,
   });
 
+  const hasUrgentIssue = Boolean(
+    filteredData?.some(
+      (issue) =>
+        issue.fields.priority.name === 'Highest' &&
+        issue.fields.status.statusCategory.key !== 'done',
+    ),
+  );
+  const sectionState = isLoading
+    ? 'loading'
+    : filteredData?.length === 0
+      ? 'empty'
+      : hasUrgentIssue
+        ? 'urgent'
+        : 'populated';
+
   return (
-    <Card className={cn('flex flex-col overflow-hidden', className)}>
+    <Card
+      data-section-state={sectionState}
+      className={cn('flex flex-col overflow-hidden', className)}
+    >
       <CardHeader className="pb-3 shrink-0">
         <CardTitle className="w-full flex items-center justify-between">
           <div className="flex items-center gap-2 text-lg">
@@ -238,11 +269,13 @@ export function JiraSection({ className }: JiraSectionProps) {
           </Select>
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
-        {isRefreshing && (
-          <p className="text-xs text-muted-foreground" role="status">
-            Refreshing Jira tickets…
-          </p>
-        )}
+        <div className="min-h-4">
+          {isRefreshing && (
+            <p className="text-xs text-muted-foreground" role="status">
+              Refreshing Jira tickets…
+            </p>
+          )}
+        </div>
         {hasProviderError && hasData && (
           <div className="flex items-center justify-between gap-2 text-xs text-destructive">
             <span>Could not refresh Jira. Showing previously loaded data.</span>

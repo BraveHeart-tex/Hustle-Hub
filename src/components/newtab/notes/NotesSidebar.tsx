@@ -86,7 +86,7 @@ export const NotesSidebar = () => {
         </div>
 
         <div className="space-y-3">
-          <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Tags
           </p>
 

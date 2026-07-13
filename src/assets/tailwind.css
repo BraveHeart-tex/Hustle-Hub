@@ -166,3 +166,24 @@
     cursor: pointer;
   }
 }
+
+@layer components {
+  @media (width >= 80rem) {
+    .dashboard-section {
+      min-width: 0;
+      flex: 1 1 0;
+    }
+
+    .dashboard-section:has([data-section-state='urgent']) {
+      flex-grow: 1.25;
+    }
+
+    .dashboard-section-gitlab:has([data-section-state='populated']) {
+      flex-grow: 1.15;
+    }
+
+    .dashboard-section:has([data-section-state='empty']) {
+      flex-grow: 0.55;
+    }
+  }
+}

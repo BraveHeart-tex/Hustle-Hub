@@ -35,22 +35,19 @@ import type { AttentionItem, AttentionPriority } from '@/types/attention';
 
 const PRIORITY_CONFIG: Record<
   AttentionPriority,
-  { bar: string; badge: string; icon: string; dot: string }
+  { badge: string; icon: string; dot: string }
 > = {
   critical: {
-    bar: 'bg-destructive',
     badge: 'bg-destructive/10 text-destructive border-destructive/20',
     dot: 'bg-destructive shadow-[0_0_6px_1px] shadow-destructive/60 animate-pulse',
     icon: 'text-destructive',
   },
   warning: {
-    bar: 'bg-warning',
     badge: 'bg-warning/10 text-warning border-warning/20',
     dot: 'bg-warning',
     icon: 'text-warning',
   },
   info: {
-    bar: 'bg-info',
     badge: 'bg-info/10 text-info border-info/20',
     dot: 'bg-info',
     icon: 'text-info',
@@ -149,14 +146,9 @@ function AttentionRow({
       )}
     >
       {!nested && (
-        <>
-          <div
-            className={`absolute left-0 top-2 bottom-2 w-[3px] rounded-full ${cfg.bar}`}
-          />
-          <div className="mt-[5px] shrink-0">
-            <span className={`block h-2 w-2 rounded-full ${cfg.dot}`} />
-          </div>
-        </>
+        <div className="mt-1 shrink-0">
+          <span className={`block h-2 w-2 rounded-full ${cfg.dot}`} />
+        </div>
       )}
 
       <div className="min-w-0 flex-1">
@@ -314,7 +306,7 @@ function AttentionEntityRow({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="rounded-full border border-border bg-background/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+            <span className="rounded-full border border-border bg-background/70 px-2 py-0.5 text-xs font-medium text-muted-foreground">
               {group.items.length}
             </span>
             <ChevronDown
@@ -408,10 +400,16 @@ function PriorityGroup({
 // ------------------------------------------------------------
 
 function AttentionSkeleton() {
+  const rows = [
+    'attention-loading-primary',
+    'attention-loading-secondary',
+    'attention-loading-tertiary',
+  ];
+
   return (
     <div className="flex flex-col gap-3 px-1">
-      {[...Array(3)].map((_, i: number) => (
-        <div key={i} className="flex items-start gap-3 px-3">
+      {rows.map((rowId) => (
+        <div key={rowId} className="flex items-start gap-3 px-3">
           <Skeleton className="mt-1 h-2 w-2 rounded-full shrink-0" />
           <div className="flex-1 space-y-1.5">
             <Skeleton className="h-4 w-3/4" />
@@ -623,9 +621,13 @@ export function AttentionSection() {
 
     if (totalCount === 0) {
       return (
-        <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-          <BellOff size={22} className="text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 py-2">
+          <BellOff
+            aria-hidden="true"
+            size={16}
+            className="shrink-0 text-muted-foreground/40"
+          />
+          <p className="text-xs text-muted-foreground">
             No attention rules are currently triggered.
           </p>
         </div>
@@ -672,8 +674,19 @@ export function AttentionSection() {
     retryAttention,
   ]);
 
+  const sectionState = isLoading
+    ? 'loading'
+    : totalCount === 0
+      ? 'empty'
+      : criticalItems.length > 0
+        ? 'urgent'
+        : 'populated';
+
   return (
-    <Card className="max-h-[calc(100vh-110px)] flex flex-col">
+    <Card
+      data-section-state={sectionState}
+      className="max-h-[calc(100vh-110px)] flex flex-col"
+    >
       <CardHeader className="pb-2 shrink-0">
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-2">
@@ -717,7 +730,7 @@ export function AttentionSection() {
         </CardTitle>
 
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] text-muted-foreground" role="status">
+          <p className="text-xs text-muted-foreground" role="status">
             {isLoading
               ? 'Loading attention rules…'
               : isRefreshing
