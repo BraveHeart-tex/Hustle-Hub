@@ -212,7 +212,12 @@ export function JiraSection({ className }: JiraSectionProps) {
       <CardHeader className="pb-3 shrink-0">
         <CardTitle className="w-full flex items-center justify-between">
           <div className="flex items-center gap-2 text-lg">
-            <a href={getJiraForYouUrl()} target="_blank" rel="noreferrer">
+            <a
+              href={getJiraForYouUrl()}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open Jira"
+            >
               <JiraIcon className="text-blue-500" />
             </a>
             <span ref={headingRef} tabIndex={-1} className="outline-none">

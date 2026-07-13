@@ -13,7 +13,11 @@ import { SEARCH_SHORTCUT } from '@/components/newtab/keyboardShortcuts';
 import { KeyboardShortcutsHelp } from '@/components/newtab/KeyboardShortcutsHelp';
 import { AllCommentsWidget } from '@/components/newtab/misc/AllCommentsWidget';
 import { ModeToggle } from '@/components/newtab/ModeToggle';
-import { OPEN_SEARCH_EVENT } from '@/components/newtab/SearchDialog';
+import {
+  OPEN_SEARCH_EVENT,
+  type OpenSearchEventDetail,
+  SEARCH_TRIGGER_ID,
+} from '@/components/newtab/SearchDialog';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -35,8 +39,12 @@ export function Header() {
     void queryClient.refetchQueries({ type: 'active' });
   };
 
-  const handleOpenSearch = () => {
-    document.dispatchEvent(new Event(OPEN_SEARCH_EVENT));
+  const handleOpenSearch = (trigger: HTMLElement) => {
+    document.dispatchEvent(
+      new CustomEvent<OpenSearchEventDetail>(OPEN_SEARCH_EVENT, {
+        detail: { trigger },
+      }),
+    );
   };
 
   return (
@@ -92,9 +100,10 @@ export function Header() {
               </button>
             </nav>
             <Button
+              id={SEARCH_TRIGGER_ID}
               type="button"
               variant="outline"
-              onClick={handleOpenSearch}
+              onClick={(event) => handleOpenSearch(event.currentTarget)}
               className="h-9 justify-between px-2 text-muted-foreground lg:min-w-48 lg:px-3"
               aria-label="Search work"
               aria-keyshortcuts={SEARCH_SHORTCUT.ariaKeyShortcuts}

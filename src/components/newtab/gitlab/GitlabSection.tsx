@@ -397,6 +397,7 @@ export function GitlabSection() {
               href="https://gitlab.com/dashboard/merge_requests"
               target="_blank"
               rel="noreferrer noopener"
+              aria-label="Open GitLab"
             >
               <GitlabIcon />
             </a>

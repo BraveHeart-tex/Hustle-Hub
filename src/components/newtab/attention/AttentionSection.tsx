@@ -201,7 +201,7 @@ function AttentionRow({
         </div>
 
         {!nested && item.entityTitle && (
-          <p className="mt-0.5 text-xs text-muted-foreground/70 leading-snug truncate font-normal">
+          <p className="mt-0.5 text-xs text-muted-foreground leading-snug truncate font-normal">
             {item.entityTitle}
           </p>
         )}

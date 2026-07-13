@@ -4,7 +4,7 @@ import {
   SearchIcon,
   SquareArrowOutUpRight,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { JiraIcon } from '@/components/misc/JiraIcon';
@@ -14,6 +14,7 @@ import {
   CommandDialog,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
@@ -31,6 +32,11 @@ const STATUS_CATEGORY_CONFIG: Record<string, string> = {
 };
 
 export const OPEN_SEARCH_EVENT = 'hustle-hub:open-search';
+export const SEARCH_TRIGGER_ID = 'newtab-search-trigger';
+
+export interface OpenSearchEventDetail {
+  trigger?: HTMLElement;
+}
 
 function getStatusStyle(statusName: string): string {
   return (
@@ -39,9 +45,27 @@ function getStatusStyle(statusName: string): string {
   );
 }
 
+function getMergeRequestValue(mr: {
+  id: string;
+  title: string;
+  projectName?: string;
+}): string {
+  return `${mr.id} ${mr.title} ${mr.projectName ?? ''}`;
+}
+
+function getJiraIssueValue(issue: {
+  id: string;
+  key?: string;
+  title: string;
+  status?: string;
+}): string {
+  return `${issue.id} ${issue.key ?? ''} ${issue.title} ${issue.status ?? ''}`;
+}
+
 export const SearchDialog = () => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const searchTriggerRef = useRef<HTMLElement | null>(null);
   const { gitlab: filteredMRs, jira: filteredIssues } = useWorkItemSearch(
     query,
     isOpen,
@@ -51,10 +75,22 @@ export const SearchDialog = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setIsOpen((v) => !v);
+        setIsOpen((open) => {
+          if (!open) {
+            searchTriggerRef.current =
+              document.getElementById(SEARCH_TRIGGER_ID);
+          }
+          return !open;
+        });
       }
     };
-    const handleOpenSearch = () => setIsOpen(true);
+    const handleOpenSearch = (event: Event) => {
+      const { trigger } =
+        (event as CustomEvent<OpenSearchEventDetail>).detail ?? {};
+      searchTriggerRef.current =
+        trigger ?? document.getElementById(SEARCH_TRIGGER_ID);
+      setIsOpen(true);
+    };
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener(OPEN_SEARCH_EVENT, handleOpenSearch);
     return () => {
@@ -70,30 +106,49 @@ export const SearchDialog = () => {
     if (!open) setQuery('');
   }, []);
 
+  const handleCloseAutoFocus = useCallback((event: Event) => {
+    event.preventDefault();
+    searchTriggerRef.current?.focus();
+  }, []);
+
+  const handleResultSelect = useCallback(
+    (url: string, features?: string) => {
+      window.open(url, '_blank', features);
+      handleOpenChange(false);
+    },
+    [handleOpenChange],
+  );
+
   return (
     <CommandDialog
       open={isOpen}
       onOpenChange={handleOpenChange}
       className="lg:min-w-[580px] overflow-hidden"
       showCloseButton={false}
+      onCloseAutoFocus={handleCloseAutoFocus}
+      commandProps={{ shouldFilter: false }}
     >
       {/* Search input */}
-      <div className="flex items-center gap-2.5 border-b px-4 py-3">
-        <SearchIcon size={15} className="shrink-0 text-muted-foreground/60" />
-        <input
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
-          placeholder="Search MRs, tickets…"
-          aria-label="Search work"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          autoFocus
-        />
-        <span className="hidden items-center gap-1 sm:flex" aria-hidden="true">
-          {SEARCH_SHORTCUT.keys.map((key) => (
-            <KeyboardShortcutKey key={key}>{key}</KeyboardShortcutKey>
-          ))}
-        </span>
-      </div>
+      <CommandInput
+        wrapperClassName="h-auto gap-2.5 px-4 py-3 focus-within:border-border focus-within:ring-0"
+        iconClassName="size-[15px] text-muted-foreground/60 opacity-100"
+        className="h-auto flex-1 p-0 placeholder:text-muted-foreground/40"
+        placeholder="Search MRs, tickets…"
+        aria-label="Search work"
+        value={query}
+        onValueChange={setQuery}
+        autoFocus
+        trailing={
+          <span
+            className="hidden items-center gap-1 sm:flex"
+            aria-hidden="true"
+          >
+            {SEARCH_SHORTCUT.keys.map((key) => (
+              <KeyboardShortcutKey key={key}>{key}</KeyboardShortcutKey>
+            ))}
+          </span>
+        }
+      />
 
       <CommandList className="max-h-[420px] overflow-y-auto py-1.5">
         {!hasResults && (
@@ -125,10 +180,10 @@ export const SearchDialog = () => {
             {filteredMRs.map((mr) => (
               <CommandItem
                 key={mr.id}
-                value={`${mr.id} ${mr.title} ${mr.projectName ?? ''}`}
+                value={getMergeRequestValue(mr)}
                 className="group flex items-start gap-3 px-3 py-2.5 cursor-pointer"
                 onSelect={() =>
-                  window.open(mr.url, '_blank', 'noopener,noreferrer')
+                  handleResultSelect(mr.url, 'noopener,noreferrer')
                 }
               >
                 {/* MR icon */}
@@ -205,11 +260,9 @@ export const SearchDialog = () => {
             {filteredIssues.map((issue) => (
               <CommandItem
                 key={issue.id}
-                value={`${issue.id} ${issue.key ?? ''} ${issue.title} ${
-                  issue.status ?? ''
-                }`}
+                value={getJiraIssueValue(issue)}
                 className="group flex items-start gap-3 px-3 py-2.5 cursor-pointer"
-                onSelect={() => window.open(issue.url, '_blank')}
+                onSelect={() => handleResultSelect(issue.url)}
               >
                 {/* Priority dot */}
                 <div className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-info" />
