@@ -158,7 +158,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
     },
     editorProps: {
       attributes: {
-        class: 'tiptap not-prose min-h-[300px] focus:outline-none',
+        class: 'tiptap min-h-[300px]',
       },
     },
   });
@@ -436,7 +436,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           </span>
         </div>
 
-        <div className="min-h-[300px]">
+        <div className="min-h-[300px] rounded-md border border-transparent transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
           <FloatingToolbar editor={editor} />
           <EditorContent editor={editor} />
         </div>
