@@ -1,0 +1,6 @@
+{
+  "files": ["src/entrypoints/newtab/index.html"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}
