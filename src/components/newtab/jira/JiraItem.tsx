@@ -50,7 +50,7 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
   };
 
   return (
-    <div className="group relative px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors">
+    <div className="group relative px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 motion-safe:transition-colors">
       <a
         href={issueUrl}
         target="_blank"
@@ -77,13 +77,14 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
         {fields.summary}
       </h3>
 
-      <div className="pointer-events-none relative flex items-center justify-between gap-2 transition-opacity">
+      <div className="pointer-events-none relative flex items-center justify-between gap-2">
         <span className="text-xs text-muted-foreground flex items-center gap-1">
           <img src={fields.priority.iconUrl} alt="" width={12} height={12} />
           {fields.priority.name}
         </span>
         <div className="pointer-events-auto relative z-10 flex items-center gap-2">
           <WorkItemComments
+            triggerClassName="size-6"
             itemMeta={{
               itemId: issue.id,
               itemType: 'jira',
@@ -97,7 +98,7 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="size-4 relative text-muted-foreground"
+                  className="relative size-6 text-muted-foreground"
                   onClick={() => void copyTaskLinkToClipboard()}
                   loading={isCopying}
                   aria-label={

@@ -45,7 +45,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
   return (
     <div
       className={cn(
-        'group relative rounded-lg border border-border px-3 py-2 transition-colors hover:bg-muted/50 dark:hover:bg-accent/50',
+        'group relative rounded-lg border border-border px-3 py-2 motion-safe:transition-colors hover:bg-muted/50 dark:hover:bg-accent/50',
         mr.needsCurrentUserAction &&
           !hasProblem &&
           'border-warning/60 bg-warning/5',
@@ -106,7 +106,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
             />
             <button
               type="button"
-              className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground outline-none motion-safe:transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
               aria-label={`${showDetails ? 'Hide' : 'Show'} details for ${mr.title}`}
               aria-expanded={showDetails}
               aria-controls={detailsId}
@@ -115,7 +115,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
               <ChevronDown
                 aria-hidden="true"
                 className={cn(
-                  'size-4 transition-transform duration-150 motion-reduce:transition-none',
+                  'size-4 motion-safe:transition-transform motion-safe:duration-150',
                   showDetails && 'rotate-180',
                 )}
               />

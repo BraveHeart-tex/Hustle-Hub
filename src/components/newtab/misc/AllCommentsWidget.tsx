@@ -146,7 +146,7 @@ export const AllCommentsWidget = () => {
                       {groupComments.map((comment) => (
                         <div
                           key={comment.id}
-                          className="group px-3.5 py-2.5 bg-card hover:bg-muted/20 transition-colors"
+                          className="group px-3.5 py-2.5 bg-card hover:bg-muted/20 motion-safe:transition-colors"
                         >
                           {/* Meta */}
                           <div className="flex items-center justify-between mb-1.5">
@@ -161,9 +161,9 @@ export const AllCommentsWidget = () => {
                               }
                               disabled={submitting.has(comment.id)}
                               className={cn(
-                                'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity',
+                                'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 motion-safe:transition-opacity',
                                 'flex items-center gap-1 text-[10px] text-muted-foreground',
-                                'hover:text-success transition-colors',
+                                'hover:text-success motion-safe:transition-colors',
                                 'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                                 submitting.has(comment.id) &&
                                   'opacity-50 cursor-not-allowed',

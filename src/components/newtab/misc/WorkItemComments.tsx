@@ -29,6 +29,7 @@ const RichTextEditor = lazy(() =>
 );
 
 interface WorkItemCommentsProps {
+  triggerClassName?: string;
   itemMeta: {
     itemId: string;
     itemType: CommentItemType;
@@ -37,7 +38,10 @@ interface WorkItemCommentsProps {
   };
 }
 
-export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
+export const WorkItemComments = ({
+  itemMeta,
+  triggerClassName,
+}: WorkItemCommentsProps) => {
   const popoverId = useId();
   const editorId = useId();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -122,7 +126,10 @@ export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
         <Button
           size="icon"
           variant="ghost"
-          className="size-4 relative text-muted-foreground hover:text-foreground transition-colors"
+          className={cn(
+            'relative size-4 text-muted-foreground motion-safe:transition-colors hover:text-foreground',
+            triggerClassName,
+          )}
           onClick={handleTriggerClick}
           aria-label={`Comments for ${itemMeta.title}`}
           aria-expanded={isPopoverOpen}
@@ -180,7 +187,7 @@ export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
               <div
                 key={comment.id}
                 className={cn(
-                  'group px-3 py-2 transition-colors hover:bg-muted/30',
+                  'group px-3 py-2 motion-safe:transition-colors hover:bg-muted/30',
                   i !== comments.length - 1 && 'border-b border-border/50',
                 )}
               >
@@ -193,7 +200,7 @@ export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
                     onClick={() => void handleResolveComment(comment.id)}
                     disabled={resolvingIds.has(comment.id)}
                     className={cn(
-                      'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity',
+                      'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 motion-safe:transition-opacity',
                       'h-4 w-4 rounded flex items-center justify-center',
                       'text-muted-foreground hover:text-success hover:bg-success/10',
                       'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
@@ -261,7 +268,7 @@ export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
                   clearEditor();
                   setShowEditor(false);
                 }}
-                className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                className="text-[10px] text-muted-foreground hover:text-foreground motion-safe:transition-colors"
               >
                 Cancel
               </button>

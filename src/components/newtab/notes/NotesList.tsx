@@ -150,7 +150,7 @@ export const NotesList = () => {
                   }
                 }}
                 className={cn(
-                  'w-full rounded-lg border bg-card p-3 text-left transition-colors hover:bg-accent/50',
+                  'w-full rounded-lg border bg-card p-3 text-left motion-safe:transition-colors hover:bg-accent/50',
                   isSelected
                     ? 'border-primary ring-2 ring-primary/15'
                     : 'border-border',

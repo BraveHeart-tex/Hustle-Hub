@@ -67,7 +67,7 @@ export const NotesSidebar = () => {
                   setActiveTag(null);
                 }}
                 className={cn(
-                  'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm outline-none transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                  'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm outline-none motion-safe:transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                   isActive
                     ? 'bg-accent text-accent-foreground'
                     : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
@@ -105,7 +105,7 @@ export const NotesSidebar = () => {
                   <Badge
                     variant="secondary"
                     className={cn(
-                      'cursor-pointer gap-1.5 transition-colors',
+                      'cursor-pointer gap-1.5 motion-safe:transition-colors',
                       activeTag === tag.name &&
                         'bg-accent text-accent-foreground',
                     )}
@@ -126,7 +126,7 @@ export const NotesSidebar = () => {
         <button
           type="button"
           onClick={clearFilters}
-          className="rounded-sm text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+          className="rounded-sm text-sm text-muted-foreground outline-none motion-safe:transition-colors hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
         >
           Clear filters
         </button>

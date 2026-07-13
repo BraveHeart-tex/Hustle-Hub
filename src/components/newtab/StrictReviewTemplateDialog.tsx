@@ -222,7 +222,7 @@ export const StrictReviewTemplateDialog = ({
                   type="button"
                   onClick={() => setSelectedId(item.id)}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors',
+                    'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm motion-safe:transition-colors',
                     item.id === selected?.id
                       ? 'bg-secondary text-secondary-foreground'
                       : 'hover:bg-muted/50',
@@ -289,7 +289,7 @@ export const StrictReviewTemplateDialog = ({
                       onClick={() =>
                         editorHandleRef.current?.insertVariable(variable.key)
                       }
-                      className="rounded-md border border-border bg-secondary px-2 py-1 text-xs font-mono text-secondary-foreground hover:bg-secondary/80 hover:border-primary/40 transition-colors"
+                      className="rounded-md border border-border bg-secondary px-2 py-1 text-xs font-mono text-secondary-foreground hover:bg-secondary/80 hover:border-primary/40 motion-safe:transition-colors"
                       title={variable.description}
                     >
                       {`{${variable.key}}`}

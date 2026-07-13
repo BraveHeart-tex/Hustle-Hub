@@ -42,7 +42,7 @@ export function JiraSection({ className }: JiraSectionProps) {
   } = useJiraTickets(filter);
   const [selectedTaskStatus, setSelectedTaskStatus] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const headingRef = useRef<HTMLSpanElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const hasData = data !== undefined;
   const hasProviderError = isError || isUnauthorized;
   const isRefreshing = isFetching && hasData;
@@ -220,9 +220,9 @@ export function JiraSection({ className }: JiraSectionProps) {
             >
               <JiraIcon className="text-blue-500" />
             </a>
-            <span ref={headingRef} tabIndex={-1} className="outline-none">
+            <h2 ref={headingRef} tabIndex={-1} className="outline-none">
               Jira Tickets
-            </span>
+            </h2>
           </div>
           <Select
             open={isFilterOpen}

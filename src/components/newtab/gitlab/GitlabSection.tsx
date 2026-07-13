@@ -60,7 +60,7 @@ export function GitlabSection() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
-  const headingRef = useRef<HTMLSpanElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const hasData = data !== undefined;
   const hasProviderError = isError || isUnauthorized;
   const isRefreshing = isFetching && hasData;
@@ -264,7 +264,7 @@ export function GitlabSection() {
             onOpenChange={setIsDraftsOpen}
             className="border-t border-border"
           >
-            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-muted/30 dark:hover:bg-accent/50">
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-2 text-left motion-safe:transition-colors hover:bg-muted/30 dark:hover:bg-accent/50">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">
                   Draft merge requests
@@ -279,13 +279,13 @@ export function GitlabSection() {
                 </span>
                 <ChevronDown
                   className={cn(
-                    'size-4 text-muted-foreground transition-transform duration-200',
+                    'size-4 text-muted-foreground motion-safe:transition-transform motion-safe:duration-200',
                     isDraftsOpen && 'rotate-180',
                   )}
                 />
               </div>
             </CollapsibleTrigger>
-            <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+            <CollapsibleContent className="overflow-hidden motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0">
               <div className="grid gap-3 border-t border-border/60 px-3 py-3">
                 {draftMrs.map((mr) => (
                   <MRItem mr={mr} key={mr.iid} />
@@ -328,13 +328,16 @@ export function GitlabSection() {
                   Approve all
                 </Button>
 
-                <CollapsibleTrigger className="flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-muted/20 dark:hover:bg-accent/50">
+                <CollapsibleTrigger
+                  aria-label={`${isSyncOpen ? 'Hide' : 'Show'} ${syncMrs.length} sync merge request${syncMrs.length === 1 ? '' : 's'}`}
+                  className="flex items-center gap-1.5 rounded-md px-2 py-1 motion-safe:transition-colors hover:bg-muted/20 dark:hover:bg-accent/50"
+                >
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                     {syncMrs.length}
                   </span>
                   <ChevronDown
                     className={cn(
-                      'size-4 text-muted-foreground transition-transform duration-200',
+                      'size-4 text-muted-foreground motion-safe:transition-transform motion-safe:duration-200',
                       isSyncOpen && 'rotate-180',
                     )}
                   />
@@ -342,7 +345,7 @@ export function GitlabSection() {
               </div>
             </div>
 
-            <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+            <CollapsibleContent className="overflow-hidden motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0">
               <div className="grid gap-3 border-t border-border/60 px-3 py-3">
                 {syncMrs.map((mr) => (
                   <MRItem mr={mr} key={mr.iid} />
@@ -401,9 +404,9 @@ export function GitlabSection() {
             >
               <GitlabIcon />
             </a>
-            <span ref={headingRef} tabIndex={-1} className="outline-none">
+            <h2 ref={headingRef} tabIndex={-1} className="outline-none">
               GitLab MRs
-            </span>
+            </h2>
           </div>
           <Select
             open={isFilterOpen}

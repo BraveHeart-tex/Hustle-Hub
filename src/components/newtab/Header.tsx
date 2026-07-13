@@ -70,7 +70,7 @@ export function Header() {
                 onClick={() => navigate('/')}
                 aria-current={route === '/' ? 'page' : undefined}
                 className={cn(
-                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
+                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium motion-safe:transition-colors',
                   'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                   route === '/'
                     ? 'bg-background text-foreground shadow-sm'
@@ -85,7 +85,7 @@ export function Header() {
                 onClick={() => navigate('/notes')}
                 aria-current={route === '/notes' ? 'page' : undefined}
                 className={cn(
-                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors',
+                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium motion-safe:transition-colors',
                   'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                   route === '/notes'
                     ? 'bg-background text-foreground shadow-sm'
@@ -137,7 +137,7 @@ export function Header() {
                       aria-hidden="true"
                       className={cn(
                         'h-5 w-5',
-                        isFetching > 0 && 'animate-spin',
+                        isFetching > 0 && 'motion-safe:animate-spin',
                       )}
                     />
                   </Button>

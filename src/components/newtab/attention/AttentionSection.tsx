@@ -12,7 +12,14 @@ import {
   Ticket,
   Zap,
 } from 'lucide-react';
-import { useCallback, useId, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,7 +46,7 @@ const PRIORITY_CONFIG: Record<
 > = {
   critical: {
     badge: 'bg-destructive/10 text-destructive border-destructive/20',
-    dot: 'bg-destructive shadow-[0_0_6px_1px] shadow-destructive/60 animate-pulse',
+    dot: 'bg-destructive shadow-[0_0_6px_1px] shadow-destructive/60 motion-safe:animate-pulse',
     icon: 'text-destructive',
   },
   warning: {
@@ -141,7 +148,7 @@ function AttentionRow({
   return (
     <div
       className={cn(
-        'group relative flex items-start gap-3 rounded-lg transition-colors hover:bg-muted/40',
+        'group relative flex items-start gap-3 rounded-lg motion-safe:transition-colors hover:bg-muted/40',
         nested ? 'border border-border/50 px-2.5 py-2' : 'px-3 py-2.5',
       )}
     >
@@ -153,22 +160,24 @@ function AttentionRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <a
-            href={item.entityUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="flex items-center gap-1.5 rounded text-sm font-medium leading-snug hover:underline underline-offset-2 truncate outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-          >
-            <SourceIcon item={item} />
-            <span className="truncate">{item.title}</span>
-            <ChevronRight
-              size={11}
-              className="shrink-0 text-muted-foreground/50"
-            />
-          </a>
+          <h3 className="min-w-0 flex-1 text-sm font-medium leading-snug">
+            <a
+              href={item.entityUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="-my-1 flex min-h-8 items-center gap-1.5 rounded py-1 hover:underline underline-offset-2 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            >
+              <SourceIcon item={item} />
+              <span className="truncate">{item.title}</span>
+              <ChevronRight
+                size={11}
+                className="shrink-0 text-muted-foreground/50"
+              />
+            </a>
+          </h3>
 
           <div
-            className={`flex items-center gap-1 shrink-0 transition-opacity ${showSnooze ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'}`}
+            className={`flex items-center gap-1 shrink-0 motion-safe:transition-opacity ${showSnooze ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'}`}
           >
             <Button
               type="button"
@@ -274,53 +283,54 @@ function AttentionEntityRow({
       onOpenChange={setOpen}
       className="border border-border/70 bg-muted/15"
     >
-      <div className="relative px-3 py-3 transition-colors hover:bg-muted/30">
-        <CollapsibleTrigger asChild>
-          <button
-            type="button"
-            aria-label={`${open ? 'Collapse' : 'Expand'} ${group.entityTitle || representativeItem.title}`}
-            aria-controls={contentId}
-            className="absolute inset-0 w-full outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-          />
-        </CollapsibleTrigger>
-        <div className="pointer-events-none relative flex w-full items-start justify-between gap-3 text-left">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-sm font-medium leading-snug">
+      <div className="flex w-full items-start justify-between gap-3 px-3 py-3 motion-safe:transition-colors hover:bg-muted/30">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-medium leading-snug">
+            <a
+              href={group.entityUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="-my-1 flex min-h-8 items-center gap-1.5 rounded py-1 hover:underline underline-offset-2 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            >
               <SourceIcon item={representativeItem} />
-              <a
-                href={group.entityUrl}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="pointer-events-auto relative z-10 rounded truncate hover:underline underline-offset-2 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                onClick={(event) => event.stopPropagation()}
-              >
+              <span className="truncate">
                 {group.entityTitle || representativeItem.title}
-              </a>
+              </span>
               <ChevronRight
                 size={11}
                 className="shrink-0 text-muted-foreground/50"
               />
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {group.items.length} attention items for the same entity
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="rounded-full border border-border bg-background/70 px-2 py-0.5 text-xs font-medium text-muted-foreground">
-              {group.items.length}
-            </span>
-            <ChevronDown
-              className={cn(
-                'size-4 text-muted-foreground transition-transform duration-200',
-                open && 'rotate-180',
-              )}
-            />
-          </div>
+            </a>
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {group.items.length} attention items for the same entity
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded-full border border-border bg-background/70 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+            {group.items.length}
+          </span>
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              aria-label={`${open ? 'Collapse' : 'Expand'} ${group.entityTitle || representativeItem.title}`}
+              aria-controls={contentId}
+              className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground outline-none motion-safe:transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            >
+              <ChevronDown
+                aria-hidden="true"
+                className={cn(
+                  'size-4 motion-safe:transition-transform motion-safe:duration-200',
+                  open && 'rotate-180',
+                )}
+              />
+            </button>
+          </CollapsibleTrigger>
         </div>
       </div>
       <CollapsibleContent
         id={contentId}
-        className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0"
+        className="overflow-hidden motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0"
       >
         <div className="grid gap-2 border-t border-border/60 px-3 py-3">
           {group.items.map((item) => (
@@ -442,9 +452,23 @@ export function AttentionSection() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
-  const headingRef = useRef<HTMLSpanElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const feedbackSequenceRef = useRef(0);
   const hasData = items !== undefined;
   const isRefreshing = isFetching && hasData;
+
+  useEffect(() => {
+    if (mutationFeedback?.type !== 'success') return;
+
+    const currentFeedback = mutationFeedback;
+    const timeoutId = window.setTimeout(() => {
+      setMutationFeedback((feedback) =>
+        feedback === currentFeedback ? null : feedback,
+      );
+    }, 2500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [mutationFeedback]);
   const { mutateAsync: runAttentionMutation } = useMutation({
     mutationFn: async ({
       id,
@@ -518,6 +542,9 @@ export function AttentionSection() {
     ): Promise<boolean> => {
       const pendingAction =
         action === 'snooze' ? `snooze:${duration}` : 'dismiss';
+      const feedbackSequence = announce
+        ? ++feedbackSequenceRef.current
+        : undefined;
       setPendingActions((current) => ({ ...current, [id]: pendingAction }));
       if (announce) setMutationFeedback(null);
 
@@ -528,7 +555,7 @@ export function AttentionSection() {
           QUERY_KEYS.attention.list,
           (current = []) => current.filter((item) => item.id !== id),
         );
-        if (announce) {
+        if (announce && feedbackSequence === feedbackSequenceRef.current) {
           setMutationFeedback({
             type: 'success',
             message:
@@ -539,7 +566,7 @@ export function AttentionSection() {
         }
         return true;
       } catch (mutationError) {
-        if (announce) {
+        if (announce && feedbackSequence === feedbackSequenceRef.current) {
           setMutationFeedback({
             type: 'error',
             message: `${
@@ -574,6 +601,7 @@ export function AttentionSection() {
 
   const handleBulkDismiss = useCallback(async () => {
     if (isBulkDismissing) return;
+    const feedbackSequence = ++feedbackSequenceRef.current;
     setIsBulkDismissing(true);
     setMutationFeedback(null);
 
@@ -585,13 +613,15 @@ export function AttentionSection() {
     const successCount = results.filter(Boolean).length;
     const failureCount = results.length - successCount;
 
-    setMutationFeedback({
-      type: failureCount > 0 ? 'error' : 'success',
-      message:
-        failureCount > 0
-          ? `Dismissed ${successCount} FYI${successCount === 1 ? '' : 's'}; ${failureCount} failed and remain in the list.`
-          : `Dismissed ${successCount} FYI${successCount === 1 ? '' : 's'}.`,
-    });
+    if (feedbackSequence === feedbackSequenceRef.current) {
+      setMutationFeedback({
+        type: failureCount > 0 ? 'error' : 'success',
+        message:
+          failureCount > 0
+            ? `Dismissed ${successCount} FYI${successCount === 1 ? '' : 's'}; ${failureCount} failed and remain in the list.`
+            : `Dismissed ${successCount} FYI${successCount === 1 ? '' : 's'}.`,
+      });
+    }
     setIsBulkDismissing(false);
     headingRef.current?.focus();
   }, [infoItems, isBulkDismissing, mutateAttentionItem]);
@@ -695,9 +725,9 @@ export function AttentionSection() {
             ) : (
               <Bell size={16} className="text-muted-foreground" />
             )}
-            <span ref={headingRef} tabIndex={-1} className="outline-none">
+            <h2 ref={headingRef} tabIndex={-1} className="outline-none">
               Attention
-            </span>
+            </h2>
             {totalCount > 0 && (
               <span
                 className={`
