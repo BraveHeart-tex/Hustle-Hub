@@ -30,17 +30,23 @@ interface JiraItemProps {
 
 export const JiraItem = ({ issue }: JiraItemProps) => {
   const [isCopied, setIsCopied] = useState(false);
+  const [copyError, setCopyError] = useState('');
+  const [isCopying, setIsCopying] = useState(false);
   const { fields } = issue;
   const issueUrl = getJiraTaskUrl(issue.key);
 
   const copyTaskLinkToClipboard = async () => {
+    setCopyError('');
+    setIsCopying(true);
     try {
       await navigator.clipboard.writeText(issueUrl);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
       console.error(error);
-      window.alert('Failed to copy task link to clipboard');
+      setCopyError('Could not copy the Jira link. Try again.');
+    } finally {
+      setIsCopying(false);
     }
   };
 
@@ -94,6 +100,7 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
                   variant="ghost"
                   className="size-4 relative text-muted-foreground"
                   onClick={() => void copyTaskLinkToClipboard()}
+                  loading={isCopying}
                   aria-label={
                     isCopied
                       ? `Copied link for Jira issue ${issue.key}`
@@ -114,6 +121,15 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
           </TooltipProvider>
         </div>
       </div>
+      {copyError && (
+        <p
+          role="status"
+          aria-live="polite"
+          className="pointer-events-none relative mt-1 text-xs text-destructive"
+        >
+          {copyError}
+        </p>
+      )}
     </div>
   );
 };

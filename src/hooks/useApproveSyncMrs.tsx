@@ -2,12 +2,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { GITLAB_FILTERS, QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
+import { isMockDataEnabled } from '@/lib/mockData';
 
 export const useApproveSyncMrs = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (approvalsByProjectId: Record<string, string[]>) => {
+      if (isMockDataEnabled) return { success: true };
+
       const response = await fetch(ENDPOINTS.gitlab.approveMergeRequests, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,13 +35,6 @@ export const useApproveSyncMrs = () => {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.gitlab.mergeRequests(GITLAB_FILTERS.ASSIGNED),
       });
-    },
-    onError: (error) => {
-      window.alert(
-        error instanceof Error
-          ? error.message
-          : 'Failed to approve sync merge requests.',
-      );
     },
   });
 };

@@ -5,6 +5,7 @@ import {
 import { type AttentionItem } from '@/types/attention';
 
 const API_BASE = import.meta.env.VITE_BASE_API_URL as string;
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 const RECONNECT_DELAY = 3_000;
 
 function notify(batch: AttentionItem[]): void {
@@ -59,8 +60,7 @@ export default defineBackground({
       browser.runtime.getPlatformInfo().catch(() => {});
     }, 20_000);
 
-    // SSE connection for attention feed
-    connectSSE();
+    if (!USE_MOCK_DATA) connectSSE();
 
     // Click notification → open new tab
     browser.notifications.onClicked.addListener(() => {

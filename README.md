@@ -61,6 +61,16 @@ VITE_GITLAB_USER_ID="123456"
 VITE_RELEASE_REVIEWER_USER_ID="123456"
 ```
 
+To run the new-tab dashboard with realistic local fixtures instead of the
+backend, add:
+
+```env
+VITE_USE_MOCK_DATA="true"
+```
+
+This supplies mock attention items, Jira tickets, and GitLab merge requests.
+The attention event stream is disabled while mock data is enabled.
+
 To enable the deployment widget, also set:
 
 ```env

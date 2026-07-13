@@ -12,6 +12,7 @@ const viteEnvSchema = z.object({
     .url()
     .describe('Jira base URL used to generate task urls'),
   VITE_GITLAB_USER_ID: z.string().regex(/^\d+$/, 'Must be a numeric user ID'),
+  VITE_USE_MOCK_DATA: z.enum(['true', 'false']).optional(),
   VITE_DEPLOYMENT_WIDGET_MATCH: z
     .string()
     .min(1)

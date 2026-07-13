@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 
 import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
+import { isMockDataEnabled } from '@/lib/mockData';
 import type { AttentionItem, AttentionSource } from '@/types/attention';
 
 const RECONNECT_DELAY = 3_000;
@@ -13,6 +14,8 @@ export function useAttentionStream(): void {
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    if (isMockDataEnabled) return;
+
     let unmounted = false;
 
     function connect() {

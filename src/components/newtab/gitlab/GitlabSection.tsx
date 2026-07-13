@@ -1,11 +1,12 @@
-import { AlertCircle, ChevronDown, GitMerge } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { AlertCircle, ChevronDown, GitMerge, RefreshCw } from 'lucide-react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { FilterButton } from '@/components/newtab/FilterButton';
 import { MRItem } from '@/components/newtab/gitlab/MRItem';
 import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
 import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Collapsible,
@@ -50,14 +51,38 @@ const isSyncBranch = (sourceBranch: string): boolean =>
   sourceBranch.startsWith('sync/');
 
 export function GitlabSection() {
-  const { mutate: approveSyncMrs, isPending: isApprovingSyncMrs } =
-    useApproveSyncMrs();
+  const {
+    mutate: approveSyncMrs,
+    isPending: isApprovingSyncMrs,
+    reset: resetApproval,
+  } = useApproveSyncMrs();
   const [filter, setFilter] = useGitlabFilter();
-  const { data, isError, isLoading, error } = useGitlabMrs(filter);
+  const {
+    data,
+    isError,
+    isUnauthorized,
+    isFetching,
+    isLoading,
+    error,
+    refetch,
+  } = useGitlabMrs(filter);
   const [selectedProjectName, setSelectedProjectName] = useState('');
   const [isDraftsOpen, setIsDraftsOpen] = useState(false);
   const [isSyncOpen, setIsSyncOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [approvalFeedback, setApprovalFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const headingRef = useRef<HTMLSpanElement>(null);
+  const hasData = data !== undefined;
+  const hasProviderError = isError || isUnauthorized;
+  const isRefreshing = isFetching && hasData;
+
+  const retryGitlab = useCallback(async () => {
+    await refetch();
+    headingRef.current?.focus();
+  }, [refetch]);
 
   const handleFilterValueChange = useCallback(
     (value: string) => {
@@ -154,8 +179,26 @@ export function GitlabSection() {
       {},
     );
 
-    approveSyncMrs(approvalsByProjectId);
-  }, [approveSyncMrs, syncMrs]);
+    resetApproval();
+    setApprovalFeedback(null);
+    approveSyncMrs(approvalsByProjectId, {
+      onSuccess: () => {
+        setApprovalFeedback({
+          type: 'success',
+          message: `${syncMrs.length} sync merge request${syncMrs.length === 1 ? '' : 's'} approved.`,
+        });
+      },
+      onError: (approvalError) => {
+        setApprovalFeedback({
+          type: 'error',
+          message:
+            approvalError instanceof Error
+              ? approvalError.message
+              : 'Failed to approve sync merge requests.',
+        });
+      },
+    });
+  }, [approveSyncMrs, resetApproval, syncMrs]);
 
   const renderContent = useCallback(() => {
     if (isLoading) {
@@ -173,13 +216,23 @@ export function GitlabSection() {
       );
     }
 
-    if (isError) {
+    if (hasProviderError && !hasData) {
       return (
         <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
           <AlertCircle size={22} className="text-destructive/50" />
           <p className="text-sm text-destructive font-medium">
             {error?.message ?? 'Failed to load merge requests.'}
           </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            loading={isFetching}
+            onClick={() => void retryGitlab()}
+          >
+            <RefreshCw aria-hidden="true" />
+            Retry GitLab
+          </Button>
         </div>
       );
     }
@@ -259,17 +312,19 @@ export function GitlabSection() {
 
               {/* Right: actions + trigger */}
               <div className="flex items-center gap-2 shrink-0">
-                <button
+                <Button
                   type="button"
-                  className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px]"
                   onClick={(e) => {
                     e.stopPropagation();
                     void approveAllSyncMrs();
                   }}
-                  disabled={isApprovingSyncMrs}
+                  loading={isApprovingSyncMrs}
                 >
-                  {isApprovingSyncMrs ? 'Approving...' : 'Approve all'}
-                </button>
+                  Approve all
+                </Button>
 
                 <CollapsibleTrigger className="flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-muted/20 dark:hover:bg-accent/50">
                   <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
@@ -300,15 +355,18 @@ export function GitlabSection() {
     activeMrs,
     draftMrs,
     error?.message,
-    isError,
+    hasData,
+    hasProviderError,
     isDraftsOpen,
     isLoading,
+    isFetching,
     filter,
     data?.length,
     approveAllSyncMrs,
     isApprovingSyncMrs,
     isSyncOpen,
     syncMrs,
+    retryGitlab,
   ]);
 
   return (
@@ -323,7 +381,9 @@ export function GitlabSection() {
             >
               <GitlabIcon />
             </a>
-            <span>GitLab MRs</span>
+            <span ref={headingRef} tabIndex={-1} className="outline-none">
+              GitLab MRs
+            </span>
           </div>
           <Select
             open={isFilterOpen}
@@ -355,6 +415,43 @@ export function GitlabSection() {
           </Select>
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
+        {isRefreshing && (
+          <p className="text-xs text-muted-foreground" role="status">
+            Refreshing GitLab merge requests…
+          </p>
+        )}
+        {hasProviderError && hasData && (
+          <div className="flex items-center justify-between gap-2 text-xs text-destructive">
+            <span>
+              Could not refresh GitLab. Showing previously loaded data.
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 shrink-0"
+              loading={isFetching}
+              onClick={() => void retryGitlab()}
+            >
+              <RefreshCw aria-hidden="true" />
+              Retry
+            </Button>
+          </div>
+        )}
+        {approvalFeedback && (
+          <p
+            role="status"
+            aria-live="polite"
+            className={cn(
+              'text-xs',
+              approvalFeedback.type === 'error'
+                ? 'text-destructive'
+                : 'text-success',
+            )}
+          >
+            {approvalFeedback.message}
+          </p>
+        )}
         {!isLoading && avilableProjectNames.length > 1 && (
           <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
             {avilableProjectNames.map((projectName) => (

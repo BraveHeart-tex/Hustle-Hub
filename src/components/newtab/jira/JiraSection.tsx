@@ -1,11 +1,12 @@
-import { AlertCircle, CheckSquare } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AlertCircle, CheckSquare, RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { JiraIcon } from '@/components/misc/JiraIcon';
 import { FilterButton } from '@/components/newtab/FilterButton';
 import { JiraItem } from '@/components/newtab/jira/JiraItem';
 import { KeyboardShortcutKey } from '@/components/newtab/KeyboardShortcutKey';
 import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -50,9 +51,26 @@ interface JiraSectionProps {
 
 export function JiraSection({ className }: JiraSectionProps) {
   const [filter, setFilter] = useJiraFilter();
-  const { data, isLoading, isError, error } = useJiraTickets(filter);
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+    isUnauthorized,
+    error,
+    refetch,
+  } = useJiraTickets(filter);
   const [selectedTaskStatus, setSelectedTaskStatus] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const headingRef = useRef<HTMLSpanElement>(null);
+  const hasData = data !== undefined;
+  const hasProviderError = isError || isUnauthorized;
+  const isRefreshing = isFetching && hasData;
+
+  const retryJira = useCallback(async () => {
+    await refetch();
+    headingRef.current?.focus();
+  }, [refetch]);
 
   const taskStatuses: { label: string; count: number }[] = useMemo(() => {
     if (!data?.issues) return [];
@@ -99,13 +117,23 @@ export function JiraSection({ className }: JiraSectionProps) {
       );
     }
 
-    if (isError) {
+    if (hasProviderError && !hasData) {
       return (
         <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
           <AlertCircle size={22} className="text-destructive/50" />
           <p className="text-sm text-destructive font-medium">
             {error?.message ?? 'Failed to load tickets.'}
           </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            loading={isFetching}
+            onClick={() => void retryJira()}
+          >
+            <RefreshCw aria-hidden="true" />
+            Retry Jira
+          </Button>
         </div>
       );
     }
@@ -122,7 +150,15 @@ export function JiraSection({ className }: JiraSectionProps) {
     return filteredData?.map((issue) => (
       <JiraItem key={issue.id} issue={issue} />
     ));
-  }, [filteredData, error?.message, isError, isLoading]);
+  }, [
+    filteredData,
+    error?.message,
+    hasData,
+    hasProviderError,
+    isFetching,
+    isLoading,
+    retryJira,
+  ]);
 
   const handleFilterValueChange = useCallback(
     (filterValue: string) => {
@@ -168,7 +204,9 @@ export function JiraSection({ className }: JiraSectionProps) {
             <a href={getJiraForYouUrl()} target="_blank" rel="noreferrer">
               <JiraIcon className="text-blue-500" />
             </a>
-            Jira Tickets
+            <span ref={headingRef} tabIndex={-1} className="outline-none">
+              Jira Tickets
+            </span>
           </div>
           <Select
             open={isFilterOpen}
@@ -200,6 +238,27 @@ export function JiraSection({ className }: JiraSectionProps) {
           </Select>
         </CardTitle>
         {isLoading && <Skeleton className="h-4 w-1/3" />}
+        {isRefreshing && (
+          <p className="text-xs text-muted-foreground" role="status">
+            Refreshing Jira tickets…
+          </p>
+        )}
+        {hasProviderError && hasData && (
+          <div className="flex items-center justify-between gap-2 text-xs text-destructive">
+            <span>Could not refresh Jira. Showing previously loaded data.</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 shrink-0"
+              loading={isFetching}
+              onClick={() => void retryJira()}
+            >
+              <RefreshCw aria-hidden="true" />
+              Retry
+            </Button>
+          </div>
+        )}
         {shouldShowStatusFilters && (
           <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
             {taskStatuses.map((status) => (

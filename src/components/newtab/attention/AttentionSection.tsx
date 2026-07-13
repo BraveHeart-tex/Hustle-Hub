@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Bell,
   BellOff,
@@ -7,10 +8,11 @@ import {
   Clock,
   GitMerge,
   MessageSquare,
+  RefreshCw,
   Ticket,
   Zap,
 } from 'lucide-react';
-import { useCallback, useId, useMemo, useState } from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +23,9 @@ import {
 } from '@/components/ui/collapsible';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAttention } from '@/hooks/useAttention';
+import { QUERY_KEYS } from '@/lib/constants';
 import { ENDPOINTS } from '@/lib/endpoints';
+import { isMockDataEnabled } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
 import type { AttentionItem, AttentionPriority } from '@/types/attention';
 
@@ -124,11 +128,13 @@ function AttentionRow({
   item,
   onDismiss,
   onSnooze,
+  pendingAction,
   nested = false,
 }: {
   item: AttentionItem;
-  onDismiss: (id: string) => void;
-  onSnooze: (id: string, duration: string) => void;
+  onDismiss: (id: string) => Promise<boolean>;
+  onSnooze: (id: string, duration: string) => Promise<boolean>;
+  pendingAction?: string;
   nested?: boolean;
 }) {
   const [showSnooze, setShowSnooze] = useState(false);
@@ -172,26 +178,33 @@ function AttentionRow({
           <div
             className={`flex items-center gap-1 shrink-0 transition-opacity ${showSnooze ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'}`}
           >
-            <button
+            <Button
               type="button"
               onClick={() => setShowSnooze((v) => !v)}
-              className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              variant="ghost"
+              size="icon"
+              className="size-6 text-muted-foreground"
+              disabled={pendingAction !== undefined}
               aria-label={`Snooze ${item.title}`}
               aria-expanded={showSnooze}
               aria-controls={snoozeOptionsId}
               title="Snooze"
             >
               <Clock aria-hidden="true" size={12} />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              onClick={() => onDismiss(item.id)}
-              className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              onClick={() => void onDismiss(item.id)}
+              variant="ghost"
+              size="icon"
+              className="size-6 text-muted-foreground"
+              loading={pendingAction === 'dismiss'}
+              disabled={pendingAction !== undefined}
               aria-label={`Dismiss ${item.title}`}
               title="Dismiss"
             >
               <CheckCheck aria-hidden="true" size={12} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -214,17 +227,21 @@ function AttentionRow({
           >
             <span className="text-xs text-muted-foreground">Snooze for:</span>
             {SNOOZE_OPTIONS.map((opt) => (
-              <button
+              <Button
                 type="button"
                 key={opt.value}
-                onClick={() => {
-                  onSnooze(item.id, opt.value);
-                  setShowSnooze(false);
+                variant="outline"
+                size="sm"
+                className="h-6 px-2 text-xs text-muted-foreground"
+                loading={pendingAction === `snooze:${opt.value}`}
+                disabled={pendingAction !== undefined}
+                onClick={async () => {
+                  const succeeded = await onSnooze(item.id, opt.value);
+                  if (succeeded) setShowSnooze(false);
                 }}
-                className="rounded border border-border px-2 py-0.5 text-xs hover:bg-muted hover:text-foreground text-muted-foreground transition-colors outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
               >
                 {opt.label}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -237,10 +254,12 @@ function AttentionEntityRow({
   group,
   onDismiss,
   onSnooze,
+  pendingActions,
 }: {
   group: AttentionEntityGroup;
-  onDismiss: (id: string) => void;
-  onSnooze: (id: string, duration: string) => void;
+  onDismiss: (id: string) => Promise<boolean>;
+  onSnooze: (id: string, duration: string) => Promise<boolean>;
+  pendingActions: Record<string, string>;
 }) {
   const [open, setOpen] = useState(false);
   const contentId = useId();
@@ -252,6 +271,7 @@ function AttentionEntityRow({
         item={representativeItem}
         onDismiss={onDismiss}
         onSnooze={onSnooze}
+        pendingAction={pendingActions[representativeItem.id]}
       />
     );
   }
@@ -317,6 +337,7 @@ function AttentionEntityRow({
               item={item}
               onDismiss={onDismiss}
               onSnooze={onSnooze}
+              pendingAction={pendingActions[item.id]}
               nested
             />
           ))}
@@ -335,11 +356,13 @@ function PriorityGroup({
   groups,
   onDismiss,
   onSnooze,
+  pendingActions,
 }: {
   priority: AttentionPriority;
   groups: AttentionEntityGroup[];
-  onDismiss: (id: string) => void;
-  onSnooze: (id: string, duration: string) => void;
+  onDismiss: (id: string) => Promise<boolean>;
+  onSnooze: (id: string, duration: string) => Promise<boolean>;
+  pendingActions: Record<string, string>;
 }) {
   if (groups.length === 0) return null;
   const cfg = PRIORITY_CONFIG[priority];
@@ -372,6 +395,7 @@ function PriorityGroup({
             group={group}
             onDismiss={onDismiss}
             onSnooze={onSnooze}
+            pendingActions={pendingActions}
           />
         ))}
       </div>
@@ -404,7 +428,60 @@ function AttentionSkeleton() {
 // ------------------------------------------------------------
 
 export function AttentionSection() {
-  const { data: items, isLoading, isError } = useAttention();
+  const queryClient = useQueryClient();
+  const {
+    data: items,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useAttention();
+  const [pendingActions, setPendingActions] = useState<Record<string, string>>(
+    {},
+  );
+  const [isBulkDismissing, setIsBulkDismissing] = useState(false);
+  const [mutationFeedback, setMutationFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const headingRef = useRef<HTMLSpanElement>(null);
+  const hasData = items !== undefined;
+  const isRefreshing = isFetching && hasData;
+  const { mutateAsync: runAttentionMutation } = useMutation({
+    mutationFn: async ({
+      id,
+      action,
+      duration,
+    }: {
+      id: string;
+      action: 'dismiss' | 'snooze';
+      duration?: string;
+    }) => {
+      if (isMockDataEnabled) return;
+
+      const response = await fetch(
+        action === 'dismiss'
+          ? ENDPOINTS.attention.dismiss(id)
+          : ENDPOINTS.attention.snooze(id),
+        {
+          method: 'PATCH',
+          headers:
+            action === 'snooze'
+              ? { 'Content-Type': 'application/json' }
+              : undefined,
+          body: action === 'snooze' ? JSON.stringify({ duration }) : undefined,
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          action === 'dismiss'
+            ? 'Could not dismiss the attention item.'
+            : 'Could not snooze the attention item.',
+        );
+      }
+    },
+  });
 
   const criticalItems = useMemo(
     () => (items ? items?.filter((item) => item.priority === 'critical') : []),
@@ -429,28 +506,118 @@ export function AttentionSection() {
   const infoGroups = useMemo(() => groupAttentionItems(infoItems), [infoItems]);
   const totalCount = items?.length || 0;
 
-  const handleDismiss = useCallback(async (id: string) => {
-    await fetch(ENDPOINTS.attention.dismiss(id), { method: 'PATCH' });
-    // SSE will push the resolved event and update cache automatically
-  }, []);
+  const retryAttention = useCallback(async () => {
+    await refetch();
+    headingRef.current?.focus();
+  }, [refetch]);
 
-  const handleSnooze = useCallback(async (id: string, duration: string) => {
-    await fetch(ENDPOINTS.attention.snooze(id), {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ duration }),
+  const mutateAttentionItem = useCallback(
+    async (
+      id: string,
+      action: 'dismiss' | 'snooze',
+      duration?: string,
+      announce = true,
+    ): Promise<boolean> => {
+      const pendingAction =
+        action === 'snooze' ? `snooze:${duration}` : 'dismiss';
+      setPendingActions((current) => ({ ...current, [id]: pendingAction }));
+      if (announce) setMutationFeedback(null);
+
+      try {
+        await runAttentionMutation({ id, action, duration });
+
+        queryClient.setQueryData<AttentionItem[]>(
+          QUERY_KEYS.attention.list,
+          (current = []) => current.filter((item) => item.id !== id),
+        );
+        if (announce) {
+          setMutationFeedback({
+            type: 'success',
+            message:
+              action === 'dismiss'
+                ? 'Attention item dismissed.'
+                : 'Attention item snoozed.',
+          });
+        }
+        return true;
+      } catch (mutationError) {
+        if (announce) {
+          setMutationFeedback({
+            type: 'error',
+            message: `${
+              mutationError instanceof Error
+                ? mutationError.message
+                : 'Could not update the attention item.'
+            } It remains in the list.`,
+          });
+        }
+        return false;
+      } finally {
+        setPendingActions((current) => {
+          const next = { ...current };
+          delete next[id];
+          return next;
+        });
+      }
+    },
+    [queryClient, runAttentionMutation],
+  );
+
+  const handleDismiss = useCallback(
+    (id: string) => mutateAttentionItem(id, 'dismiss'),
+    [mutateAttentionItem],
+  );
+
+  const handleSnooze = useCallback(
+    (id: string, duration: string) =>
+      mutateAttentionItem(id, 'snooze', duration),
+    [mutateAttentionItem],
+  );
+
+  const handleBulkDismiss = useCallback(async () => {
+    if (isBulkDismissing) return;
+    setIsBulkDismissing(true);
+    setMutationFeedback(null);
+
+    const results = await Promise.all(
+      infoItems.map((item) =>
+        mutateAttentionItem(item.id, 'dismiss', undefined, false),
+      ),
+    );
+    const successCount = results.filter(Boolean).length;
+    const failureCount = results.length - successCount;
+
+    setMutationFeedback({
+      type: failureCount > 0 ? 'error' : 'success',
+      message:
+        failureCount > 0
+          ? `Dismissed ${successCount} FYI${successCount === 1 ? '' : 's'}; ${failureCount} failed and remain in the list.`
+          : `Dismissed ${successCount} FYI${successCount === 1 ? '' : 's'}.`,
     });
-    // SSE will push the update automatically
-  }, []);
+    setIsBulkDismissing(false);
+    headingRef.current?.focus();
+  }, [infoItems, isBulkDismissing, mutateAttentionItem]);
 
   const renderContent = useCallback(() => {
     if (isLoading) return <AttentionSkeleton />;
 
-    if (isError) {
+    if (isError && !hasData) {
       return (
-        <p className="px-3 text-sm text-destructive font-medium">
-          Failed to load attention feed.
-        </p>
+        <div className="flex flex-col items-center gap-2 px-3 py-8 text-center">
+          <p className="text-sm text-destructive font-medium">
+            Failed to load attention feed.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            loading={isFetching}
+            onClick={() => void retryAttention()}
+          >
+            <RefreshCw aria-hidden="true" />
+            Retry Attention
+          </Button>
+        </div>
       );
     }
 
@@ -459,7 +626,7 @@ export function AttentionSection() {
         <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
           <BellOff size={22} className="text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">
-            All clear. Nothing needs your attention.
+            No attention rules are currently triggered.
           </p>
         </div>
       );
@@ -472,18 +639,21 @@ export function AttentionSection() {
           groups={criticalGroups}
           onDismiss={handleDismiss}
           onSnooze={handleSnooze}
+          pendingActions={pendingActions}
         />
         <PriorityGroup
           priority="warning"
           groups={warningGroups}
           onDismiss={handleDismiss}
           onSnooze={handleSnooze}
+          pendingActions={pendingActions}
         />
         <PriorityGroup
           priority="info"
           groups={infoGroups}
           onDismiss={handleDismiss}
           onSnooze={handleSnooze}
+          pendingActions={pendingActions}
         />
       </div>
     );
@@ -496,6 +666,10 @@ export function AttentionSection() {
     infoGroups,
     handleDismiss,
     handleSnooze,
+    hasData,
+    isFetching,
+    pendingActions,
+    retryAttention,
   ]);
 
   return (
@@ -508,7 +682,9 @@ export function AttentionSection() {
             ) : (
               <Bell size={16} className="text-muted-foreground" />
             )}
-            <span>Attention</span>
+            <span ref={headingRef} tabIndex={-1} className="outline-none">
+              Attention
+            </span>
             {totalCount > 0 && (
               <span
                 className={`
@@ -531,11 +707,8 @@ export function AttentionSection() {
               variant="ghost"
               size="sm"
               className="h-7 text-xs text-muted-foreground hover:text-foreground gap-1"
-              onClick={() =>
-                infoItems.forEach((item) => {
-                  handleDismiss(item.id);
-                })
-              }
+              onClick={() => void handleBulkDismiss()}
+              loading={isBulkDismissing}
             >
               <CheckCheck size={12} />
               Clear FYIs
@@ -543,12 +716,47 @@ export function AttentionSection() {
           )}
         </CardTitle>
 
-        {/* Live indicator */}
-        {!isLoading && (
-          <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] text-muted-foreground">Live</span>
-          </div>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] text-muted-foreground" role="status">
+            {isLoading
+              ? 'Loading attention rules…'
+              : isRefreshing
+                ? 'Refreshing attention rules…'
+                : isError
+                  ? hasData
+                    ? 'Refresh failed. Showing previously loaded rules.'
+                    : 'Attention rules are unavailable.'
+                  : isMockDataEnabled
+                    ? 'Showing local mock attention rules.'
+                    : 'Attention rules are up to date.'}
+          </p>
+          {isError && hasData && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7"
+              loading={isFetching}
+              onClick={() => void retryAttention()}
+            >
+              <RefreshCw aria-hidden="true" />
+              Retry
+            </Button>
+          )}
+        </div>
+        {mutationFeedback && (
+          <p
+            role="status"
+            aria-live="polite"
+            className={cn(
+              'text-xs',
+              mutationFeedback.type === 'error'
+                ? 'text-destructive'
+                : 'text-success',
+            )}
+          >
+            {mutationFeedback.message}
+          </p>
         )}
       </CardHeader>
 
