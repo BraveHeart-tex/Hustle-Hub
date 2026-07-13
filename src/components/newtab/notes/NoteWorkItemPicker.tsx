@@ -65,10 +65,10 @@ const WorkItemRow = ({
               className="text-muted-foreground/60"
             />
           ) : (
-            <GitMergeIcon size={14} className="text-emerald-500/80" />
+            <GitMergeIcon size={14} className="text-info" />
           )
         ) : (
-          <span className="mt-1.5 block h-1.5 w-1.5 rounded-full bg-blue-400/70" />
+          <span className="mt-1.5 block h-1.5 w-1.5 rounded-full bg-info" />
         )}
       </div>
 

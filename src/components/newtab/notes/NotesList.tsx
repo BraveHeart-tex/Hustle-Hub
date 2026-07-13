@@ -17,9 +17,9 @@ import { cn } from '@/lib/utils';
 import { type Note } from '@/types/notes';
 
 const priorityDot: Record<Note['priority'], string> = {
-  high: 'bg-red-500',
-  medium: 'bg-yellow-500',
-  low: 'bg-blue-500',
+  high: 'bg-destructive',
+  medium: 'bg-warning',
+  low: 'bg-info',
 };
 
 const sortLabels: Record<NotesSort, string> = {
@@ -166,7 +166,7 @@ export const NotesList = () => {
                     </p>
                   </div>
                   {note.pinned && (
-                    <PinIcon className="h-4 w-4 shrink-0 fill-yellow-500 text-yellow-500" />
+                    <PinIcon className="h-4 w-4 shrink-0 fill-primary text-primary" />
                   )}
                 </div>
 

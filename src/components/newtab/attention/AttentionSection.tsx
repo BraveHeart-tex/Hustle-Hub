@@ -38,22 +38,22 @@ const PRIORITY_CONFIG: Record<
   { bar: string; badge: string; icon: string; dot: string }
 > = {
   critical: {
-    bar: 'bg-red-500',
-    badge: 'bg-red-500/10 text-red-500 border-red-500/20',
-    dot: 'bg-red-500 shadow-[0_0_6px_1px_rgba(239,68,68,0.6)] animate-pulse',
-    icon: 'text-red-500',
+    bar: 'bg-destructive',
+    badge: 'bg-destructive/10 text-destructive border-destructive/20',
+    dot: 'bg-destructive shadow-[0_0_6px_1px] shadow-destructive/60 animate-pulse',
+    icon: 'text-destructive',
   },
   warning: {
-    bar: 'bg-amber-400',
-    badge: 'bg-amber-400/10 text-amber-400 border-amber-400/20',
-    dot: 'bg-amber-400',
-    icon: 'text-amber-400',
+    bar: 'bg-warning',
+    badge: 'bg-warning/10 text-warning border-warning/20',
+    dot: 'bg-warning',
+    icon: 'text-warning',
   },
   info: {
-    bar: 'bg-blue-400',
-    badge: 'bg-blue-400/10 text-blue-400 border-blue-400/20',
-    dot: 'bg-blue-400/60',
-    icon: 'text-blue-400',
+    bar: 'bg-info',
+    badge: 'bg-info/10 text-info border-info/20',
+    dot: 'bg-info',
+    icon: 'text-info',
   },
 };
 
@@ -678,7 +678,7 @@ export function AttentionSection() {
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-2">
             {criticalItems.length > 0 ? (
-              <Zap size={16} className="text-red-500" />
+              <Zap size={16} className="text-destructive" />
             ) : (
               <Bell size={16} className="text-muted-foreground" />
             )}
@@ -691,7 +691,7 @@ export function AttentionSection() {
                 text-xs rounded-full px-2 py-px font-medium border
                 ${
                   criticalItems.length > 0
-                    ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                    ? 'bg-destructive/10 text-destructive border-destructive/20'
                     : 'bg-muted text-muted-foreground border-border'
                 }
               `}

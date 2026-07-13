@@ -15,8 +15,7 @@ const mrStatusIconVariants = cva(
   {
     variants: {
       variant: {
-        warning:
-          'bg-yellow-500 text-yellow-50 dark:bg-yellow-700 dark:text-yellow-100',
+        warning: 'bg-warning text-warning-foreground',
         destructive: 'bg-destructive text-destructive-foreground',
       },
     },

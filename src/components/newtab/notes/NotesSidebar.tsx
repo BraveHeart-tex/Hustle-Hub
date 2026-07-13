@@ -24,8 +24,8 @@ interface FilterItem {
 const filters: FilterItem[] = [
   { value: 'all', label: 'All', icon: LayoutListIcon },
   { value: 'pinned', label: 'Pinned', icon: PinIcon },
-  { value: 'high', label: 'High', dot: 'bg-red-500' },
-  { value: 'low', label: 'Low', dot: 'bg-blue-500' },
+  { value: 'high', label: 'High', dot: 'bg-destructive' },
+  { value: 'low', label: 'Low', dot: 'bg-info' },
   { value: 'archived', label: 'Archived', icon: ArchiveIcon },
 ];
 

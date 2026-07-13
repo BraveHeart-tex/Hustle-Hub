@@ -21,11 +21,11 @@ import { useWorkItemSearch } from '@/hooks/useWorkItemSearch';
 // Maps Jira status category to a color pill
 const STATUS_CATEGORY_CONFIG: Record<string, string> = {
   'To Do': 'bg-muted text-muted-foreground border-border',
-  'In Progress': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  Done: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-  'On Review': 'bg-violet-500/10 text-violet-500 border-violet-500/20',
-  'On Hold': 'bg-amber-400/10 text-amber-400 border-amber-400/20',
-  Testing: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
+  'In Progress': 'bg-info/10 text-info border-info/20',
+  Done: 'bg-success/10 text-success border-success/20',
+  'On Review': 'bg-info/10 text-info border-info/20',
+  'On Hold': 'bg-warning/10 text-warning border-warning/20',
+  Testing: 'bg-info/10 text-info border-info/20',
 };
 
 function getStatusStyle(statusName: string): string {
@@ -125,7 +125,7 @@ export const SearchDialog = () => {
                       className="text-muted-foreground/50"
                     />
                   ) : (
-                    <GitMerge size={14} className="text-emerald-500/80" />
+                    <GitMerge size={14} className="text-info" />
                   )}
                 </div>
 
@@ -150,12 +150,12 @@ export const SearchDialog = () => {
                       </span>
                     )}
                     {(mr.approvedBy ?? 0) > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-1.5 py-px">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-success bg-success/10 border border-success/20 rounded-full px-1.5 py-px">
                         ✓ {mr.approvedBy}/{mr.approvalsRequired ?? 0}
                       </span>
                     )}
                     {mr.conflicts && (
-                      <span className="inline-flex items-center text-[10px] font-medium text-red-500 bg-red-500/10 border border-red-500/20 rounded-full px-1.5 py-px">
+                      <span className="inline-flex items-center text-[10px] font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-full px-1.5 py-px">
                         Conflicts
                       </span>
                     )}
@@ -198,7 +198,7 @@ export const SearchDialog = () => {
                 onSelect={() => window.open(issue.url, '_blank')}
               >
                 {/* Priority dot */}
-                <div className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-blue-400/60" />
+                <div className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-info" />
 
                 {/* Content */}
                 {/* Content */}

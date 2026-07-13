@@ -229,7 +229,7 @@ export const StrictReviewTemplateDialog = ({
                   )}
                 >
                   {item.isDefault && (
-                    <Star className="size-3 shrink-0 fill-current text-amber-500" />
+                    <Star className="size-3 shrink-0 fill-current text-primary" />
                   )}
                   <span className="truncate">{item.name}</span>
                 </button>

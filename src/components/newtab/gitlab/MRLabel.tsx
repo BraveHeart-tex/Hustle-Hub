@@ -34,8 +34,8 @@ export const MrLabel = ({
 }: {
   label: GitlabMergeRequest['labels'][number];
 }) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   const isTooDark = brightness(label.color) < 80;
 

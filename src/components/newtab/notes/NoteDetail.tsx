@@ -52,9 +52,9 @@ import { type Note, type NoteLinkedWorkItem } from '@/types/notes';
 
 const priorityConfig: Record<Note['priority'], { label: string; dot: string }> =
   {
-    high: { label: 'High', dot: 'bg-red-500' },
-    medium: { label: 'Medium', dot: 'bg-yellow-500' },
-    low: { label: 'Low', dot: 'bg-blue-500' },
+    high: { label: 'High', dot: 'bg-destructive' },
+    medium: { label: 'Medium', dot: 'bg-warning' },
+    low: { label: 'Low', dot: 'bg-info' },
   };
 
 const formatRelativeTime = (value?: string) => {
@@ -259,11 +259,9 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           variant="ghost"
           size="icon"
           onClick={() => void saveNote({ pinned: !note.pinned })}
-          className={cn(note.pinned && 'text-yellow-500')}
+          className={cn(note.pinned && 'text-primary')}
         >
-          <PinIcon
-            className={cn('h-4 w-4', note.pinned && 'fill-yellow-500')}
-          />
+          <PinIcon className={cn('h-4 w-4', note.pinned && 'fill-primary')} />
         </Button>
         <Button
           variant="ghost"

@@ -52,13 +52,13 @@ const getStatusBadge = ({
       );
     case 'needs_review':
       return (
-        <Badge variant="destructive" className="text-xs">
+        <Badge className="border-transparent bg-warning text-xs text-warning-foreground">
           Needs Review
         </Badge>
       );
     case 'approved':
       return (
-        <Badge className="text-xs bg-green-500 hover:bg-green-600">
+        <Badge className="bg-success text-xs text-success-foreground">
           Approved
         </Badge>
       );

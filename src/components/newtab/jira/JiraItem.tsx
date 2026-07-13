@@ -16,9 +16,8 @@ import { type JiraIssue } from '@/types/jira';
 // Status badge styles keyed by statusCategory.colorName
 const STATUS_BADGE: Record<string, string> = {
   red: 'bg-destructive/10 text-destructive border-destructive/20',
-  yellow: 'bg-amber-400/10 text-amber-500 border-amber-400/20',
-  green:
-    'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
+  yellow: 'bg-warning/10 text-warning border-warning/20',
+  green: 'bg-success/10 text-success border-success/20',
 };
 
 const getStatusBadgeClass = (colorName: string) =>

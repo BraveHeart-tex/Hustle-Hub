@@ -163,7 +163,7 @@ export const AllCommentsWidget = () => {
                               className={cn(
                                 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity',
                                 'flex items-center gap-1 text-[10px] text-muted-foreground',
-                                'hover:text-green-500 transition-colors',
+                                'hover:text-success transition-colors',
                                 'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                                 submitting.has(comment.id) &&
                                   'opacity-50 cursor-not-allowed',

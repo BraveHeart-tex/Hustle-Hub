@@ -195,7 +195,7 @@ export const WorkItemComments = ({ itemMeta }: WorkItemCommentsProps) => {
                     className={cn(
                       'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity',
                       'h-4 w-4 rounded flex items-center justify-center',
-                      'text-muted-foreground hover:text-green-500 hover:bg-green-500/10',
+                      'text-muted-foreground hover:text-success hover:bg-success/10',
                       'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                       resolvingIds.has(comment.id) &&
                         'opacity-50 cursor-not-allowed',

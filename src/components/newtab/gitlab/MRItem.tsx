@@ -31,9 +31,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
     <div
       className={cn(
         'group px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 transition-colors relative',
-        mr.needsCurrentUserAction &&
-          !hasProblem &&
-          'border-yellow-500 dark:border-yellow-700 border-2',
+        mr.needsCurrentUserAction && !hasProblem && 'border-warning border-2',
         shouldHighlightProblem && 'border-destructive border-2',
       )}
     >
@@ -68,7 +66,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
             </span>
             <MrStatusBadge status={mr.mergeStatus} draft={mr.draft} />
             {mr.autoMergeEnabled && (
-              <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium shrink-0">
+              <span className="flex items-center gap-1 text-xs text-info font-medium shrink-0">
                 <WorkflowIcon className="size-3" />
                 Auto-merge
               </span>
@@ -114,10 +112,10 @@ export const MRItem = ({ mr }: MRItemProps) => {
           {mr.diffStatsSummary && (
             <span className="flex items-center gap-1 font-mono">
               <FileDiffIcon className="size-3 shrink-0" />
-              <span className="text-green-600/60 dark:text-green-400/60">
+              <span className="text-success">
                 +{mr.diffStatsSummary.additions}
               </span>
-              <span className="text-destructive/60">
+              <span className="text-destructive">
                 -{mr.diffStatsSummary.deletions}
               </span>
             </span>
@@ -142,7 +140,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
                         className="w-5 h-5"
                       />
                       {reviewer.hasApproved && (
-                        <CheckIcon className="absolute -bottom-1 -right-1 w-3 h-3 text-white bg-green-500 dark:bg-green-700 rounded-full p-px border border-background" />
+                        <CheckIcon className="absolute -bottom-1 -right-1 w-3 h-3 text-success-foreground bg-success rounded-full p-px border border-background" />
                       )}
                     </div>
                   ))}
