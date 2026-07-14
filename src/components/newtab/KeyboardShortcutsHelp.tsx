@@ -37,7 +37,7 @@ export function KeyboardShortcutsHelp() {
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="icon"
           aria-label="Keyboard shortcuts"
           title="Keyboard shortcuts"

@@ -61,7 +61,7 @@ export const AllCommentsWidget = () => {
       <SheetTrigger asChild>
         <Button
           size="icon"
-          variant="outline"
+          variant="ghost"
           className="relative"
           aria-label="Comments"
           aria-expanded={isOpen}

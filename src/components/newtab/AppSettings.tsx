@@ -39,7 +39,7 @@ export const AppSettings = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" aria-label="Settings">
+              <Button variant="ghost" size="icon" aria-label="Settings">
                 <Settings aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>

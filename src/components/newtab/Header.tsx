@@ -29,6 +29,25 @@ import { useHashRoute } from '@/lib/router';
 import { useNotes } from '@/lib/storage/notes';
 import { cn } from '@/lib/utils';
 
+function tabClassName(isActive: boolean) {
+  return cn(
+    'relative inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium motion-safe:transition-colors',
+    'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+    isActive
+      ? 'text-foreground'
+      : 'text-muted-foreground hover:text-foreground',
+  );
+}
+
+function TabIndicator() {
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-foreground"
+    />
+  );
+}
+
 export function Header() {
   const queryClient = useQueryClient();
   const isFetching = useIsFetching();
@@ -51,68 +70,57 @@ export function Header() {
     <header className="border-b border-border bg-card">
       <div className="px-4 py-3">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <ZapIcon
-                className="h-4 w-4 text-primary-foreground"
-                fill="currentColor"
-              />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <ZapIcon
+                  className="h-4 w-4 text-primary-foreground"
+                  fill="currentColor"
+                />
+              </div>
+              <h1 className="text-lg font-semibold text-foreground">
+                Hustle Hub
+              </h1>
             </div>
-            <h1 className="text-lg font-semibold text-foreground">
-              Hustle Hub
-            </h1>
-          </div>
-          <div className="flex items-center justify-self-center gap-3">
-            <nav
-              aria-label="Primary"
-              className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1"
-            >
+            <nav aria-label="Primary" className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => navigate('/')}
                 aria-current={route === '/' ? 'page' : undefined}
-                className={cn(
-                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium motion-safe:transition-colors',
-                  'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-                  route === '/'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
-                )}
+                className={tabClassName(route === '/')}
               >
                 <LayoutDashboardIcon className="h-4 w-4" />
                 Dashboard
+                {route === '/' && <TabIndicator />}
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/notes')}
                 aria-current={route === '/notes' ? 'page' : undefined}
-                className={cn(
-                  'inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium motion-safe:transition-colors',
-                  'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-                  route === '/notes'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
-                )}
+                className={tabClassName(route === '/notes')}
               >
                 <NotebookTextIcon className="h-4 w-4" />
                 Notes
-                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold leading-5 text-primary-foreground">
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-xs font-semibold leading-5 text-muted-foreground">
                   {notes.length}
                 </span>
+                {route === '/notes' && <TabIndicator />}
               </button>
             </nav>
+          </div>
+          <div className="flex justify-center">
             <Button
               id={SEARCH_TRIGGER_ID}
               type="button"
               variant="outline"
               onClick={(event) => handleOpenSearch(event.currentTarget)}
-              className="h-9 justify-between px-2 text-muted-foreground lg:min-w-48 lg:px-3"
+              className="h-9 w-full max-w-md justify-between gap-2 px-3 font-normal text-muted-foreground"
               aria-label="Search work"
               aria-keyshortcuts={SEARCH_SHORTCUT.ariaKeyShortcuts}
             >
-              <span className="flex items-center gap-2">
-                <SearchIcon aria-hidden="true" className="size-4" />
-                <span className="hidden lg:inline">Search work</span>
+              <span className="flex min-w-0 items-center gap-2">
+                <SearchIcon aria-hidden="true" className="size-4 shrink-0" />
+                <span className="truncate">Search work</span>
               </span>
               <span className="flex items-center gap-1" aria-hidden="true">
                 {SEARCH_SHORTCUT.keys.map((key) => (
@@ -121,13 +129,13 @@ export function Header() {
               </span>
             </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0.5">
             <AllCommentsWidget />
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="icon"
                     onClick={handleRefreshData}
                     disabled={isFetching > 0}
@@ -147,11 +155,9 @@ export function Header() {
                 <TooltipContent>Refresh data</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <div className="flex items-center divide-x divide-border overflow-hidden rounded-md border border-border bg-background [&_[data-slot=button]]:rounded-none [&_[data-slot=button]]:border-0">
-              <KeyboardShortcutsHelp />
-              <ModeToggle />
-              <AppSettings />
-            </div>
+            <KeyboardShortcutsHelp />
+            <ModeToggle />
+            <AppSettings />
           </div>
         </div>
       </div>
