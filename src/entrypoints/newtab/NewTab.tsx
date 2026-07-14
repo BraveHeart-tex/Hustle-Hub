@@ -8,7 +8,6 @@ import { Header } from '@/components/newtab/Header';
 import { JiraSection } from '@/components/newtab/jira/JiraSection';
 import { NotesPage } from '@/components/newtab/notes/NotesPage';
 import { SearchDialog } from '@/components/newtab/SearchDialog';
-import { type GitlabCategory, type JiraFilter } from '@/lib/constants';
 import { useHashRoute } from '@/lib/router';
 import { CommentsProvider } from '@/lib/storage/comments';
 
@@ -23,27 +22,14 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const NewTab = ({
-  initialGitlabFilter,
-  initialJiraFilter,
-}: {
-  initialGitlabFilter: GitlabCategory;
-  initialJiraFilter: JiraFilter;
-}) => {
+export const NewTab = () => {
   const { route } = useHashRoute();
 
   return (
     <QueryClientProvider client={queryClient}>
       <CommentsProvider>
         <AppLayout>
-          {route === '/notes' ? (
-            <NotesPage />
-          ) : (
-            <DashboardPage
-              initialGitlabFilter={initialGitlabFilter}
-              initialJiraFilter={initialJiraFilter}
-            />
-          )}
+          {route === '/notes' ? <NotesPage /> : <DashboardPage />}
         </AppLayout>
 
         <SearchDialog />
@@ -53,13 +39,7 @@ export const NewTab = ({
   );
 };
 
-const DashboardPage = ({
-  initialGitlabFilter,
-  initialJiraFilter,
-}: {
-  initialGitlabFilter: GitlabCategory;
-  initialJiraFilter: JiraFilter;
-}) => {
+const DashboardPage = () => {
   return (
     <>
       <div className="dashboard-sections grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
@@ -68,11 +48,11 @@ const DashboardPage = ({
         </div>
 
         <div className="dashboard-section xl:sticky xl:top-6">
-          <GitlabSection initialCategory={initialGitlabFilter} />
+          <GitlabSection />
         </div>
 
         <div className="dashboard-section xl:sticky xl:top-6">
-          <JiraSection className="h-full" initialFilter={initialJiraFilter} />
+          <JiraSection className="h-full" />
         </div>
       </div>
     </>

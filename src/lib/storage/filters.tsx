@@ -21,11 +21,9 @@ export const gitlabCategoryStorage = storage.defineItem<GitlabCategory>(
   },
 );
 
-export const useJiraFilter = (initialFilter?: JiraFilter) => {
+export const useJiraFilter = () => {
   const [filter, setFilter] = useState<JiraFilter>(
-    initialFilter ||
-      jiraFilterStorage.fallback ||
-      JIRA_FILTERS.LITERALLY_WORKING_ON,
+    jiraFilterStorage.fallback || JIRA_FILTERS.LITERALLY_WORKING_ON,
   );
 
   useEffect(() => {
@@ -41,11 +39,9 @@ export const useJiraFilter = (initialFilter?: JiraFilter) => {
   return [filter, updateFilter] as const;
 };
 
-export const useGitlabCategory = (initialCategory?: GitlabCategory) => {
+export const useGitlabCategory = () => {
   const [category, setCategory] = useState<GitlabCategory>(
-    initialCategory ||
-      gitlabCategoryStorage.fallback ||
-      GITLAB_CATEGORIES.REVIEW_REQUESTED,
+    gitlabCategoryStorage.fallback || GITLAB_CATEGORIES.REVIEW_REQUESTED,
   );
 
   useEffect(() => {
