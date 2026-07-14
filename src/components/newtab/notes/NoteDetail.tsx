@@ -278,7 +278,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
         </DropdownMenu>
       </div>
 
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-8 py-8">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-8 py-8">
         <textarea
           ref={titleRef}
           value={title}
@@ -299,126 +299,138 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           placeholder="Untitled"
         />
 
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center gap-2 rounded-md px-1 py-0.5 outline-none transition-colors motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-              >
-                <span
-                  className={cn(
-                    'h-2.5 w-2.5 rounded-full',
-                    priorityConfig[note.priority].dot,
-                  )}
-                />
-                {priorityConfig[note.priority].label}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-40 p-1">
-              {(Object.keys(priorityConfig) as Note['priority'][]).map(
-                (priority) => (
-                  <button
-                    key={priority}
-                    type="button"
-                    onClick={() => void saveNote({ priority })}
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none hover:bg-accent focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                  >
-                    <span
-                      className={cn(
-                        'h-2.5 w-2.5 rounded-full',
-                        priorityConfig[priority].dot,
-                      )}
-                    />
-                    {priorityConfig[priority].label}
-                  </button>
-                ),
-              )}
-            </PopoverContent>
-          </Popover>
-
-          <div className="flex flex-wrap items-center gap-1.5">
-            {(note.tags ?? []).map((tag) => (
-              <Badge key={tag} variant="secondary" className="gap-1">
-                {tag}
+        <div className="mt-2 flex items-start justify-between gap-4 text-xs text-muted-foreground">
+          <div className="flex min-w-0 flex-wrap items-center gap-1">
+            <Popover>
+              <PopoverTrigger asChild>
                 <button
                   type="button"
-                  onClick={() => removeTag(tag)}
-                  className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                  className="flex h-6 items-center gap-1.5 rounded-md px-1.5 font-medium outline-none transition-colors motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 >
-                  <XIcon className="h-3 w-3" />
+                  <span
+                    className={cn(
+                      'h-2 w-2 rounded-full',
+                      priorityConfig[note.priority].dot,
+                    )}
+                  />
+                  {priorityConfig[note.priority].label}
                 </button>
-              </Badge>
-            ))}
-            <Input
-              value={newTag}
-              onChange={(event) => setNewTag(event.target.value)}
-              onBlur={addTag}
-              onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  addTag();
-                }
-              }}
-              placeholder="+ tag"
-              className="h-7 w-24 border-0 bg-transparent px-1 text-xs shadow-none"
-            />
-          </div>
-
-          {!!note.linkedItems?.length && (
-            <>
-              <span>·</span>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {note.linkedItems.map((item) => {
-                  const Icon = item.type === 'jira' ? JiraIcon : GitlabIcon;
-
-                  return (
-                    <Badge
-                      key={`${item.type}-${item.id}`}
-                      variant="secondary"
-                      className="max-w-60 gap-1"
-                      title={item.title}
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-40 p-1">
+                {(Object.keys(priorityConfig) as Note['priority'][]).map(
+                  (priority) => (
+                    <button
+                      key={priority}
+                      type="button"
+                      onClick={() => void saveNote({ priority })}
+                      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none hover:bg-accent focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                     >
-                      <Icon
+                      <span
                         className={cn(
-                          'h-3 w-3 shrink-0',
-                          item.type === 'jira' && 'text-blue-500',
+                          'h-2.5 w-2.5 rounded-full',
+                          priorityConfig[priority].dot,
                         )}
                       />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          window.open(item.url, '_blank', 'noopener,noreferrer')
-                        }
-                        className="flex min-w-0 items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                      >
-                        <span className="shrink-0 font-mono">
-                          {linkedItemLabel(item)}
-                        </span>
-                        <span className="truncate">{item.title}</span>
-                        <ExternalLinkIcon className="h-3 w-3 shrink-0 text-muted-foreground" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(event) => removeLinkedItem(item, event)}
-                        className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                      >
-                        <XIcon className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                      {priorityConfig[priority].label}
+                    </button>
+                  ),
+                )}
+              </PopoverContent>
+            </Popover>
 
-          <span>·</span>
-          <span>
+            <div className="flex flex-wrap items-center gap-0.5">
+              {(note.tags ?? []).map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="h-6 gap-0.5 border-0 bg-transparent px-1.5 font-normal text-muted-foreground"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${tag} tag`}
+                    onClick={() => removeTag(tag)}
+                    className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              <Input
+                value={newTag}
+                onChange={(event) => setNewTag(event.target.value)}
+                onBlur={addTag}
+                onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addTag();
+                  }
+                }}
+                placeholder="+ tag"
+                className="h-6 w-20 border-0 bg-transparent px-1.5 text-xs shadow-none"
+              />
+            </div>
+
+            {!!note.linkedItems?.length && (
+              <>
+                <span aria-hidden="true" className="px-1">
+                  ·
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {note.linkedItems.map((item) => {
+                    const Icon = item.type === 'jira' ? JiraIcon : GitlabIcon;
+
+                    return (
+                      <Badge
+                        key={`${item.type}-${item.id}`}
+                        variant="secondary"
+                        className="max-w-60 gap-1"
+                        title={item.title}
+                      >
+                        <Icon
+                          className={cn(
+                            'h-3 w-3 shrink-0',
+                            item.type === 'jira' && 'text-blue-500',
+                          )}
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            window.open(
+                              item.url,
+                              '_blank',
+                              'noopener,noreferrer',
+                            )
+                          }
+                          className="flex min-w-0 items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                        >
+                          <span className="shrink-0 font-mono">
+                            {linkedItemLabel(item)}
+                          </span>
+                          <span className="truncate">{item.title}</span>
+                          <ExternalLinkIcon className="h-3 w-3 shrink-0 text-muted-foreground" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(event) => removeLinkedItem(item, event)}
+                          className="rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                        >
+                          <XIcon className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+
+          <span className="mt-1 shrink-0 whitespace-nowrap text-[11px] leading-4 text-muted-foreground/80">
             Updated {formatRelativeTime(note.updatedAt ?? note.createdAt)}
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col">
+        <div className="mt-8 flex flex-1 flex-col">
           <FloatingToolbar editor={editor} />
           <EditorContent editor={editor} className="flex flex-1 flex-col" />
         </div>
