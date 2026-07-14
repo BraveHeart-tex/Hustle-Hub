@@ -127,7 +127,7 @@ export const NotesList = () => {
         <Button
           type="button"
           className="w-full justify-start gap-2"
-          variant="outline"
+          variant="ghost"
           onClick={() => void handleCreateNote()}
         >
           <PlusIcon className="h-4 w-4" />

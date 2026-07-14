@@ -112,9 +112,9 @@ export function Header() {
             <Button
               id={SEARCH_TRIGGER_ID}
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={(event) => handleOpenSearch(event.currentTarget)}
-              className="h-9 w-full max-w-md justify-between gap-2 px-3 font-normal text-muted-foreground"
+              className="h-9 w-full max-w-md justify-between gap-2 bg-muted/30 px-3 font-normal text-muted-foreground hover:bg-muted/45 hover:text-foreground focus-visible:bg-muted/45 dark:bg-muted/40 dark:hover:bg-muted/55 dark:focus-visible:bg-muted/55"
               aria-label="Search work"
               aria-keyshortcuts={SEARCH_SHORTCUT.ariaKeyShortcuts}
             >
