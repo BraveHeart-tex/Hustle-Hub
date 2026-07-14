@@ -135,8 +135,8 @@ export const NotesList = () => {
         </Button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
-        <div className="space-y-2">
+      <div className="min-h-0 flex-1 overflow-y-auto p-2">
+        <div className="space-y-1">
           {filteredNotes.map((note) => {
             const isSelected = note.id === selectedNoteId;
 
@@ -149,16 +149,15 @@ export const NotesList = () => {
                     setSelectedNoteId(note.id);
                   }
                 }}
+                aria-pressed={isSelected}
                 className={cn(
-                  'w-full rounded-lg border bg-card p-3 text-left motion-safe:transition-colors hover:bg-accent/50',
-                  isSelected
-                    ? 'border-primary ring-2 ring-primary/15'
-                    : 'border-border',
+                  'w-full rounded-md px-3 py-2.5 text-left outline-none motion-safe:transition-colors hover:bg-accent/50 focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                  isSelected ? 'bg-accent/80' : 'bg-transparent',
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-foreground">
+                    <p className="truncate font-medium text-foreground">
                       {note.title || 'Untitled'}
                     </p>
                     <p className="mt-1 truncate text-sm text-muted-foreground">
@@ -170,7 +169,7 @@ export const NotesList = () => {
                   )}
                 </div>
 
-                <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span
                     className={cn(
                       'h-2 w-2 rounded-full',
@@ -185,7 +184,7 @@ export const NotesList = () => {
                 </div>
 
                 {!!note.tags?.length && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {note.tags.map((tag) => (
                       <Badge
                         key={tag}

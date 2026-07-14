@@ -66,11 +66,10 @@ export const NotesSidebar = () => {
                   setActiveFilter(filter.value);
                   setActiveTag(null);
                 }}
+                aria-pressed={isActive}
                 className={cn(
-                  'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm outline-none motion-safe:transition-colors focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-                  isActive
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+                  'flex w-full items-center justify-between rounded-md px-3 py-1.5 text-sm text-muted-foreground outline-none motion-safe:transition-colors hover:bg-accent/50 hover:text-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                  isActive ? 'bg-accent/80 text-foreground' : 'bg-transparent',
                 )}
               >
                 <span className="flex items-center gap-2">
@@ -100,14 +99,14 @@ export const NotesSidebar = () => {
                     setActiveTag(tag.name);
                     setActiveFilter('all');
                   }}
+                  aria-pressed={activeTag === tag.name}
                   className="rounded-md outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 >
                   <Badge
                     variant="secondary"
                     className={cn(
                       'cursor-pointer gap-1.5 motion-safe:transition-colors',
-                      activeTag === tag.name &&
-                        'bg-accent text-accent-foreground',
+                      activeTag === tag.name && 'bg-accent/80 text-foreground',
                     )}
                   >
                     {tag.name}
