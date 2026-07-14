@@ -19,11 +19,8 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
-import {
-  GITLAB_CATEGORIES,
-  GITLAB_FILTERS,
-  type GitlabCategory,
-} from '@/lib/constants';
+import { GITLAB_CATEGORIES, GITLAB_FILTERS } from '@/lib/constants';
+import { useGitlabCategory } from '@/lib/storage/filters';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { type GitlabMergeRequest } from '@/types/gitlab';
 
@@ -43,9 +40,7 @@ const deduplicateMergeRequests = (mergeRequests: GitlabMergeRequest[]) => {
 export function GitlabSection() {
   const reviewQuery = useGitlabMrs(GITLAB_FILTERS.REVIEW);
   const assignedQuery = useGitlabMrs(GITLAB_FILTERS.ASSIGNED);
-  const [category, setCategory] = useState<GitlabCategory>(
-    GITLAB_CATEGORIES.REVIEW_REQUESTED,
-  );
+  const [category, setCategory] = useGitlabCategory();
   const [selectedProjectName, setSelectedProjectName] = useState('');
   const [isCategorySelectOpen, setIsCategorySelectOpen] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -123,12 +118,15 @@ export function GitlabSection() {
     headingRef.current?.focus();
   }, [assignedQuery, category, reviewQuery]);
 
-  const handleCategoryChange = useCallback((value: string) => {
-    if (!isValueOf(GITLAB_CATEGORIES, value)) return;
+  const handleCategoryChange = useCallback(
+    (value: string) => {
+      if (!isValueOf(GITLAB_CATEGORIES, value)) return;
 
-    setSelectedProjectName('');
-    setCategory(value);
-  }, []);
+      setSelectedProjectName('');
+      setCategory(value);
+    },
+    [setCategory],
+  );
 
   const closeShortcutFilter = useCallback(() => {
     setIsCategorySelectOpen(false);

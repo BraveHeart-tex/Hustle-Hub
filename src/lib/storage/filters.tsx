@@ -1,10 +1,22 @@
 import { useEffect, useState } from 'react';
 
-import { JIRA_FILTERS, type JiraFilter } from '@/lib/constants';
+import {
+  GITLAB_CATEGORIES,
+  type GitlabCategory,
+  JIRA_FILTERS,
+  type JiraFilter,
+} from '@/lib/constants';
 
 const jiraFilterStorage = storage.defineItem<JiraFilter>('local:jiraFilter', {
   fallback: JIRA_FILTERS.LITERALLY_WORKING_ON,
 });
+
+const gitlabCategoryStorage = storage.defineItem<GitlabCategory>(
+  'local:gitlabCategory',
+  {
+    fallback: GITLAB_CATEGORIES.REVIEW_REQUESTED,
+  },
+);
 
 export const useJiraFilter = () => {
   const [filter, setFilter] = useState<JiraFilter>(
@@ -22,4 +34,22 @@ export const useJiraFilter = () => {
   };
 
   return [filter, updateFilter] as const;
+};
+
+export const useGitlabCategory = () => {
+  const [category, setCategory] = useState<GitlabCategory>(
+    gitlabCategoryStorage.fallback || GITLAB_CATEGORIES.REVIEW_REQUESTED,
+  );
+
+  useEffect(() => {
+    gitlabCategoryStorage.getValue().then(setCategory);
+    return gitlabCategoryStorage.watch(setCategory);
+  }, []);
+
+  const updateCategory = (newCategory: GitlabCategory) => {
+    setCategory(newCategory);
+    gitlabCategoryStorage.setValue(newCategory);
+  };
+
+  return [category, updateCategory] as const;
 };
