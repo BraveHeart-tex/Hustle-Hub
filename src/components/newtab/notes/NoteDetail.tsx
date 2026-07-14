@@ -256,22 +256,29 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Note actions">
               <MoreHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent
+            align="end"
+            alignOffset={8}
+            sideOffset={6}
+            className="min-w-28 border-0 shadow-floating"
+          >
             <DropdownMenuItem
               onClick={() => void saveNote({ archived: !note.archived })}
+              className="h-7 gap-1.5 px-2 py-0 text-xs"
             >
-              <ArchiveIcon className="h-4 w-4" />
+              <ArchiveIcon className="h-3.5 w-3.5" />
               {note.archived ? 'Unarchive' : 'Archive'}
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
               onClick={() => setIsDeleteOpen(true)}
+              className="h-7 gap-1.5 px-2 py-0 text-xs"
             >
-              <Trash2Icon className="h-4 w-4" />
+              <Trash2Icon className="h-3.5 w-3.5" />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
