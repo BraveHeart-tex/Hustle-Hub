@@ -257,7 +257,6 @@ export const WorkItemComments = ({
                 onChange={setDraft}
                 placeholder="Add a note..."
                 className="border-muted h-20 text-xs"
-                showToolbar={false}
                 onReady={focusEditor}
                 onCmdEnter={() => void handleSubmit()}
               />
