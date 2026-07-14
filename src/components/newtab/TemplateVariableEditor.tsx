@@ -58,12 +58,21 @@ const VariableNode = Node.create<VariableNodeOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
+    const isKnown = this.options.knownKeys.has(node.attrs.key);
     return [
       'span',
       mergeAttributes(HTMLAttributes, {
         'data-variable': '',
-        class:
-          'inline-flex items-center rounded-md bg-info text-info-foreground px-1.5 py-0.5 mx-0.5 text-[0.85em] font-semibold font-mono align-baseline select-all',
+        'data-unknown-variable': isKnown ? undefined : '',
+        'aria-label': isKnown
+          ? `${node.attrs.key} variable`
+          : `Unknown ${node.attrs.key} variable`,
+        class: cn(
+          'inline-flex items-center rounded-md px-1.5 py-0.5 mx-0.5 text-[0.85em] font-semibold font-mono align-baseline select-all',
+          isKnown
+            ? 'bg-info text-info-foreground'
+            : 'bg-warning/15 text-warning underline decoration-wavy underline-offset-2',
+        ),
       }),
       `{${node.attrs.key}}`,
     ];
@@ -378,7 +387,11 @@ export const TemplateVariableEditor = ({
   return (
     <div className={cn(disabled && 'opacity-50')}>
       <div
-        className="rounded-md border border-input bg-background transition-[border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/20"
+        className={cn(
+          'rounded-md border border-input bg-background transition-[border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/20',
+          ariaInvalid &&
+            'border-destructive ring-[3px] ring-destructive/20 dark:ring-destructive/40',
+        )}
         onKeyDownCapture={(event) => {
           if (!slash.open) return;
 

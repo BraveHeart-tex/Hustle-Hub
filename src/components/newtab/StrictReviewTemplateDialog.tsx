@@ -1,6 +1,8 @@
 import {
   AlertCircle,
+  ChevronDown,
   FileText,
+  MoreHorizontal,
   Plus,
   RotateCcw,
   Star,
@@ -9,6 +11,7 @@ import {
 import {
   type FormEvent,
   Fragment,
+  type KeyboardEvent,
   type ReactNode,
   useEffect,
   useMemo,
@@ -22,6 +25,11 @@ import {
 } from '@/components/newtab/TemplateVariableEditor';
 import { Button } from '@/components/ui/button';
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -30,9 +38,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   addStrictReviewTemplate,
   DEFAULT_STRICT_REVIEW_TEMPLATE,
@@ -125,6 +145,7 @@ export const StrictReviewTemplateDialog = ({
   });
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [restoreUndo, setRestoreUndo] = useState<string | null>(null);
   const editorHandleRef = useRef<TemplateVariableEditorHandle>(null);
 
   const selected =
@@ -138,6 +159,7 @@ export const StrictReviewTemplateDialog = ({
   useEffect(() => {
     const current = templates.find((item) => item.id === resolvedId);
     if (current) {
+      setRestoreUndo(null);
       setDraft({
         name: current.name,
         urlPattern: current.urlPattern,
@@ -164,6 +186,7 @@ export const StrictReviewTemplateDialog = ({
 
   const updateDraft = (changes: Partial<Draft>) => {
     setFeedback(null);
+    if (changes.template !== undefined) setRestoreUndo(null);
     setDraft((previous) => ({ ...previous, ...changes }));
   };
 
@@ -174,9 +197,35 @@ export const StrictReviewTemplateDialog = ({
   };
 
   const handleSelect = (id: string) => {
-    if (id === selected?.id || isBusy || !confirmDiscardChanges()) return;
+    if (id === selected?.id || isBusy || !confirmDiscardChanges()) return false;
     setFeedback(null);
     setSelectedId(id);
+    return true;
+  };
+
+  const handleTemplateKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
+    let nextIndex: number | null = null;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+      nextIndex = (index + 1) % templates.length;
+    } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+      nextIndex = (index - 1 + templates.length) % templates.length;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = templates.length - 1;
+    }
+
+    if (nextIndex === null) return;
+    event.preventDefault();
+    const nextTemplate = templates[nextIndex];
+    if (!nextTemplate || !handleSelect(nextTemplate.id)) return;
+    const radioButtons = event.currentTarget.parentElement?.querySelectorAll(
+      'button[role="radio"]',
+    );
+    (radioButtons?.[nextIndex] as HTMLButtonElement | undefined)?.focus();
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -262,10 +311,44 @@ export const StrictReviewTemplateDialog = ({
     }
   };
 
-  const handleResetBody = () => {
-    updateDraft({ template: DEFAULT_STRICT_REVIEW_TEMPLATE });
+  const handleRestoreInstructions = () => {
+    setFeedback(null);
+    const previousTemplate = draft.template;
+    setDraft((previous) => ({
+      ...previous,
+      template: DEFAULT_STRICT_REVIEW_TEMPLATE,
+    }));
     editorHandleRef.current?.setTemplateString(DEFAULT_STRICT_REVIEW_TEMPLATE);
+    setRestoreUndo(previousTemplate);
   };
+
+  const handleUndoRestore = () => {
+    if (restoreUndo === null) return;
+    const previousTemplate = restoreUndo;
+    setRestoreUndo(null);
+    setDraft((previous) => ({ ...previous, template: previousTemplate }));
+    editorHandleRef.current?.setTemplateString(previousTemplate);
+    editorHandleRef.current?.focus();
+  };
+
+  const unknownVariables = useMemo(() => {
+    const matches = draft.template.matchAll(/\{(\w+)\}/g);
+    return Array.from(
+      new Set(
+        Array.from(matches, (match) => match[1]).filter(
+          (key) => !KNOWN_VARIABLE_KEYS.has(key),
+        ),
+      ),
+    );
+  }, [draft.template]);
+
+  const editorDescriptionIds = [
+    'strict-review-template-help',
+    isTemplateEmpty ? 'strict-review-template-error' : null,
+    unknownVariables.length > 0 ? 'strict-review-template-unknown' : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -276,32 +359,84 @@ export const StrictReviewTemplateDialog = ({
         <DialogHeader>
           <DialogTitle>Strict Review Templates</DialogTitle>
           <DialogDescription>
-            Keep one template per project. The copy shortcut auto-picks the
-            template whose URL pattern matches the MR, falling back to the
-            default. Type{' '}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">/</code> to
-            insert a variable, or click a chip.
+            Define the instructions used when copying a strict review prompt.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 sm:flex-row">
           <div className="flex w-full shrink-0 flex-col gap-2 border-b pb-3 sm:w-52 sm:border-r sm:border-b-0 sm:pr-3 sm:pb-0">
             <div className="flex items-center justify-between">
-              <Label>Templates</Label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2"
-                onClick={handleAdd}
-                disabled={isLoading || loadError != null || isBusy}
-                loading={pendingAction === 'add'}
-              >
-                <Plus className="size-3.5" />
-                Add
-              </Button>
+              <span className="text-sm font-medium">Templates</span>
+              <div className="flex items-center gap-1">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-7"
+                      aria-label="Selected template actions"
+                      disabled={!selected || isBusy}
+                    >
+                      <MoreHorizontal className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-64">
+                    {selected && !selected.isDefault && (
+                      <DropdownMenuItem
+                        disabled={isDirty || isBusy}
+                        onSelect={() => void handleSetDefault()}
+                      >
+                        <Star />
+                        <span className="flex flex-col">
+                          <span>Set as default</span>
+                          {isDirty && (
+                            <span className="text-xs text-muted-foreground">
+                              Save changes first
+                            </span>
+                          )}
+                        </span>
+                      </DropdownMenuItem>
+                    )}
+                    {selected && !selected.isDefault && (
+                      <DropdownMenuSeparator />
+                    )}
+                    <DropdownMenuItem
+                      variant="destructive"
+                      disabled={!selected || templates.length <= 1 || isBusy}
+                      onSelect={() => void handleDelete()}
+                    >
+                      <Trash2 />
+                      <span className="flex flex-col">
+                        <span>Delete template</span>
+                        {templates.length <= 1 && (
+                          <span className="text-xs text-muted-foreground">
+                            Keep at least one template
+                          </span>
+                        )}
+                      </span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2"
+                  onClick={handleAdd}
+                  disabled={isLoading || loadError != null || isBusy}
+                  loading={pendingAction === 'add'}
+                >
+                  <Plus className="size-3.5" />
+                  Add
+                </Button>
+              </div>
             </div>
-            <div className="flex min-h-0 flex-1 gap-1 overflow-x-auto sm:flex-col sm:overflow-x-visible sm:overflow-y-auto">
+            <div
+              className="flex min-h-0 flex-1 gap-1 overflow-x-auto sm:flex-col sm:overflow-x-visible sm:overflow-y-auto"
+              role="radiogroup"
+              aria-label="Strict review templates"
+            >
               {isLoading && (
                 <div className="flex w-52 flex-col gap-2 px-1 py-1 sm:w-full">
                   <Skeleton className="h-7 w-full" />
@@ -309,14 +444,16 @@ export const StrictReviewTemplateDialog = ({
                 </div>
               )}
               {!isLoading &&
-                templates.map((item) => (
+                templates.map((item, index) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => handleSelect(item.id)}
-                    aria-pressed={item.id === selected?.id}
+                    role="radio"
+                    aria-checked={item.id === selected?.id}
+                    tabIndex={item.id === selected?.id ? 0 : -1}
+                    onKeyDown={(event) => handleTemplateKeyDown(event, index)}
                     disabled={isBusy}
-                    title={item.name}
                     className={cn(
                       'flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm outline-none motion-safe:transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-full',
                       item.id === selected?.id
@@ -331,6 +468,11 @@ export const StrictReviewTemplateDialog = ({
                       </>
                     )}
                     <span className="min-w-0 truncate">{item.name}</span>
+                    {item.isDefault && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        Default
+                      </span>
+                    )}
                   </button>
                 ))}
             </div>
@@ -402,9 +544,10 @@ export const StrictReviewTemplateDialog = ({
               aria-busy={isBusy}
               className="flex min-h-0 flex-1 flex-col gap-4"
             >
-              <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
-                <div className="flex flex-col gap-3 md:flex-row">
-                  <div className="flex-1 space-y-2">
+              <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pr-1">
+                <fieldset className="min-w-0 space-y-3">
+                  <legend className="text-sm font-semibold">Identity</legend>
+                  <div className="space-y-2">
                     <Label htmlFor="template-name">Name</Label>
                     <Input
                       id="template-name"
@@ -415,11 +558,16 @@ export const StrictReviewTemplateDialog = ({
                       placeholder="e.g. Mobile app"
                       maxLength={100}
                       disabled={isBusy}
+                      autoFocus
                     />
                   </div>
-                  <div className="flex-1 space-y-2">
+                </fieldset>
+
+                <fieldset className="min-w-0 space-y-3 border-t pt-4">
+                  <legend className="text-sm font-semibold">When to use</legend>
+                  <div className="space-y-2">
                     <Label htmlFor="template-url-pattern">URL pattern</Label>
-                    <Input
+                    <textarea
                       id="template-url-pattern"
                       value={draft.urlPattern}
                       onChange={(event) =>
@@ -428,43 +576,91 @@ export const StrictReviewTemplateDialog = ({
                       placeholder="e.g. group/project, !group/legacy"
                       maxLength={1000}
                       disabled={isBusy}
+                      rows={3}
+                      aria-describedby="template-url-pattern-help"
+                      className="flex w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/20"
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Matched against the MR project path. Comma or new-line
-                      separated terms; <code>*</code> is a wildcard, and{' '}
-                      <code>!</code> or <code>NOT</code> negates a term. Leave
-                      empty to never auto-select.
+                    <p
+                      id="template-url-pattern-help"
+                      className="max-w-[70ch] text-xs text-muted-foreground"
+                    >
+                      Match the MR project path. Separate terms with commas or
+                      new lines. Use <code>*</code> as a wildcard and{' '}
+                      <code>!</code> to exclude a term. Leave empty to use only
+                      as the fallback default.
                     </p>
                   </div>
-                </div>
+                </fieldset>
 
-                <div className="space-y-2">
-                  <Label>Insert variable</Label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {STRICT_REVIEW_TEMPLATE_VARIABLES.map((variable) => (
+                <fieldset className="min-w-0 space-y-3 border-t pt-4">
+                  <legend className="text-sm font-semibold">
+                    Review instructions
+                  </legend>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div
+                      className="flex flex-wrap gap-1.5"
+                      role="group"
+                      aria-label="Insert a variable"
+                    >
+                      {STRICT_REVIEW_TEMPLATE_VARIABLES.map((variable) => (
+                        <Tooltip key={variable.key}>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              disabled={isBusy}
+                              onClick={() =>
+                                editorHandleRef.current?.insertVariable(
+                                  variable.key,
+                                )
+                              }
+                              className="h-8 font-mono text-xs"
+                              aria-label={`Insert ${variable.label} variable`}
+                            >
+                              {`{${variable.key}}`}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-64">
+                            {variable.description}
+                          </TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {restoreUndo !== null && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleUndoRestore}
+                          disabled={isBusy}
+                        >
+                          Undo restore
+                        </Button>
+                      )}
                       <Button
-                        key={variable.key}
                         type="button"
-                        variant="secondary"
+                        variant="ghost"
                         size="sm"
-                        disabled={isBusy}
-                        onClick={() =>
-                          editorHandleRef.current?.insertVariable(variable.key)
+                        onClick={handleRestoreInstructions}
+                        disabled={
+                          isBusy ||
+                          draft.template === DEFAULT_STRICT_REVIEW_TEMPLATE
                         }
-                        className="h-8 font-mono text-xs"
-                        aria-label={`Insert ${variable.label} variable`}
-                        title={variable.description}
                       >
-                        {`{${variable.key}}`}
+                        <RotateCcw className="size-3.5" />
+                        Restore default instructions
                       </Button>
-                    ))}
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-2 px-1">
-                  <Label htmlFor="strict-review-template-editor">
-                    Template
-                  </Label>
+                  <p
+                    id="strict-review-template-help"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Insert a variable with the toolbar or type <code>/</code> in
+                    the editor.
+                  </p>
                   <TemplateVariableEditor
                     id="strict-review-template-editor"
                     ariaLabel="Strict review template"
@@ -472,11 +668,7 @@ export const StrictReviewTemplateDialog = ({
                     onChange={(next) => updateDraft({ template: next })}
                     variables={STRICT_REVIEW_TEMPLATE_VARIABLES}
                     handleRef={editorHandleRef}
-                    ariaDescribedBy={
-                      isTemplateEmpty
-                        ? 'strict-review-template-error'
-                        : undefined
-                    }
+                    ariaDescribedBy={editorDescriptionIds}
                     ariaInvalid={isTemplateEmpty}
                     disabled={isBusy}
                   />
@@ -488,78 +680,78 @@ export const StrictReviewTemplateDialog = ({
                       Add review instructions before saving.
                     </p>
                   )}
-                </div>
+                  {unknownVariables.length > 0 && (
+                    <p
+                      id="strict-review-template-unknown"
+                      className="text-xs text-warning"
+                      role="status"
+                      aria-live="polite"
+                    >
+                      Unknown{' '}
+                      {unknownVariables.length === 1 ? 'variable' : 'variables'}
+                      : {unknownVariables.map((key) => `{${key}}`).join(', ')}.
+                      Unknown variables remain unchanged when copied.
+                    </p>
+                  )}
 
-                <div className="space-y-2 px-1">
-                  <Label>Preview</Label>
-                  <div className="max-h-40 overflow-auto rounded-md border bg-muted/30 p-3 text-xs whitespace-pre-wrap break-words font-mono leading-snug">
-                    {previewTokens.length > 0 ? (
-                      previewTokens
-                    ) : (
-                      <span className="font-sans text-muted-foreground">
-                        Your rendered template will appear here.
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="group px-2"
+                      >
+                        Example preview
+                        <span className="text-xs font-normal text-muted-foreground">
+                          Sample values
+                        </span>
+                        <ChevronDown className="size-3.5 transition-transform group-data-[state=open]:rotate-180 motion-reduce:transition-none" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-2">
+                      <div className="max-h-40 overflow-auto rounded-md bg-muted/40 p-3 text-xs whitespace-pre-wrap break-words font-mono leading-snug">
+                        {previewTokens.length > 0 ? (
+                          previewTokens
+                        ) : (
+                          <span className="font-sans text-muted-foreground">
+                            Your rendered template will appear here using sample
+                            values.
+                          </span>
+                        )}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </fieldset>
               </div>
 
-              <DialogFooter className="gap-2 border-t pt-4 sm:justify-between">
-                <div className="flex flex-wrap gap-2">
-                  {selected && !selected.isDefault && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={handleSetDefault}
-                      disabled={isBusy || isDirty}
-                      loading={pendingAction === 'default'}
-                      title={
-                        isDirty
-                          ? 'Save or discard your changes before changing the default.'
-                          : undefined
-                      }
-                    >
-                      <Star className="size-3.5" />
-                      Set as default
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleResetBody}
-                    disabled={isBusy}
-                  >
-                    <RotateCcw className="size-3.5" />
-                    Reset body
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleDelete}
-                    disabled={isBusy || templates.length <= 1}
-                    loading={pendingAction === 'delete'}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="size-3.5" />
-                    Delete
-                  </Button>
-                </div>
-                <div className="flex min-w-0 flex-col gap-2 sm:items-end">
-                  <div
+              <div className="border-t pt-3">
+                {feedback && (
+                  <p
                     className={cn(
-                      'min-h-5 text-xs',
-                      feedback?.kind === 'error'
+                      'mb-2 text-xs',
+                      feedback.kind === 'error'
                         ? 'text-destructive'
                         : 'text-success',
                     )}
-                    role={feedback?.kind === 'error' ? 'alert' : 'status'}
+                    role={feedback.kind === 'error' ? 'alert' : 'status'}
                     aria-live={
-                      feedback?.kind === 'error' ? 'assertive' : 'polite'
+                      feedback.kind === 'error' ? 'assertive' : 'polite'
                     }
                   >
-                    {feedback?.message}
-                  </div>
-                  <div className="flex gap-2">
+                    {feedback.message}
+                  </p>
+                )}
+                <DialogFooter className="flex-row items-center justify-between gap-2 sm:justify-between">
+                  {isDirty && (
+                    <span
+                      className="min-w-0 truncate text-xs text-muted-foreground"
+                      role="status"
+                    >
+                      Unsaved changes
+                    </span>
+                  )}
+                  <div className="ml-auto flex shrink-0 gap-2">
                     <DialogClose asChild>
                       <Button type="button" variant="outline" disabled={isBusy}>
                         Close
@@ -573,8 +765,8 @@ export const StrictReviewTemplateDialog = ({
                       Save
                     </Button>
                   </div>
-                </div>
-              </DialogFooter>
+                </DialogFooter>
+              </div>
             </form>
           )}
         </div>
