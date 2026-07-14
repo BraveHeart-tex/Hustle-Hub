@@ -268,7 +268,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           >
             <DropdownMenuItem
               onClick={() => void saveNote({ archived: !note.archived })}
-              className="h-7 gap-1.5 px-2 py-0 text-xs"
+              className="h-8 gap-1.5 px-2 py-0 text-sm"
             >
               <ArchiveIcon className="h-3.5 w-3.5" />
               {note.archived ? 'Unarchive' : 'Archive'}
@@ -276,7 +276,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
             <DropdownMenuItem
               variant="destructive"
               onClick={() => setIsDeleteOpen(true)}
-              className="h-7 gap-1.5 px-2 py-0 text-xs"
+              className="h-8 gap-1.5 px-2 py-0 text-sm"
             >
               <Trash2Icon className="h-3.5 w-3.5" />
               Delete
@@ -479,9 +479,11 @@ export const NoteDetail = () => {
   if (!selectedNote) {
     return (
       <section className="flex min-w-0 flex-1 items-center justify-center bg-card">
-        <div className="flex flex-col items-center gap-3 text-center text-muted-foreground">
-          <NotebookTextIcon className="h-14 w-14" />
-          <p className="text-lg font-medium text-foreground">Select a note</p>
+        <div className="flex flex-col items-center gap-1.5 text-center">
+          <NotebookTextIcon className="size-6 text-muted-foreground/40" />
+          <p className="text-base font-light text-muted-foreground">
+            Select a note
+          </p>
         </div>
       </section>
     );

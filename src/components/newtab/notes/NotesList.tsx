@@ -136,7 +136,14 @@ export const NotesList = () => {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
-        <div className="space-y-1">
+        <div
+          className={cn(
+            'min-h-full',
+            filteredNotes.length === 0
+              ? 'flex items-center justify-center'
+              : 'space-y-1',
+          )}
+        >
           {filteredNotes.map((note) => {
             const isSelected = note.id === selectedNoteId;
 
@@ -201,9 +208,9 @@ export const NotesList = () => {
           })}
 
           {filteredNotes.length === 0 && (
-            <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+            <p className="text-center text-xs italic text-muted-foreground/70">
               No notes match these filters.
-            </div>
+            </p>
           )}
         </div>
       </div>
