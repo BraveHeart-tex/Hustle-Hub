@@ -43,6 +43,10 @@
     margin: 0.75rem 0;
   }
 
+  .notes-canvas p {
+    font-size: 1.125rem;
+  }
+
   .tiptap h1,
   .tiptap h2,
   .tiptap h3,

@@ -94,22 +94,6 @@ const formatRelativeTime = (value?: string) => {
   return `${count} ${interval.unit}${count === 1 ? '' : 's'} ago`;
 };
 
-const formatDate = (value?: string) => {
-  if (!value) {
-    return 'No date';
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return 'No date';
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(date);
-};
-
 const isSameLinkedItem = (
   left: NoteLinkedWorkItem,
   right: NoteLinkedWorkItem,
@@ -158,7 +142,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
     },
     editorProps: {
       attributes: {
-        class: 'tiptap min-h-[300px]',
+        class: 'notes-canvas tiptap flex-1',
       },
     },
   });
@@ -253,7 +237,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
   };
 
   return (
-    <article className="min-h-full bg-card">
+    <article className="flex min-h-full flex-col bg-card">
       <div className="sticky top-0 z-10 flex items-center justify-end gap-1 border-b border-border bg-card/95 px-6 py-3 backdrop-blur">
         <Button
           variant="ghost"
@@ -294,7 +278,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
         </DropdownMenu>
       </div>
 
-      <div className="mx-auto flex max-w-4xl flex-col gap-8 px-8 py-8">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-8 py-8">
         <textarea
           ref={titleRef}
           value={title}
@@ -434,16 +418,9 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           </span>
         </div>
 
-        <div className="min-h-[300px] rounded-md border border-transparent transition-colors motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+        <div className="flex flex-1 flex-col">
           <FloatingToolbar editor={editor} />
-          <EditorContent editor={editor} />
-        </div>
-
-        <div className="flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
-          <span>Created {formatDate(note.createdAt)}</span>
-          <span>
-            Last updated {formatDate(note.updatedAt ?? note.createdAt)}
-          </span>
+          <EditorContent editor={editor} className="flex flex-1 flex-col" />
         </div>
       </div>
 
