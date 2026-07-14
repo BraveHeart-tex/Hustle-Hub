@@ -295,7 +295,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
               editor?.commands.focus();
             }
           }}
-          className="min-h-12 w-full resize-none overflow-hidden rounded-sm border-0 bg-transparent p-0 text-2xl font-semibold leading-tight tracking-[-0.025em] text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+          className="min-h-12 w-full resize-none appearance-none overflow-hidden border-0 bg-transparent p-0 text-4xl font-bold leading-tight tracking-tight text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:outline-none focus-visible:ring-0"
           placeholder="Untitled"
         />
 
