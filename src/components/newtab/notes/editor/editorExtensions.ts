@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 
 import { SlashCommands } from '@/components/newtab/notes/editor/SlashCommands';
 import { type SlashCommandOptions } from '@/components/newtab/notes/editor/SlashMenuItem';
+import { MarkdownPaste } from '@/components/ui/extensions/markdown-paste';
 
 export const createEditorExtensions = (options: SlashCommandOptions = {}) => [
   StarterKit.configure({
@@ -14,6 +15,7 @@ export const createEditorExtensions = (options: SlashCommandOptions = {}) => [
   }),
   TaskList,
   TaskItem.configure({ nested: true }),
+  MarkdownPaste,
   Placeholder.configure({
     placeholder: "Write something, or type '/' for commands…",
   }),
