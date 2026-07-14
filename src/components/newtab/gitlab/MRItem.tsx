@@ -48,7 +48,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
   return (
     <article
       className={cn(
-        'group relative rounded-lg border border-border px-3 py-2.5 motion-safe:transition-colors hover:bg-muted/50 dark:hover:bg-accent/50',
+        'group relative px-3 py-3 motion-safe:transition-colors hover:bg-muted/50 dark:hover:bg-accent/50',
         mr.needsCurrentUserAction && !hasProblem && 'bg-warning/5',
         shouldHighlightProblem && 'bg-destructive/5',
       )}
@@ -58,7 +58,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Open merge request !${mr.iid}: ${mr.title}`}
-        className="absolute inset-0 rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="absolute inset-0 rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50"
       />
 
       <div className="pointer-events-none relative">

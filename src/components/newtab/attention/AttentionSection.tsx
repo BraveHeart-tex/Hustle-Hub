@@ -148,8 +148,8 @@ function AttentionRow({
   return (
     <div
       className={cn(
-        'group relative flex items-start gap-3 rounded-lg motion-safe:transition-colors hover:bg-muted/40',
-        nested ? 'border border-border/50 px-2.5 py-2' : 'px-3 py-2.5',
+        'group relative flex items-start gap-3 motion-safe:transition-colors hover:bg-muted/40',
+        nested ? 'rounded-md px-2.5 py-2' : 'px-3 py-2.5',
       )}
     >
       {!nested && (
@@ -278,11 +278,7 @@ function AttentionEntityRow({
   }
 
   return (
-    <Collapsible
-      open={open}
-      onOpenChange={setOpen}
-      className="border border-border/70 bg-muted/15"
-    >
+    <Collapsible open={open} onOpenChange={setOpen} className="bg-muted/20">
       <div className="flex w-full items-start justify-between gap-3 px-3 py-3 motion-safe:transition-colors hover:bg-muted/30">
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-medium leading-snug">
@@ -390,7 +386,7 @@ function PriorityGroup({
           {itemCount}
         </span>
       </div>
-      <div className="flex flex-col gap-px">
+      <div className="flex flex-col divide-y divide-border/60">
         {groups.map((group) => (
           <AttentionEntityRow
             key={group.key}

@@ -150,16 +150,13 @@ export function GitlabSection() {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="grid gap-3" aria-hidden="true">
+        <div className="divide-y divide-border/60" aria-hidden="true">
           {[
             'gitlab-loading-primary',
             'gitlab-loading-secondary',
             'gitlab-loading-tertiary',
           ].map((rowId) => (
-            <div
-              key={rowId}
-              className="rounded-lg border border-border px-3 py-2"
-            >
+            <div key={rowId} className="px-3 py-3">
               <div className="mb-2 flex items-center gap-2">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="ml-auto h-3 w-10" />
@@ -345,7 +342,7 @@ export function GitlabSection() {
         )}
       </CardHeader>
 
-      <CardContent className="grid flex-1 gap-3 overflow-auto pt-2">
+      <CardContent className="flex-1 divide-y divide-border/60 overflow-auto">
         {renderContent()}
       </CardContent>
     </Card>

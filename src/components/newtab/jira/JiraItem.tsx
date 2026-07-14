@@ -50,13 +50,13 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
   };
 
   return (
-    <div className="group relative px-3 py-2 rounded-lg border border-border hover:bg-muted/50 dark:hover:bg-accent/50 motion-safe:transition-colors">
+    <div className="group relative px-3 py-3 hover:bg-muted/50 dark:hover:bg-accent/50 motion-safe:transition-colors">
       <a
         href={issueUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Open Jira issue ${issue.key}: ${fields.summary}`}
-        className="absolute inset-0 rounded-lg outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+        className="absolute inset-0 rounded-sm outline-none focus-visible:ring-inset focus-visible:ring-ring/50 focus-visible:ring-[3px]"
       />
 
       <div className="pointer-events-none relative flex items-center justify-between gap-2 mb-1">

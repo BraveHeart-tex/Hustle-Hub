@@ -84,16 +84,13 @@ export function JiraSection({ className }: JiraSectionProps) {
   const renderContent = useCallback(() => {
     if (isLoading) {
       return (
-        <div className="grid gap-3" aria-hidden="true">
+        <div className="divide-y divide-border/60" aria-hidden="true">
           {[
             'jira-loading-primary',
             'jira-loading-secondary',
             'jira-loading-tertiary',
           ].map((rowId) => (
-            <div
-              key={rowId}
-              className="rounded-lg border border-border px-3 py-2"
-            >
+            <div key={rowId} className="px-3 py-3">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <Skeleton className="h-3 w-16" />
                 <Skeleton className="h-3 w-20" />
@@ -300,7 +297,7 @@ export function JiraSection({ className }: JiraSectionProps) {
           </div>
         )}
       </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto space-y-3 min-h-0">
+      <CardContent className="flex-1 divide-y divide-border/60 overflow-y-auto min-h-0">
         {renderContent()}
       </CardContent>
     </Card>
