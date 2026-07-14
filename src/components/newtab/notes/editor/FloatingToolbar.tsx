@@ -56,7 +56,7 @@ const ToolbarButton = ({
           event.preventDefault();
         }}
         onClick={onClick}
-        className="size-7"
+        className="size-8"
       >
         {children}
       </Button>
@@ -76,7 +76,11 @@ export const FloatingToolbar = ({ editor }: FloatingToolbarProps) => {
   return (
     <BubbleMenu editor={editor}>
       <TooltipProvider>
-        <div className="flex items-center gap-0.5 rounded-lg border border-border bg-popover p-1 shadow-floating">
+        <div
+          role="toolbar"
+          aria-label="Text formatting"
+          className="flex items-center gap-0.5 rounded-lg border border-border bg-popover p-1 shadow-floating"
+        >
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             active={editor.isActive('bold')}

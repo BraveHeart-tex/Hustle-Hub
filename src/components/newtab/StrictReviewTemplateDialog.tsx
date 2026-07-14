@@ -188,7 +188,7 @@ export const StrictReviewTemplateDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl sm:max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+      <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden p-4 sm:max-w-4xl sm:p-6">
         <DialogHeader>
           <DialogTitle>Strict Review Templates</DialogTitle>
           <DialogDescription>
@@ -200,8 +200,8 @@ export const StrictReviewTemplateDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1 gap-4">
-          <div className="flex w-52 shrink-0 flex-col gap-2 border-r pr-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 sm:flex-row">
+          <div className="flex w-full shrink-0 flex-col gap-2 border-b pb-3 sm:w-52 sm:border-r sm:border-b-0 sm:pr-3 sm:pb-0">
             <div className="flex items-center justify-between">
               <Label>Templates</Label>
               <Button
@@ -215,14 +215,15 @@ export const StrictReviewTemplateDialog = ({
                 Add
               </Button>
             </div>
-            <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+            <div className="flex min-h-0 flex-1 gap-1 overflow-x-auto sm:flex-col sm:overflow-x-visible sm:overflow-y-auto">
               {templates.map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => setSelectedId(item.id)}
+                  aria-pressed={item.id === selected?.id}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm motion-safe:transition-colors',
+                    'flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm outline-none motion-safe:transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-full',
                     item.id === selected?.id
                       ? 'bg-secondary text-secondary-foreground'
                       : 'hover:bg-muted/50',
@@ -242,7 +243,7 @@ export const StrictReviewTemplateDialog = ({
             className="flex min-h-0 flex-1 flex-col gap-4"
           >
             <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 md:flex-row">
                 <div className="flex-1 space-y-2">
                   <Label htmlFor="template-name">Name</Label>
                   <Input
@@ -283,24 +284,29 @@ export const StrictReviewTemplateDialog = ({
                 <Label>Insert variable</Label>
                 <div className="flex flex-wrap gap-1.5">
                   {STRICT_REVIEW_TEMPLATE_VARIABLES.map((variable) => (
-                    <button
+                    <Button
                       key={variable.key}
                       type="button"
+                      variant="secondary"
+                      size="sm"
                       onClick={() =>
                         editorHandleRef.current?.insertVariable(variable.key)
                       }
-                      className="rounded-md border border-border bg-secondary px-2 py-1 text-xs font-mono text-secondary-foreground hover:bg-secondary/80 hover:border-primary/40 motion-safe:transition-colors"
+                      className="h-8 font-mono text-xs"
+                      aria-label={`Insert ${variable.label} variable`}
                       title={variable.description}
                     >
                       {`{${variable.key}}`}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-2 px-1">
-                <Label>Template</Label>
+                <Label htmlFor="strict-review-template-editor">Template</Label>
                 <TemplateVariableEditor
+                  id="strict-review-template-editor"
+                  ariaLabel="Strict review template"
                   value={draft.template}
                   onChange={(next) =>
                     setDraft((prev) => ({ ...prev, template: next }))
@@ -319,7 +325,7 @@ export const StrictReviewTemplateDialog = ({
             </div>
 
             <DialogFooter className="gap-2 border-t pt-4 sm:justify-between">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {selected && !selected.isDefault && (
                   <Button
                     type="button"

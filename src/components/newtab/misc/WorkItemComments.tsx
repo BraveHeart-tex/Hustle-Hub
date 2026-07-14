@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { CheckIcon, MessageSquareIcon, PlusIcon, SendIcon } from 'lucide-react';
 import {
   lazy,
@@ -28,6 +29,8 @@ const RichTextEditor = lazy(() =>
   })),
 );
 
+const sanitizeCommentContent = (content: string) => DOMPurify.sanitize(content);
+
 interface WorkItemCommentsProps {
   triggerClassName?: string;
   itemMeta: {
@@ -55,6 +58,7 @@ export const WorkItemComments = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resolvingIds, setResolvingIds] = useState<Set<string>>(new Set());
   const [showEditor, setShowEditor] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const focusEditor = useCallback(() => {
     tiptapRef.current?.editor?.commands.focus();
@@ -78,6 +82,7 @@ export const WorkItemComments = ({
       return;
     }
     try {
+      setErrorMessage('');
       setIsSubmitting(true);
       await addComment({
         content,
@@ -90,6 +95,8 @@ export const WorkItemComments = ({
       });
       clearEditor();
       setShowEditor(false);
+    } catch {
+      setErrorMessage('Could not save the comment. Try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -98,7 +105,10 @@ export const WorkItemComments = ({
   const handleResolveComment = async (commentId: string) => {
     setResolvingIds((prev) => new Set(prev).add(commentId));
     try {
+      setErrorMessage('');
       await removeComment(commentId);
+    } catch {
+      setErrorMessage('Could not resolve the comment. Try again.');
     } finally {
       setResolvingIds((prev) => {
         const next = new Set(prev);
@@ -117,7 +127,7 @@ export const WorkItemComments = ({
     event.stopPropagation();
   };
 
-  const isEditorEmpty = !draft.trim();
+  const isEditorEmpty = tiptapRef.current?.editor?.isEmpty ?? true;
   const hasComments = comments.length > 0;
 
   return (
@@ -127,7 +137,7 @@ export const WorkItemComments = ({
           size="icon"
           variant="ghost"
           className={cn(
-            'relative size-4 text-muted-foreground motion-safe:transition-colors hover:text-foreground',
+            'relative size-8 text-muted-foreground motion-safe:transition-colors hover:text-foreground',
             triggerClassName,
           )}
           onClick={handleTriggerClick}
@@ -149,14 +159,14 @@ export const WorkItemComments = ({
         id={popoverId}
         side="bottom"
         align="end"
-        className="w-72 p-0 overflow-hidden shadow-lg"
+        className="w-80 max-w-[calc(100vw-1.5rem)] overflow-hidden p-0"
         onClick={handleContentClick}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
+        <div className="flex min-h-10 items-center justify-between border-b bg-muted/30 px-3 py-2">
           <div className="flex items-center gap-1.5">
             <MessageSquareIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs font-medium">Notes</span>
+            <span className="text-sm font-medium">Comments</span>
             {hasComments && (
               <span className="rounded-full bg-muted px-1.5 py-px text-xs text-muted-foreground">
                 {comments.length}
@@ -166,7 +176,7 @@ export const WorkItemComments = ({
           <Button
             size="icon"
             variant="ghost"
-            className="h-5 w-5 text-muted-foreground hover:text-foreground"
+            className="size-7 text-muted-foreground hover:text-foreground"
             aria-label={showEditor ? 'Hide comment editor' : 'Add comment'}
             aria-expanded={showEditor}
             aria-controls={editorId}
@@ -176,24 +186,30 @@ export const WorkItemComments = ({
               if (!showEditor) setTimeout(focusEditor, 50);
             }}
           >
-            <PlusIcon aria-hidden="true" className="h-3.5 w-3.5" />
+            <PlusIcon
+              aria-hidden="true"
+              className={cn(
+                'h-3.5 w-3.5 transition-transform duration-150 ease-out motion-reduce:transition-none',
+                showEditor && 'rotate-45',
+              )}
+            />
           </Button>
         </div>
 
         {/* Comment list */}
         {hasComments && (
-          <div className="max-h-48 overflow-y-auto">
+          <div className="max-h-64 overflow-y-auto">
             {comments.map((comment, i) => (
               <div
                 key={comment.id}
                 className={cn(
-                  'group px-3 py-2 motion-safe:transition-colors hover:bg-muted/30',
+                  'group px-3 py-2.5 motion-safe:transition-colors hover:bg-muted/30',
                   i !== comments.length - 1 && 'border-b border-border/50',
                 )}
               >
                 {/* Meta row */}
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground/70">
+                <div className="mb-1 flex min-h-6 items-center justify-between">
+                  <span className="text-xs text-muted-foreground">
                     {comment.createdAt ? formatDate(comment.createdAt) : 'You'}
                   </span>
                   <button
@@ -201,7 +217,7 @@ export const WorkItemComments = ({
                     disabled={resolvingIds.has(comment.id)}
                     className={cn(
                       'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 motion-safe:transition-opacity',
-                      'h-4 w-4 rounded flex items-center justify-center',
+                      'flex size-6 items-center justify-center rounded-md',
                       'text-muted-foreground hover:text-success hover:bg-success/10',
                       'outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                       resolvingIds.has(comment.id) &&
@@ -215,8 +231,10 @@ export const WorkItemComments = ({
                 </div>
                 {/* Content */}
                 <div
-                  className="prose prose-xs dark:prose-invert max-w-none text-foreground text-xs leading-relaxed [&_p]:my-0"
-                  dangerouslySetInnerHTML={{ __html: comment.content }}
+                  className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-foreground [&_p]:my-0"
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeCommentContent(comment.content),
+                  }}
                 />
               </div>
             ))}
@@ -225,14 +243,14 @@ export const WorkItemComments = ({
 
         {/* Empty state — shown when no comments and editor is hidden */}
         {!hasComments && !showEditor && (
-          <div className="flex flex-col items-center gap-2 py-6 text-center px-4">
+          <div className="flex flex-col items-center gap-2 px-4 py-7 text-center">
             <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
               <MessageSquareIcon className="h-4 w-4 text-muted-foreground/50" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              No notes yet.{' '}
+            <p className="text-sm text-muted-foreground">
+              No comments yet.{' '}
               <button
-                className="text-foreground underline underline-offset-2 hover:no-underline"
+                className="rounded-sm font-medium text-foreground underline underline-offset-2 outline-none hover:no-underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 onClick={() => {
                   setShowEditor(true);
                   setTimeout(focusEditor, 50);
@@ -248,42 +266,56 @@ export const WorkItemComments = ({
         {showEditor && (
           <div
             id={editorId}
-            className="border-t border-border/50 p-2 space-y-2 bg-muted/10"
+            className="space-y-2.5 border-t border-border/50 bg-muted/10 p-2.5"
           >
             <Suspense fallback={<EditorSkeleton className="h-20" />}>
               <RichTextEditor
                 ref={tiptapRef}
                 content={draft}
                 onChange={setDraft}
-                placeholder="Add a note..."
-                className="border-muted h-20 text-xs"
+                placeholder="Write a comment…"
+                ariaLabel="Comment"
+                editorClassName="compact-editor min-h-20 max-h-40 overflow-y-auto"
                 onReady={focusEditor}
                 onCmdEnter={() => void handleSubmit()}
               />
             </Suspense>
-            <div className="flex items-center justify-between">
-              <button
+            <div className="flex min-h-8 items-center justify-between gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   clearEditor();
                   setShowEditor(false);
+                  setErrorMessage('');
                 }}
-                className="text-[10px] text-muted-foreground hover:text-foreground motion-safe:transition-colors"
+                className="text-muted-foreground"
               >
                 Cancel
-              </button>
+              </Button>
               <Button
                 type="button"
                 size="sm"
-                className="h-6 px-2.5 text-xs gap-1.5"
+                className="h-8 gap-1.5 px-3"
                 onClick={() => void handleSubmit()}
                 disabled={isEditorEmpty || isSubmitting}
+                loading={isSubmitting}
                 aria-keyshortcuts="Meta+Enter Control+Enter"
               >
                 <SendIcon className="h-3 w-3" />
-                Save
+                Add comment
               </Button>
             </div>
           </div>
+        )}
+        {errorMessage && (
+          <p
+            role="alert"
+            className="border-t border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+          >
+            {errorMessage}
+          </p>
         )}
       </PopoverContent>
     </Popover>

@@ -1,19 +1,40 @@
 import { Extension } from '@tiptap/core';
-import { TaskItem, TaskList } from '@tiptap/extension-list';
-import { Placeholder } from '@tiptap/extensions';
 import { type Editor, EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 import { forwardRef, useImperativeHandle } from 'react';
 
+import { createEditorExtensions } from '@/components/ui/extensions/create-editor-extensions';
 import { cn } from '@/lib/utils';
 
+interface ModEnterOptions {
+  onModEnter?: () => void;
+}
+
+const ModEnter = Extension.create<ModEnterOptions>({
+  name: 'modEnter',
+
+  addOptions() {
+    return { onModEnter: undefined };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Enter': () => {
+        this.options.onModEnter?.();
+        return true;
+      },
+    };
+  },
+});
+
 interface RichTextEditorProps {
+  ariaLabel?: string;
+  className?: string;
   content?: string;
+  editorClassName?: string;
   onChange?: (content: string) => void;
   onCmdEnter?: () => void;
   onReady?: () => void;
   placeholder?: string;
-  className?: string;
 }
 
 export interface TiptapRef {
@@ -23,18 +44,20 @@ export interface TiptapRef {
 export const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
   (
     {
+      ariaLabel = 'Rich text editor',
+      className,
       content = '',
+      editorClassName,
       onChange,
       placeholder = 'Start typing...',
-      className,
       onReady,
       onCmdEnter,
     }: RichTextEditorProps,
     ref,
   ) => {
     const editor = useEditor({
-      extensions: [
-        StarterKit.configure({
+      extensions: createEditorExtensions({
+        starterKit: {
           heading: {
             levels: [1, 2, 3],
           },
@@ -46,32 +69,18 @@ export const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
             keepMarks: true,
             keepAttributes: false,
           },
-        }),
-        Extension.create({
-          name: 'cmdEnterHandler',
-          addKeyboardShortcuts() {
-            return {
-              'Mod-Enter': () => {
-                onCmdEnter?.();
-                return true;
-              },
-            };
-          },
-        }),
-        Placeholder.configure({
-          placeholder,
-        }),
-        TaskList.configure({
-          itemTypeName: 'taskItem',
-        }),
-        TaskItem.configure({
-          nested: true,
-        }),
-      ],
+        },
+        placeholder,
+        extensions: [ModEnter.configure({ onModEnter: onCmdEnter })],
+      }),
       content,
       editorProps: {
         attributes: {
-          class: 'tiptap min-h-[200px] px-3 py-2.5',
+          'aria-label': ariaLabel,
+          class: cn(
+            'tiptap min-h-32 px-3 py-2.5 text-sm outline-none',
+            editorClassName,
+          ),
         },
       },
       onUpdate: ({ editor }) => {
@@ -91,17 +100,14 @@ export const RichTextEditor = forwardRef<TiptapRef, RichTextEditorProps>(
     }
 
     return (
-      <>
-        <div
-          className={cn(
-            'overflow-hidden border border-border border-l-0 bg-transparent transition-colors motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30',
-            className,
-          )}
-        >
-          {/* Editor Content */}
-          <EditorContent editor={editor} className="bg-background" />
-        </div>
-      </>
+      <div
+        className={cn(
+          'overflow-hidden rounded-md border border-input bg-background transition-[border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/20',
+          className,
+        )}
+      >
+        <EditorContent editor={editor} />
+      </div>
     );
   },
 );

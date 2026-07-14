@@ -20,7 +20,7 @@ import {
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { JiraIcon } from '@/components/misc/JiraIcon';
-import { createEditorExtensions } from '@/components/newtab/notes/editor/editorExtensions';
+import { createNoteEditorExtensions } from '@/components/newtab/notes/editor/editorExtensions';
 import { FloatingToolbar } from '@/components/newtab/notes/editor/FloatingToolbar';
 import { NoteWorkItemPicker } from '@/components/newtab/notes/NoteWorkItemPicker';
 import { useNotesPage } from '@/components/newtab/notes/useNotesPage';
@@ -120,28 +120,39 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
   const [newTag, setNewTag] = useState('');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isWorkItemPickerOpen, setIsWorkItemPickerOpen] = useState(false);
+  const [editorSaveStatus, setEditorSaveStatus] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
-    extensions: createEditorExtensions({
+    extensions: createNoteEditorExtensions({
       onWorkItemLink: () => setIsWorkItemPickerOpen(true),
     }),
     content: note.content,
     onUpdate: ({ editor }) => {
+      setEditorSaveStatus('saving');
+
       if (saveTimerRef.current) {
         clearTimeout(saveTimerRef.current);
       }
 
-      saveTimerRef.current = setTimeout(() => {
-        void updateNote(note.id, {
-          content: editor.getHTML(),
-          updatedAt: new Date().toISOString(),
-        });
+      saveTimerRef.current = setTimeout(async () => {
+        try {
+          await updateNote(note.id, {
+            content: editor.getHTML(),
+            updatedAt: new Date().toISOString(),
+          });
+          setEditorSaveStatus('saved');
+        } catch {
+          setEditorSaveStatus('error');
+        }
       }, 500);
     },
     editorProps: {
       attributes: {
+        'aria-label': 'Note content',
         class: 'notes-canvas tiptap flex-1',
       },
     },
@@ -238,12 +249,14 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
 
   return (
     <article className="flex min-h-full flex-col bg-card">
-      <div className="sticky top-0 z-10 flex items-center justify-end gap-1 border-b border-border bg-card/95 px-6 py-3 backdrop-blur">
+      <div className="sticky top-0 z-10 flex items-center justify-end gap-1 border-b border-border bg-card/95 px-3 py-3 backdrop-blur sm:px-6">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => void saveNote({ pinned: !note.pinned })}
           className={cn(note.pinned && 'text-primary')}
+          aria-label={note.pinned ? 'Unpin note' : 'Pin note'}
+          aria-pressed={note.pinned}
         >
           <PinIcon className={cn('h-4 w-4', note.pinned && 'fill-primary')} />
         </Button>
@@ -251,6 +264,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           variant="ghost"
           size="icon"
           onClick={() => titleRef.current?.focus()}
+          aria-label="Edit note title"
         >
           <PencilIcon className="h-4 w-4" />
         </Button>
@@ -285,7 +299,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
         </DropdownMenu>
       </div>
 
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-8 py-8">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-6 sm:px-8 sm:py-8">
         <textarea
           ref={titleRef}
           value={title}
@@ -302,11 +316,12 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
               editor?.commands.focus();
             }
           }}
-          className="min-h-12 w-full resize-none appearance-none overflow-hidden border-0 bg-transparent p-0 text-4xl font-bold leading-tight tracking-tight text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:outline-none focus-visible:ring-0"
+          className="min-h-10 w-full resize-none appearance-none overflow-hidden border-0 bg-transparent p-0 text-2xl font-semibold leading-tight tracking-tight text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:outline-none focus-visible:ring-0"
           placeholder="Untitled"
+          aria-label="Note title"
         />
 
-        <div className="mt-2 flex items-start justify-between gap-4 text-xs text-muted-foreground">
+        <div className="mt-2 flex flex-col items-start justify-between gap-2 text-xs text-muted-foreground sm:flex-row sm:gap-4">
           <div className="flex min-w-0 flex-wrap items-center gap-1">
             <Popover>
               <PopoverTrigger asChild>
@@ -432,12 +447,23 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
             )}
           </div>
 
-          <span className="mt-1 shrink-0 whitespace-nowrap text-[11px] leading-4 text-muted-foreground/80">
-            Updated {formatRelativeTime(note.updatedAt ?? note.createdAt)}
+          <span
+            role="status"
+            aria-live="polite"
+            className={cn(
+              'mt-1 shrink-0 whitespace-nowrap text-xs leading-4 text-muted-foreground',
+              editorSaveStatus === 'error' && 'text-destructive',
+            )}
+          >
+            {editorSaveStatus === 'saving' && 'Saving…'}
+            {editorSaveStatus === 'saved' && 'Saved'}
+            {editorSaveStatus === 'error' && 'Could not save'}
+            {editorSaveStatus === 'idle' &&
+              `Updated ${formatRelativeTime(note.updatedAt ?? note.createdAt)}`}
           </span>
         </div>
 
-        <div className="mt-8 flex flex-1 flex-col">
+        <div className="-mx-3 mt-6 flex flex-1 flex-col rounded-lg border border-transparent px-3 py-3 transition-[border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus-within:border-ring/40 focus-within:ring-[3px] focus-within:ring-ring/15">
           <FloatingToolbar editor={editor} />
           <EditorContent editor={editor} className="flex flex-1 flex-col" />
         </div>

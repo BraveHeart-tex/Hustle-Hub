@@ -5,16 +5,21 @@ import {
   type JSONContent,
   useEditor,
 } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 import {
   useCallback,
   useEffect,
+  useId,
   useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 
+import { createEditorExtensions } from '@/components/ui/extensions/create-editor-extensions';
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 export interface TemplateVariableDefinition {
@@ -152,29 +157,37 @@ export interface TemplateVariableEditorHandle {
   focus: () => void;
 }
 
+interface TemplateVariableEditorProps {
+  ariaLabel?: string;
+  className?: string;
+  handleRef?: React.Ref<TemplateVariableEditorHandle>;
+  id?: string;
+  onChange: (next: string) => void;
+  value: string;
+  variables: readonly TemplateVariableDefinition[];
+}
+
 export const TemplateVariableEditor = ({
   value,
   onChange,
   variables,
   className,
   handleRef,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-  variables: readonly TemplateVariableDefinition[];
-  className?: string;
-  handleRef?: React.Ref<TemplateVariableEditorHandle>;
-}) => {
+  id,
+  ariaLabel = 'Template editor',
+}: TemplateVariableEditorProps) => {
+  const generatedId = useId();
+  const editorId = id ?? generatedId;
+  const menuId = `${editorId}-variables`;
   const [slash, setSlash] = useState<SlashState>(CLOSED_SLASH);
-  const containerRef = useRef<HTMLDivElement>(null);
   const knownKeys = useMemo(
     () => new Set(variables.map((v) => v.key)),
     [variables],
   );
 
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
+    extensions: createEditorExtensions({
+      starterKit: {
         blockquote: false,
         bold: false,
         bulletList: false,
@@ -192,17 +205,22 @@ export const TemplateVariableEditor = ({
         underline: false,
         dropcursor: false,
         trailingNode: false,
-      }),
-      VariableNode.configure({ knownKeys }),
-    ],
+      },
+      placeholder: "Write review instructions. Type '/' to insert a variable…",
+      extensions: [VariableNode.configure({ knownKeys })],
+    }),
     content: templateStringToDoc(value),
     editorProps: {
       attributes: {
+        'aria-autocomplete': 'list',
+        'aria-haspopup': 'listbox',
+        'aria-label': ariaLabel,
         class: cn(
-          'min-h-40 max-h-64 overflow-auto px-3 py-2 font-mono text-xs leading-snug outline-none whitespace-pre-wrap',
+          'template-editor min-h-40 max-h-64 overflow-auto whitespace-pre-wrap px-3 py-2.5 font-mono text-sm leading-relaxed outline-none',
           '[&_p]:my-0 [&_p+p]:mt-1',
           className,
         ),
+        id: editorId,
       },
     },
     onUpdate: ({ editor }) => {
@@ -235,15 +253,13 @@ export const TemplateVariableEditor = ({
     const triggerLength = match[2].length + 1;
     const slashFrom = from - triggerLength;
     const coords = editor.view.coordsAtPos(slashFrom);
-    const containerRect = containerRef.current?.getBoundingClientRect();
-    if (!containerRect) return;
     setSlash({
       open: true,
       query: match[2],
       from: slashFrom,
       to: from,
-      top: coords.bottom - containerRect.top + 2,
-      left: coords.left - containerRect.left,
+      top: coords.bottom,
+      left: coords.left,
       highlightedIndex: 0,
     });
   };
@@ -261,6 +277,26 @@ export const TemplateVariableEditor = ({
       setSlash((prev) => ({ ...prev, highlightedIndex: 0 }));
     }
   }, [filteredVariables.length, slash.open, slash.highlightedIndex]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    editor.view.dom.setAttribute('aria-expanded', String(slash.open));
+    if (slash.open) {
+      editor.view.dom.setAttribute('aria-controls', menuId);
+      if (filteredVariables.length > 0) {
+        editor.view.dom.setAttribute(
+          'aria-activedescendant',
+          `${menuId}-${slash.highlightedIndex}`,
+        );
+      } else {
+        editor.view.dom.removeAttribute('aria-activedescendant');
+      }
+    } else {
+      editor.view.dom.removeAttribute('aria-controls');
+      editor.view.dom.removeAttribute('aria-activedescendant');
+    }
+  }, [editor, filteredVariables.length, menuId, slash]);
 
   // Sync external value changes (e.g. reset to default).
   useEffect(() => {
@@ -309,12 +345,28 @@ export const TemplateVariableEditor = ({
 
   if (!editor) return null;
 
+  const virtualRef = {
+    current: {
+      getBoundingClientRect: () => new DOMRect(slash.left, slash.top),
+    },
+  };
+
   return (
-    <div className="relative" ref={containerRef}>
+    <div>
       <div
-        className="rounded-md border bg-background transition-[color,box-shadow] motion-reduce:transition-none focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]"
+        className="rounded-md border border-input bg-background transition-[border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/20"
         onKeyDownCapture={(event) => {
-          if (!slash.open || filteredVariables.length === 0) return;
+          if (!slash.open) return;
+
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            setSlash(CLOSED_SLASH);
+            return;
+          }
+
+          if (filteredVariables.length === 0) return;
+
           if (event.key === 'ArrowDown') {
             event.preventDefault();
             event.stopPropagation();
@@ -336,43 +388,61 @@ export const TemplateVariableEditor = ({
             event.preventDefault();
             event.stopPropagation();
             insertVariable(filteredVariables[slash.highlightedIndex].key);
-          } else if (event.key === 'Escape') {
-            event.preventDefault();
-            event.stopPropagation();
-            setSlash(CLOSED_SLASH);
           }
         }}
       >
         <EditorContent editor={editor} />
       </div>
-      {slash.open && filteredVariables.length > 0 && (
-        <div
-          className="absolute z-50 rounded-md border bg-popover shadow-md py-1 min-w-52"
-          style={{ top: slash.top, left: slash.left }}
-        >
-          {filteredVariables.map((variable, index) => (
-            <button
-              key={variable.key}
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => insertVariable(variable.key)}
-              onMouseEnter={() =>
-                setSlash((prev) => ({ ...prev, highlightedIndex: index }))
-              }
-              className={cn(
-                'flex w-full flex-col items-start gap-0.5 px-3 py-1.5 text-left text-xs',
-                index === slash.highlightedIndex
-                  ? 'bg-accent text-accent-foreground'
-                  : '',
-              )}
+      {slash.open && (
+        <Popover open>
+          <PopoverAnchor virtualRef={virtualRef} />
+          <PopoverContent
+            align="start"
+            side="bottom"
+            sideOffset={6}
+            collisionPadding={12}
+            onOpenAutoFocus={(event) => event.preventDefault()}
+            onCloseAutoFocus={(event) => event.preventDefault()}
+            className="w-64 p-1"
+          >
+            <div
+              id={menuId}
+              role="listbox"
+              aria-label="Template variables"
+              className="max-h-64 overflow-y-auto"
             >
-              <span className="font-mono">{`{${variable.key}}`}</span>
-              <span className="text-[10px] text-muted-foreground">
-                {variable.description}
-              </span>
-            </button>
-          ))}
-        </div>
+              {filteredVariables.length === 0 && (
+                <p className="px-2 py-2 text-sm text-muted-foreground">
+                  No matching variables
+                </p>
+              )}
+              {filteredVariables.map((variable, index) => (
+                <button
+                  id={`${menuId}-${index}`}
+                  key={variable.key}
+                  type="button"
+                  role="option"
+                  aria-selected={index === slash.highlightedIndex}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => insertVariable(variable.key)}
+                  onMouseEnter={() =>
+                    setSlash((prev) => ({ ...prev, highlightedIndex: index }))
+                  }
+                  className={cn(
+                    'flex w-full flex-col items-start gap-0.5 rounded-md px-2 py-2 text-left outline-none transition-colors duration-150 ease-out motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                    index === slash.highlightedIndex &&
+                      'bg-accent text-accent-foreground',
+                  )}
+                >
+                  <span className="font-mono text-sm font-medium">{`{${variable.key}}`}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {variable.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
       )}
     </div>
   );

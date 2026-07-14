@@ -93,7 +93,7 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
         </span>
         <div className="pointer-events-auto relative z-10 flex items-center gap-2">
           <WorkItemComments
-            triggerClassName="size-6"
+            triggerClassName="size-8"
             itemMeta={{
               itemId: issue.id,
               itemType: 'jira',

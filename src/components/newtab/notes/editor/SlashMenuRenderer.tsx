@@ -116,6 +116,10 @@ export const SlashMenuRenderer = forwardRef<
       }
 
       if (event.key === 'Enter') {
+        if (items.length === 0) {
+          return false;
+        }
+
         event.preventDefault();
         event.stopPropagation();
         selectItem(selectedIndexRef.current);
@@ -144,6 +148,7 @@ export const SlashMenuRenderer = forwardRef<
       >
         <div
           role="listbox"
+          aria-label="Insert block"
           className="max-h-[min(320px,var(--radix-popover-content-available-height))] overflow-y-auto"
         >
           {items.length === 0 && (
@@ -168,7 +173,7 @@ export const SlashMenuRenderer = forwardRef<
                 }}
                 className={cn(
                   'flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left text-sm',
-                  'hover:bg-accent hover:text-accent-foreground',
+                  'outline-none transition-colors duration-150 ease-out motion-reduce:transition-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50',
                   index === selectedIndex && 'bg-accent text-accent-foreground',
                 )}
               >

@@ -173,7 +173,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
                 <TooltipTrigger asChild>
                   <span className="inline-flex">
                     <WorkItemComments
-                      triggerClassName="size-6"
+                      triggerClassName="size-8"
                       itemMeta={{
                         itemId: mr.iid,
                         itemType: 'gitlab',
