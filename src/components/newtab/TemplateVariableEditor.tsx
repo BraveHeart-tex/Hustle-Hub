@@ -216,7 +216,7 @@ export const TemplateVariableEditor = ({
         'aria-haspopup': 'listbox',
         'aria-label': ariaLabel,
         class: cn(
-          'template-editor min-h-40 max-h-64 overflow-auto whitespace-pre-wrap px-3 py-2.5 font-mono text-sm leading-relaxed outline-none',
+          'template-editor h-52 overflow-y-auto whitespace-pre-wrap px-3 py-2.5 font-mono text-sm leading-relaxed outline-none',
           '[&_p]:my-0 [&_p+p]:mt-1',
           className,
         ),
