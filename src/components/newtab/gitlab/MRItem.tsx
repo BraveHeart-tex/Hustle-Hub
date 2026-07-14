@@ -109,7 +109,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
           {formatDate(mr.createdAt)}
         </p>
 
-        <div className="mt-2 flex items-end justify-between gap-3 border-t border-border/60 pt-2">
+        <div className="mt-2 flex items-center justify-between gap-3 border-t border-border/60 pt-2">
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1.5">
               <GitlabUserAvatar
