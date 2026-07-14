@@ -463,7 +463,7 @@ const SelectedNoteDetail = ({ note }: SelectedNoteDetailProps) => {
           </span>
         </div>
 
-        <div className="-mx-3 mt-6 flex flex-1 flex-col rounded-lg border border-transparent px-3 py-3 transition-[border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus-within:border-ring/40 focus-within:ring-[3px] focus-within:ring-ring/15">
+        <div className="-mx-3 mt-6 flex flex-1 flex-col rounded-lg border border-transparent px-3 py-3 transition-[border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none">
           <FloatingToolbar editor={editor} />
           <EditorContent editor={editor} className="flex flex-1 flex-col" />
         </div>
