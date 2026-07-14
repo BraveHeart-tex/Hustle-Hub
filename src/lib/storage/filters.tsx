@@ -7,20 +7,25 @@ import {
   type JiraFilter,
 } from '@/lib/constants';
 
-const jiraFilterStorage = storage.defineItem<JiraFilter>('local:jiraFilter', {
-  fallback: JIRA_FILTERS.LITERALLY_WORKING_ON,
-});
+export const jiraFilterStorage = storage.defineItem<JiraFilter>(
+  'local:jiraFilter',
+  {
+    fallback: JIRA_FILTERS.LITERALLY_WORKING_ON,
+  },
+);
 
-const gitlabCategoryStorage = storage.defineItem<GitlabCategory>(
+export const gitlabCategoryStorage = storage.defineItem<GitlabCategory>(
   'local:gitlabCategory',
   {
     fallback: GITLAB_CATEGORIES.REVIEW_REQUESTED,
   },
 );
 
-export const useJiraFilter = () => {
+export const useJiraFilter = (initialFilter?: JiraFilter) => {
   const [filter, setFilter] = useState<JiraFilter>(
-    jiraFilterStorage.fallback || JIRA_FILTERS.LITERALLY_WORKING_ON,
+    initialFilter ||
+      jiraFilterStorage.fallback ||
+      JIRA_FILTERS.LITERALLY_WORKING_ON,
   );
 
   useEffect(() => {
@@ -36,9 +41,11 @@ export const useJiraFilter = () => {
   return [filter, updateFilter] as const;
 };
 
-export const useGitlabCategory = () => {
+export const useGitlabCategory = (initialCategory?: GitlabCategory) => {
   const [category, setCategory] = useState<GitlabCategory>(
-    gitlabCategoryStorage.fallback || GITLAB_CATEGORIES.REVIEW_REQUESTED,
+    initialCategory ||
+      gitlabCategoryStorage.fallback ||
+      GITLAB_CATEGORIES.REVIEW_REQUESTED,
   );
 
   useEffect(() => {

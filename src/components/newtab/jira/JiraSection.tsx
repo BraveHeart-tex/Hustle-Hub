@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJiraTickets } from '@/hooks/useJiraTickets';
-import { JIRA_FILTERS } from '@/lib/constants';
+import { JIRA_FILTERS, type JiraFilter } from '@/lib/constants';
 import { useJiraFilter } from '@/lib/storage/filters';
 import { cn } from '@/lib/utils';
 import { getJiraForYouUrl } from '@/lib/utils/misc/getJiraTaskUrl';
@@ -27,10 +27,11 @@ import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
 interface JiraSectionProps {
   className?: string;
+  initialFilter?: JiraFilter;
 }
 
-export function JiraSection({ className }: JiraSectionProps) {
-  const [filter, setFilter] = useJiraFilter();
+export function JiraSection({ className, initialFilter }: JiraSectionProps) {
+  const [filter, setFilter] = useJiraFilter(initialFilter);
   const {
     data,
     isLoading,

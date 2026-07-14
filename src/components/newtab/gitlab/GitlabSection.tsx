@@ -19,7 +19,11 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
-import { GITLAB_CATEGORIES, GITLAB_FILTERS } from '@/lib/constants';
+import {
+  GITLAB_CATEGORIES,
+  GITLAB_FILTERS,
+  type GitlabCategory,
+} from '@/lib/constants';
 import { useGitlabCategory } from '@/lib/storage/filters';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { type GitlabMergeRequest } from '@/types/gitlab';
@@ -37,10 +41,14 @@ const deduplicateMergeRequests = (mergeRequests: GitlabMergeRequest[]) => {
   return Array.from(mergeRequestsById.values());
 };
 
-export function GitlabSection() {
+interface GitlabSectionProps {
+  initialCategory?: GitlabCategory;
+}
+
+export function GitlabSection({ initialCategory }: GitlabSectionProps) {
   const reviewQuery = useGitlabMrs(GITLAB_FILTERS.REVIEW);
   const assignedQuery = useGitlabMrs(GITLAB_FILTERS.ASSIGNED);
-  const [category, setCategory] = useGitlabCategory();
+  const [category, setCategory] = useGitlabCategory(initialCategory);
   const [selectedProjectName, setSelectedProjectName] = useState('');
   const [isCategorySelectOpen, setIsCategorySelectOpen] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
