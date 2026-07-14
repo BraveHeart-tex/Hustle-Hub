@@ -1,7 +1,16 @@
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { type MergeStatus } from '@/types/gitlab';
 
-const getStatusBadge = ({
+type StatusTone = 'neutral' | 'warning' | 'success' | 'critical';
+
+const DOT_CLASS: Record<StatusTone, string> = {
+  neutral: 'bg-muted-foreground/50',
+  warning: 'bg-warning',
+  success: 'bg-success',
+  critical: 'bg-destructive',
+};
+
+const getStatus = ({
   status,
   draft,
   workInProgress,
@@ -9,65 +18,34 @@ const getStatusBadge = ({
   status: MergeStatus;
   draft?: boolean;
   workInProgress?: boolean;
-}) => {
+}): { label: string; tone: StatusTone } => {
   if (draft) {
-    return (
-      <Badge variant="secondary" className="text-xs">
-        Draft
-      </Badge>
-    );
+    return { label: 'Draft', tone: 'neutral' };
   }
   if (workInProgress) {
-    return (
-      <Badge variant="secondary" className="text-xs">
-        WIP
-      </Badge>
-    );
+    return { label: 'WIP', tone: 'neutral' };
   }
 
   switch (status.toLowerCase()) {
     case 'can_be_merged':
-      return (
-        <Badge variant="secondary" className="text-xs">
-          Ready to Merge
-        </Badge>
-      );
+      return { label: 'Ready to Merge', tone: 'neutral' };
     case 'cannot_be_merged':
-      return (
-        <Badge variant="destructive" className="text-xs">
-          Cannot Merge
-        </Badge>
-      );
+      return { label: 'Cannot Merge', tone: 'critical' };
     case 'unchecked':
-      return (
-        <Badge variant="outline" className="text-xs">
-          Not Checked
-        </Badge>
-      );
+      return { label: 'Not Checked', tone: 'neutral' };
     case 'merged':
-      return (
-        <Badge variant="outline" className="text-xs">
-          Merged
-        </Badge>
-      );
+      return { label: 'Merged', tone: 'neutral' };
     case 'needs_review':
-      return (
-        <Badge className="border-transparent bg-warning text-xs text-warning-foreground">
-          Needs Review
-        </Badge>
-      );
+      return { label: 'Needs Review', tone: 'warning' };
     case 'approved':
-      return (
-        <Badge className="bg-success text-xs text-success-foreground">
-          Approved
-        </Badge>
-      );
+      return { label: 'Approved', tone: 'success' };
     default:
-      return (
-        <Badge variant="outline" className="text-xs">
-          {status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-        </Badge>
-      );
+      return {
+        label: status
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase()),
+        tone: 'neutral',
+      };
   }
 };
 
@@ -77,5 +55,15 @@ interface MRStatusBadgeProps {
 }
 
 export const MrStatusBadge = ({ status, draft }: MRStatusBadgeProps) => {
-  return getStatusBadge({ status, draft });
+  const { label, tone } = getStatus({ status, draft });
+
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+      <span
+        aria-hidden="true"
+        className={cn('size-1.5 shrink-0 rounded-full', DOT_CLASS[tone])}
+      />
+      {label}
+    </span>
+  );
 };

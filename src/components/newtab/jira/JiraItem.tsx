@@ -13,15 +13,15 @@ import { cn } from '@/lib/utils';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { type JiraIssue } from '@/types/jira';
 
-// Status badge styles keyed by statusCategory.colorName
-const STATUS_BADGE: Record<string, string> = {
-  red: 'bg-destructive/10 text-destructive border-destructive/20',
-  yellow: 'bg-warning/10 text-warning border-warning/20',
-  green: 'bg-success/10 text-success border-success/20',
+// Status indicator dot color keyed by statusCategory.colorName
+const STATUS_DOT: Record<string, string> = {
+  red: 'bg-destructive',
+  yellow: 'bg-warning',
+  green: 'bg-success',
 };
 
-const getStatusBadgeClass = (colorName: string) =>
-  STATUS_BADGE[colorName] ?? 'bg-muted text-muted-foreground border-border';
+const getStatusDotClass = (colorName: string) =>
+  STATUS_DOT[colorName] ?? 'bg-muted-foreground/50';
 
 interface JiraItemProps {
   issue: JiraIssue;
@@ -63,12 +63,14 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
         <span className="text-xs font-mono text-muted-foreground shrink-0">
           {issue.key}
         </span>
-        <span
-          className={cn(
-            'text-[10px] font-medium border rounded px-1.5 py-px leading-none shrink-0',
-            getStatusBadgeClass(fields.status.statusCategory.colorName),
-          )}
-        >
+        <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <span
+            aria-hidden="true"
+            className={cn(
+              'size-1.5 shrink-0 rounded-full',
+              getStatusDotClass(fields.status.statusCategory.colorName),
+            )}
+          />
           {fields.status.name}
         </span>
       </div>
