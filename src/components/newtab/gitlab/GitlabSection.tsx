@@ -55,6 +55,11 @@ export function GitlabSection() {
       (reviewQuery.data ?? []).filter((mergeRequest) => !mergeRequest.draft),
     [reviewQuery.data],
   );
+  const assignedMrs = useMemo(
+    () =>
+      (assignedQuery.data ?? []).filter((mergeRequest) => !mergeRequest.draft),
+    [assignedQuery.data],
+  );
   const draftMrs = useMemo(
     () =>
       deduplicateMergeRequests([
@@ -64,10 +69,12 @@ export function GitlabSection() {
     [assignedQuery.data, reviewQuery.data],
   );
 
-  const categoryMrs =
-    category === GITLAB_CATEGORIES.REVIEW_REQUESTED
-      ? reviewRequestedMrs
-      : draftMrs;
+  let categoryMrs = reviewRequestedMrs;
+  if (category === GITLAB_CATEGORIES.ASSIGNED_TO_ME) {
+    categoryMrs = assignedMrs;
+  } else if (category === GITLAB_CATEGORIES.DRAFTS) {
+    categoryMrs = draftMrs;
+  }
   const filteredMrs = selectedProjectName
     ? categoryMrs.filter(
         (mergeRequest) => mergeRequest.projectName === selectedProjectName,
@@ -86,26 +93,28 @@ export function GitlabSection() {
   );
 
   const isDraftCategory = category === GITLAB_CATEGORIES.DRAFTS;
-  const hasData = isDraftCategory
-    ? reviewQuery.data !== undefined || assignedQuery.data !== undefined
-    : reviewQuery.data !== undefined;
-  const isLoading = isDraftCategory
-    ? reviewQuery.isLoading || assignedQuery.isLoading
-    : reviewQuery.isLoading;
-  const isFetching = isDraftCategory
-    ? reviewQuery.isFetching || assignedQuery.isFetching
-    : reviewQuery.isFetching;
-  const hasProviderError = isDraftCategory
-    ? reviewQuery.isError ||
-      reviewQuery.isUnauthorized ||
-      assignedQuery.isError ||
-      assignedQuery.isUnauthorized
-    : reviewQuery.isError || reviewQuery.isUnauthorized;
-  const error = reviewQuery.error ?? assignedQuery.error;
+  const isAssignedCategory = category === GITLAB_CATEGORIES.ASSIGNED_TO_ME;
+
+  let activeQueries = [reviewQuery];
+  if (isAssignedCategory) {
+    activeQueries = [assignedQuery];
+  } else if (isDraftCategory) {
+    activeQueries = [reviewQuery, assignedQuery];
+  }
+
+  const hasData = activeQueries.some((query) => query.data !== undefined);
+  const isLoading = activeQueries.some((query) => query.isLoading);
+  const isFetching = activeQueries.some((query) => query.isFetching);
+  const hasProviderError = activeQueries.some(
+    (query) => query.isError || query.isUnauthorized,
+  );
+  const error = activeQueries.find((query) => query.error)?.error;
   const isRefreshing = isFetching && hasData;
 
   const retryGitlab = useCallback(async () => {
-    if (category === GITLAB_CATEGORIES.DRAFTS) {
+    if (category === GITLAB_CATEGORIES.ASSIGNED_TO_ME) {
+      await assignedQuery.refetch();
+    } else if (category === GITLAB_CATEGORIES.DRAFTS) {
       await Promise.all([reviewQuery.refetch(), assignedQuery.refetch()]);
     } else {
       await reviewQuery.refetch();
@@ -146,6 +155,28 @@ export function GitlabSection() {
     onPrefix: openShortcutFilter,
     onSelect: handleShortcutFilterSelect,
   });
+
+  let categoryNoun = 'review requests';
+  if (isAssignedCategory) {
+    categoryNoun = 'merge requests assigned to you';
+  } else if (isDraftCategory) {
+    categoryNoun = 'draft merge requests';
+  }
+
+  let emptyMessage = 'No review requests waiting for you.';
+  if (selectedProjectName) {
+    emptyMessage = `No ${categoryNoun} in ${selectedProjectName}.`;
+  } else if (isAssignedCategory) {
+    emptyMessage = 'No merge requests assigned to you.';
+  } else if (isDraftCategory) {
+    emptyMessage = 'No draft merge requests.';
+  }
+
+  const getCategoryCount = (value: string) => {
+    if (value === GITLAB_CATEGORIES.ASSIGNED_TO_ME) return assignedMrs.length;
+    if (value === GITLAB_CATEGORIES.DRAFTS) return draftMrs.length;
+    return reviewRequestedMrs.length;
+  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -201,13 +232,7 @@ export function GitlabSection() {
             size={16}
             className="shrink-0 text-muted-foreground/40"
           />
-          <p className="text-xs text-muted-foreground">
-            {selectedProjectName
-              ? `No ${isDraftCategory ? 'draft merge requests' : 'review requests'} in ${selectedProjectName}.`
-              : isDraftCategory
-                ? 'No draft merge requests.'
-                : 'No review requests waiting for you.'}
-          </p>
+          <p className="text-xs text-muted-foreground">{emptyMessage}</p>
         </div>
       );
     }
@@ -273,10 +298,7 @@ export function GitlabSection() {
             <SelectContent>
               <SelectGroup>
                 {GITLAB_CATEGORY_SHORTCUTS.map((option) => {
-                  const count =
-                    option.value === GITLAB_CATEGORIES.REVIEW_REQUESTED
-                      ? reviewRequestedMrs.length
-                      : draftMrs.length;
+                  const count = getCategoryCount(option.value);
 
                   return (
                     <SelectItem

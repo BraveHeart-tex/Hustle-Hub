@@ -7,7 +7,6 @@ import {
   GitBranch,
   MessageSquare,
   ThumbsUp,
-  WorkflowIcon,
 } from 'lucide-react';
 
 import { GitlabUserAvatar } from '@/components/newtab/gitlab/GitlabUserAvatar';
@@ -101,12 +100,6 @@ export const MRItem = ({ mr }: MRItemProps) => {
               <span className="text-destructive">
                 -{mr.diffStatsSummary.deletions}
               </span>
-            </span>
-          )}
-          {mr.autoMergeEnabled && (
-            <span className="flex items-center gap-1 text-info">
-              <WorkflowIcon aria-hidden="true" className="size-3" />
-              Auto-merge enabled
             </span>
           )}
         </div>

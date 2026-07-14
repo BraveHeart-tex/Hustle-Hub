@@ -13,6 +13,12 @@ export const GITLAB_CATEGORY_SHORTCUTS = [
     value: GITLAB_CATEGORIES.REVIEW_REQUESTED,
   },
   {
+    label: 'Assigned to me',
+    shortcutKeys: ['g', 'a'],
+    key: 'a',
+    value: GITLAB_CATEGORIES.ASSIGNED_TO_ME,
+  },
+  {
     label: 'Draft merge requests',
     shortcutKeys: ['g', 'd'],
     key: 'd',

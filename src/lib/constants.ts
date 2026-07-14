@@ -31,6 +31,7 @@ export type GitlabFilter = (typeof GITLAB_FILTERS)[keyof typeof GITLAB_FILTERS];
 
 export const GITLAB_CATEGORIES = {
   REVIEW_REQUESTED: 'review_requested',
+  ASSIGNED_TO_ME: 'assigned_to_me',
   DRAFTS: 'drafts',
 } as const;
 export type GitlabCategory =
