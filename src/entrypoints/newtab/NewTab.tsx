@@ -42,12 +42,12 @@ export const NewTab = () => {
 const DashboardPage = () => {
   return (
     <>
-      <div className="dashboard-sections grid grid-cols-1 items-start gap-6 xl:flex">
+      <div className="dashboard-sections grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
         <div className="dashboard-section xl:sticky xl:top-6">
           <AttentionSection />
         </div>
 
-        <div className="dashboard-section dashboard-section-gitlab xl:sticky xl:top-6">
+        <div className="dashboard-section xl:sticky xl:top-6">
           <GitlabSection />
         </div>
 

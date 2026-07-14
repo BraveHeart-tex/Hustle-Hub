@@ -1,6 +1,7 @@
 import {
   AlertCircleIcon,
   CheckIcon,
+  Clock,
   FileDiffIcon,
   FolderGit2,
   GitBranch,
@@ -13,7 +14,6 @@ import { GitlabUserAvatar } from '@/components/newtab/gitlab/GitlabUserAvatar';
 import { MrLabel } from '@/components/newtab/gitlab/MRLabel';
 import { MrStatusBadge } from '@/components/newtab/gitlab/MrStatusBadge';
 import { WorkItemComments } from '@/components/newtab/misc/WorkItemComments';
-import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
@@ -28,22 +28,15 @@ interface MRItemProps {
   mr: GitlabMergeRequest;
 }
 
-function getNextAction(mr: GitlabMergeRequest): string {
-  if (mr.conflicts) return 'Resolve conflicts';
-  if (mr.headPipelineStatus === 'FAILED') return 'Fix pipeline';
-  if (mr.needsCurrentUserAction) return 'Review MR';
-  if (mr.draft) return 'Continue draft';
-  if (mr.mergeStatus === 'approved' || mr.mergeStatus === 'can_be_merged') {
-    return 'Merge when ready';
-  }
-  return 'Open MR';
-}
+const MAX_VISIBLE_REVIEWERS = 5;
 
 export const MRItem = ({ mr }: MRItemProps) => {
+  const visibleReviewers = mr.reviewers.slice(0, MAX_VISIBLE_REVIEWERS);
+  const hiddenReviewerCount = mr.reviewers.length - visibleReviewers.length;
+
   const hasProblem = mr.conflicts || mr.headPipelineStatus === 'FAILED';
   const shouldHighlightProblem = hasProblem && !mr.draft;
   const problemLabel = mr.conflicts ? 'Conflicts' : 'Failed pipeline';
-  const nextAction = getNextAction(mr);
 
   return (
     <article
@@ -99,9 +92,6 @@ export const MRItem = ({ mr }: MRItemProps) => {
             <span className="opacity-40">→</span>
             <span className="truncate">{mr.targetBranch}</span>
           </span>
-          <span className="shrink-0 whitespace-nowrap">
-            Created {formatDate(mr.createdAt)}
-          </span>
           {mr.diffStatsSummary && (
             <span className="flex items-center gap-1 font-mono">
               <FileDiffIcon aria-hidden="true" className="size-3 shrink-0" />
@@ -121,6 +111,11 @@ export const MRItem = ({ mr }: MRItemProps) => {
           )}
         </div>
 
+        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+          <Clock aria-label="Created" className="size-3 shrink-0" />
+          {formatDate(mr.createdAt)}
+        </p>
+
         <div className="mt-2 flex items-end justify-between gap-3 border-t border-border/60 pt-2">
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1.5">
@@ -133,20 +128,21 @@ export const MRItem = ({ mr }: MRItemProps) => {
             </span>
             {mr.reviewers.length > 0 && (
               <span
-                className="flex items-center gap-1"
+                className="flex shrink-0 items-center"
                 role="group"
                 aria-label={`${mr.reviewers.length} reviewers`}
               >
-                {mr.reviewers.map((reviewer) => (
+                {visibleReviewers.map((reviewer, index) => (
                   <span
                     key={reviewer.id}
-                    className="relative inline-block"
+                    className="relative -ml-1.5 inline-block first:ml-0"
+                    style={{ zIndex: MAX_VISIBLE_REVIEWERS - index }}
                     role="img"
                     aria-label={`Reviewer ${reviewer.id}${reviewer.hasApproved ? ', approved' : ''}`}
                   >
                     <GitlabUserAvatar
                       src={reviewer.avatarUrl}
-                      className="size-5"
+                      className="size-5 ring-2 ring-background"
                       alt=""
                     />
                     {reviewer.hasApproved && (
@@ -157,6 +153,15 @@ export const MRItem = ({ mr }: MRItemProps) => {
                     )}
                   </span>
                 ))}
+                {hiddenReviewerCount > 0 && (
+                  <span
+                    className="-ml-1.5 inline-flex size-5 items-center justify-center rounded-full bg-muted font-mono text-[0.625rem] font-medium text-muted-foreground ring-2 ring-background"
+                    role="img"
+                    aria-label={`${hiddenReviewerCount} more reviewers`}
+                  >
+                    +{hiddenReviewerCount}
+                  </span>
+                )}
               </span>
             )}
             <span className="flex items-center gap-1">
@@ -169,28 +174,13 @@ export const MRItem = ({ mr }: MRItemProps) => {
             </span>
           </div>
 
-          <div className="pointer-events-auto relative z-10 flex shrink-0 items-center gap-2">
-            <Button
-              asChild
-              size="sm"
-              variant={hasProblem ? 'outline' : 'default'}
-              className={cn(
-                'h-7 text-xs',
-                hasProblem &&
-                  'text-destructive hover:bg-destructive/10 hover:text-destructive',
-              )}
-            >
-              <a href={mr.webUrl} target="_blank" rel="noopener noreferrer">
-                {nextAction}
-              </a>
-            </Button>
-            <span className="h-5 w-px bg-border" aria-hidden="true" />
+          <div className="pointer-events-auto relative z-10 flex shrink-0 items-center">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex">
                     <WorkItemComments
-                      triggerClassName="size-7"
+                      triggerClassName="size-6"
                       itemMeta={{
                         itemId: mr.iid,
                         itemType: 'gitlab',
