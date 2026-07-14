@@ -158,8 +158,11 @@ export interface TemplateVariableEditorHandle {
 }
 
 interface TemplateVariableEditorProps {
+  ariaDescribedBy?: string;
+  ariaInvalid?: boolean;
   ariaLabel?: string;
   className?: string;
+  disabled?: boolean;
   handleRef?: React.Ref<TemplateVariableEditorHandle>;
   id?: string;
   onChange: (next: string) => void;
@@ -174,7 +177,10 @@ export const TemplateVariableEditor = ({
   className,
   handleRef,
   id,
+  ariaDescribedBy,
+  ariaInvalid = false,
   ariaLabel = 'Template editor',
+  disabled = false,
 }: TemplateVariableEditorProps) => {
   const generatedId = useId();
   const editorId = id ?? generatedId;
@@ -281,6 +287,24 @@ export const TemplateVariableEditor = ({
   useEffect(() => {
     if (!editor) return;
 
+    editor.setEditable(!disabled);
+    editor.view.dom.setAttribute('aria-disabled', String(disabled));
+  }, [disabled, editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    if (ariaDescribedBy) {
+      editor.view.dom.setAttribute('aria-describedby', ariaDescribedBy);
+    } else {
+      editor.view.dom.removeAttribute('aria-describedby');
+    }
+    editor.view.dom.setAttribute('aria-invalid', String(ariaInvalid));
+  }, [ariaDescribedBy, ariaInvalid, editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+
     editor.view.dom.setAttribute('aria-expanded', String(slash.open));
     if (slash.open) {
       editor.view.dom.setAttribute('aria-controls', menuId);
@@ -352,7 +376,7 @@ export const TemplateVariableEditor = ({
   };
 
   return (
-    <div>
+    <div className={cn(disabled && 'opacity-50')}>
       <div
         className="rounded-md border border-input bg-background transition-[border-color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/20"
         onKeyDownCapture={(event) => {

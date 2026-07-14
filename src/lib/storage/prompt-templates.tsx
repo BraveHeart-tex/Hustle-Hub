@@ -154,14 +154,32 @@ export const renderTemplate = (
 
 export const useStrictReviewTemplates = () => {
   const [templates, setTemplates] = useState<StrictReviewTemplate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    getTemplates().then(setTemplates);
-    const unwatch = strictReviewTemplates.watch((next) => {
-      if (next.length > 0) setTemplates(next);
-    });
-    return () => unwatch();
+  const loadTemplates = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+
+    try {
+      setTemplates(await getTemplates());
+    } catch (error) {
+      setLoadError(
+        error instanceof Error ? error : new Error('Failed to load templates'),
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  return { templates };
+  useEffect(() => {
+    void loadTemplates();
+    const unwatch = strictReviewTemplates.watch((next) => {
+      setTemplates(next);
+      setLoadError(null);
+    });
+    return () => unwatch();
+  }, [loadTemplates]);
+
+  return { templates, isLoading, loadError, reload: loadTemplates };
 };
