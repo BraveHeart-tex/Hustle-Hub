@@ -99,7 +99,7 @@ export const CodeReviewCommandsShortcut = ({
             className="w-56 p-1"
             container={container}
           >
-            <p className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               Review template
             </p>
             {templates.map((item) => (

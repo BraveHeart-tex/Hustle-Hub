@@ -380,7 +380,7 @@ function PriorityGroup({
     <div>
       <div className="flex items-center gap-2 px-3 mb-1">
         <span
-          className={`text-[10px] font-semibold uppercase tracking-widest ${cfg.icon}`}
+          className={`text-[10px] font-semibold uppercase tracking-wider ${cfg.icon}`}
         >
           {label}
         </span>

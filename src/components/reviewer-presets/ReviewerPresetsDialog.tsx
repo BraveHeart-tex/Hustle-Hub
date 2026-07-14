@@ -35,7 +35,7 @@ const EMPTY_FORM = { name: '', users: [] as string[] };
 const ReviewerAvatar = ({ reviewer }: { reviewer: GitlabReviewer }) => (
   <Avatar className="size-4">
     <AvatarImage src={getGitlabUserAvatar(reviewer.gitlabId)} />
-    <AvatarFallback className="text-[8px]">
+    <AvatarFallback className="text-[10px]">
       {reviewer.name.slice(0, 2).toUpperCase()}
     </AvatarFallback>
   </Avatar>

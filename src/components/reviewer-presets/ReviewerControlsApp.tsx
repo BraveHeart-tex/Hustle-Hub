@@ -246,7 +246,7 @@ export const ReviewerControlsApp = ({
 
             {/* Available Reviewers */}
             <div className="grid gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Available Reviewers
               </span>
               {hasNoPresets ? (
@@ -286,7 +286,7 @@ export const ReviewerControlsApp = ({
 
             {/* Selected Reviewers */}
             <div className="grid gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Selected Reviewers
               </span>
               {selectedReviewers.length === 0 ? (

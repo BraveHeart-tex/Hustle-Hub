@@ -58,7 +58,9 @@ export function Header() {
                 fill="currentColor"
               />
             </div>
-            <h1 className="text-xl font-bold text-foreground">Hustle Hub</h1>
+            <h1 className="text-lg font-semibold text-foreground">
+              Hustle Hub
+            </h1>
           </div>
           <div className="flex items-center justify-self-center gap-3">
             <nav

@@ -259,7 +259,7 @@ export const JiraStatusButton = ({
                     <AvatarImage
                       src={details.fields.assignee.avatarUrls['24x24']}
                     />
-                    <AvatarFallback className="text-[8px]">
+                    <AvatarFallback className="text-[10px]">
                       {details.fields.assignee.displayName
                         .slice(0, 2)
                         .toUpperCase()}
@@ -284,7 +284,7 @@ export const JiraStatusButton = ({
             {/* Transitions */}
             {details.transitions.length > 0 && (
               <div className="py-1">
-                <p className="px-3 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                <p className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                   Move to
                 </p>
                 {sortedTransitions.map((transition) => {

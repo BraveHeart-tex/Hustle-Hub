@@ -39,7 +39,7 @@ export const ReviewerChipWithPreview = ({
         </Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-56 p-3" container={container} side="top">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           {preset.label}
         </p>
         <div className="flex flex-col gap-2">

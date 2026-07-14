@@ -119,7 +119,7 @@ export const MrThreadItem = ({
                 <div className="flex items-baseline gap-1.5 mb-0.5">
                   <span
                     className={cn(
-                      'text-[11px] font-medium truncate',
+                      'text-xs font-medium truncate',
                       reply.isCurrentUser
                         ? 'text-foreground'
                         : 'text-muted-foreground',
@@ -131,7 +131,7 @@ export const MrThreadItem = ({
                     {reply.timeAgo}
                   </span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                   {reply.text}
                 </p>
               </div>

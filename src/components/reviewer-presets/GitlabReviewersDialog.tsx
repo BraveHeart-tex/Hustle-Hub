@@ -165,7 +165,7 @@ export const GitlabReviewersDialog = ({
                         <p className="text-sm font-medium truncate">
                           {reviewer.name}
                         </p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           ID: {reviewer.gitlabId}
                         </p>
                       </div>
@@ -217,7 +217,7 @@ export const GitlabReviewersDialog = ({
               <button
                 type="button"
                 onClick={resetForm}
-                className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
               >
                 Cancel
               </button>
