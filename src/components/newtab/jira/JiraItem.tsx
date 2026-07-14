@@ -55,6 +55,7 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
         href={issueUrl}
         target="_blank"
         rel="noopener noreferrer"
+        title={fields.summary}
         aria-label={`Open Jira issue ${issue.key}: ${fields.summary}`}
         className="absolute inset-0 rounded-sm outline-none focus-visible:ring-inset focus-visible:ring-ring/50 focus-visible:ring-[3px]"
       />
@@ -75,14 +76,20 @@ export const JiraItem = ({ issue }: JiraItemProps) => {
         </span>
       </div>
 
-      <h3 className="pointer-events-none relative text-sm font-medium leading-snug mb-1.5">
+      <h3 className="pointer-events-none relative mb-1.5 truncate text-sm font-medium leading-snug">
         {fields.summary}
       </h3>
 
       <div className="pointer-events-none relative flex items-center justify-between gap-2">
-        <span className="text-xs text-muted-foreground flex items-center gap-1">
-          <img src={fields.priority.iconUrl} alt="" width={12} height={12} />
-          {fields.priority.name}
+        <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+          <img
+            src={fields.priority.iconUrl}
+            alt=""
+            width={12}
+            height={12}
+            className="block shrink-0"
+          />
+          <span className="truncate">{fields.priority.name}</span>
         </span>
         <div className="pointer-events-auto relative z-10 flex items-center gap-2">
           <WorkItemComments

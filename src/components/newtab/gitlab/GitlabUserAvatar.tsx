@@ -17,7 +17,7 @@ export const GitlabUserAvatar = ({
       height={32}
       loading="lazy"
       fetchPriority="low"
-      className={cn('rounded-full object-cover', className)}
+      className={cn('block rounded-full object-cover', className)}
       {...props}
     />
   );

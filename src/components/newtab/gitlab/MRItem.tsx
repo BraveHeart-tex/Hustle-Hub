@@ -57,6 +57,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
         href={mr.webUrl}
         target="_blank"
         rel="noopener noreferrer"
+        title={mr.title}
         aria-label={`Open merge request !${mr.iid}: ${mr.title}`}
         className="absolute inset-0 rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50"
       />
@@ -75,7 +76,7 @@ export const MRItem = ({ mr }: MRItemProps) => {
           </span>
         </div>
 
-        <h3 className="text-sm font-medium leading-snug text-foreground">
+        <h3 className="truncate text-sm font-medium leading-snug text-foreground">
           {mr.title}
         </h3>
 
@@ -98,7 +99,9 @@ export const MRItem = ({ mr }: MRItemProps) => {
             <span className="opacity-40">→</span>
             <span className="truncate">{mr.targetBranch}</span>
           </span>
-          <span>Created {formatDate(mr.createdAt)}</span>
+          <span className="shrink-0 whitespace-nowrap">
+            Created {formatDate(mr.createdAt)}
+          </span>
           {mr.diffStatsSummary && (
             <span className="flex items-center gap-1 font-mono">
               <FileDiffIcon aria-hidden="true" className="size-3 shrink-0" />
