@@ -1,6 +1,6 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
-import { type ApiResponse } from '@/types/api';
+import { type ApiError } from '@/services/api/client';
 
 interface UseApiOptions {
   enabled?: boolean;
@@ -8,21 +8,12 @@ interface UseApiOptions {
 
 export function useApi<T, K extends readonly unknown[]>(
   queryKey: K,
-  fetcher: () => Promise<ApiResponse<T>>,
+  fetcher: (signal: AbortSignal) => Promise<T>,
   options: UseApiOptions = {},
 ) {
-  const query: UseQueryResult<
-    T,
-    { type: 'UNAUTHORIZED' | 'INTERNAL'; message: string }
-  > = useQuery({
+  const query: UseQueryResult<T, ApiError> = useQuery({
     queryKey,
-    queryFn: async () => {
-      const response = await fetcher();
-
-      if (response.success) return response.data;
-
-      throw response.error;
-    },
+    queryFn: ({ signal }) => fetcher(signal),
     enabled: options.enabled,
     retry: false,
   });
@@ -32,6 +23,6 @@ export function useApi<T, K extends readonly unknown[]>(
   return {
     ...query,
     isUnauthorized: error?.type === 'UNAUTHORIZED',
-    isError: !!error && error.type !== 'UNAUTHORIZED',
+    isError: error !== null && error.type !== 'UNAUTHORIZED',
   };
 }

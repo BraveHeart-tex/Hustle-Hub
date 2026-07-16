@@ -1,9 +1,16 @@
+import type { paths } from '@/generated/openapi';
+
+export type JiraFilter = NonNullable<
+  NonNullable<
+    paths['/api/data/jira/issues/']['get']['parameters']['query']
+  >['filter']
+>;
+
 export const JIRA_FILTERS = {
   LITERALLY_WORKING_ON: 'literally_working_on',
   FOR_YOU: 'for_you',
   FRONTEND_RELEASES: 'frontend_releases',
-} as const;
-export type JiraFilter = (typeof JIRA_FILTERS)[keyof typeof JIRA_FILTERS];
+} as const satisfies Record<string, JiraFilter>;
 
 export const QUERY_KEYS = {
   calendar: {
@@ -23,11 +30,13 @@ export const QUERY_KEYS = {
   },
 } as const;
 
+export type GitlabFilter =
+  paths['/api/data/gitlab/merge-requests/']['get']['parameters']['query']['filter'];
+
 export const GITLAB_FILTERS = {
   ASSIGNED: 'assigned',
   REVIEW: 'review',
-} as const;
-export type GitlabFilter = (typeof GITLAB_FILTERS)[keyof typeof GITLAB_FILTERS];
+} as const satisfies Record<string, GitlabFilter>;
 
 export const GITLAB_CATEGORIES = {
   REVIEW_REQUESTED: 'review_requested',

@@ -228,6 +228,7 @@ const commonMergeRequestFields = {
 const reviewMergeRequests: GitlabMergeRequest[] = [
   {
     ...commonMergeRequestFields,
+    id: 'gid://gitlab/MergeRequest/842',
     iid: '842',
     title: 'WEB-1842 Preserve checkout after 3DS authentication retry',
     createdAt: daysAgo(2),
@@ -254,6 +255,7 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
   },
   {
     ...commonMergeRequestFields,
+    id: 'gid://gitlab/MergeRequest/317',
     iid: '317',
     title: 'PLAT-611 Add typed storefront feature-flag client',
     createdAt: daysAgo(4),
@@ -277,6 +279,7 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
   },
   {
     ...commonMergeRequestFields,
+    id: 'gid://gitlab/MergeRequest/838',
     iid: '838',
     title: 'DES-903 Refine responsive order timeline spacing',
     createdAt: daysAgo(1),
@@ -303,6 +306,7 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
 const assignedMergeRequests: GitlabMergeRequest[] = [
   {
     ...commonMergeRequestFields,
+    id: 'gid://gitlab/MergeRequest/846',
     iid: '846',
     title: 'WEB-1856 Add tracing for slow cart API responses',
     createdAt: hoursAgo(15),
@@ -333,6 +337,7 @@ const assignedMergeRequests: GitlabMergeRequest[] = [
   },
   {
     ...commonMergeRequestFields,
+    id: 'gid://gitlab/MergeRequest/119',
     iid: '119',
     title: 'REL-732 Prepare production release metadata',
     createdAt: daysAgo(1),
@@ -357,6 +362,7 @@ const assignedMergeRequests: GitlabMergeRequest[] = [
   },
   {
     ...commonMergeRequestFields,
+    id: 'gid://gitlab/MergeRequest/839',
     iid: '839',
     title: 'WEB-1827 Add saved-address empty state',
     createdAt: daysAgo(5),

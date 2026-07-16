@@ -7,7 +7,7 @@ const viteEnvSchema = z.object({
   VITE_RELEASE_REVIEWER_USER_ID: z
     .string()
     .regex(/^\d+$/, 'Must be a numeric user ID'),
-  VITE_BASE_API_URL: z.url().describe('Base API endpoint URL'),
+  VITE_BASE_API_URL: z.url().describe('Backend origin URL'),
   VITE_JIRA_BASE_URL: z
     .url()
     .describe('Jira base URL used to generate task urls'),

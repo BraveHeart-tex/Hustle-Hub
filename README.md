@@ -78,6 +78,10 @@ VITE_DEPLOYMENT_WIDGET_MATCH="*://*.example.com/*"
 VITE_DEPLOYMENT_WIDGET_PROJECT_PATH="group/subgroup/project"
 ```
 
+`VITE_BASE_API_URL` should normally be the backend origin because generated
+paths already include `/api`. Existing values ending in `/api` are normalized
+for backward compatibility.
+
 `VITE_GITLAB_USER_ID` and `VITE_RELEASE_REVIEWER_USER_ID` must be numeric user IDs. `VITE_DEPLOYMENT_WIDGET_MATCH` must be a valid browser-extension match pattern. WXT validates these values at startup/build time in `wxt.config.ts`. If the deployment widget vars are omitted, the widget is disabled.
 
 Match patterns are not secrets. They are removed from source code here, but they still appear in the built extension manifest because browsers require content-script matches there.
@@ -106,6 +110,23 @@ Type-check:
 
 ```bash
 yarn compile
+```
+
+Regenerate the committed API types while the backend is running locally on
+port `47823`:
+
+```bash
+yarn api:generate
+```
+
+The generated file is committed so regular development and production builds
+do not depend on a running backend. Regenerate it whenever the backend OpenAPI
+contract changes and review the resulting diff.
+
+Run unit tests:
+
+```bash
+yarn test
 ```
 
 Lint and auto-fix:
@@ -153,7 +174,8 @@ Check the script before running it if your local browser/profile paths differ.
 - `src/components/mr-thread-panel` - GitLab MR thread tooling.
 - `src/components/reviewer-presets` - GitLab reviewer and preset management.
 - `src/hooks` - API and page-state hooks.
-- `src/lib/endpoints.ts` - backend route definitions used by the extension.
+- `src/services` - typed OpenAPI request modules and the attention SSE adapter.
+- `src/generated/openapi.ts` - committed types generated from the backend contract.
 - `src/lib/storage` - extension-local storage helpers.
 
 ## Tech Stack
@@ -164,6 +186,7 @@ Check the script before running it if your local browser/profile paths differ.
 - Tailwind CSS 4
 - Radix UI
 - TanStack Query
+- OpenAPI Fetch
 - TipTap
 - cmdk
 - Lucide React

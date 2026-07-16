@@ -1,30 +1,39 @@
-import { ENDPOINTS } from '@/lib/endpoints';
+import type { JiraFilter } from '@/lib/constants';
+import { apiClient, executeMutation, executeRead } from '@/services/api/client';
+import type { JiraIssue, JiraIssueDetails } from '@/types/jira';
 
-export interface JiraTransition {
-  id: string;
-  name: string;
-  to: { name: string; statusCategory: { colorName: string } };
+export type { JiraIssueDetails, JiraTransition } from '@/types/jira';
+
+export async function fetchJiraIssues(
+  filter: JiraFilter,
+  signal?: AbortSignal,
+): Promise<{ issues: JiraIssue[] }> {
+  return executeRead(
+    () =>
+      apiClient.GET('/api/data/jira/issues/', {
+        params: { query: { filter } },
+        signal,
+      }),
+    signal,
+  );
 }
 
-export interface JiraIssueDetails {
-  key: string;
-  fields: {
-    summary: string;
-    status: { name: string; statusCategory: { colorName: string } };
-    priority: { name: string; iconUrl: string };
-    assignee: { displayName: string; avatarUrls: { '24x24': string } } | null;
-    description: unknown;
-  };
-  transitions: JiraTransition[];
-}
-
-export const fetchFerelKey = async (jiraId: string): Promise<string> => {
+export const fetchFerelKey = async (
+  jiraId: string,
+  signal?: AbortSignal,
+): Promise<string> => {
   try {
-    const response = await fetch(ENDPOINTS.jira.issueByFeatureKey(jiraId));
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    return data.data.issue?.key ?? 'FEREL-TASK_NUMBER_HERE';
+    const data = await executeRead(
+      () =>
+        apiClient.GET('/api/data/jira/issues/by-feature-key/{featureKey}/', {
+          params: { path: { featureKey: jiraId } },
+          signal,
+        }),
+      signal,
+    );
+    return data.issue?.key ?? 'FEREL-TASK_NUMBER_HERE';
   } catch (error) {
+    if (signal?.aborted) throw error;
     console.warn(`Failed to fetch FEREL key for ${jiraId}:`, error);
     return 'FEREL-TASK_NUMBER_HERE';
   }
@@ -32,48 +41,41 @@ export const fetchFerelKey = async (jiraId: string): Promise<string> => {
 
 export const fetchJiraIssueDetails = async (
   jiraId: string,
+  signal?: AbortSignal,
 ): Promise<JiraIssueDetails> => {
-  const response = await fetch(ENDPOINTS.jira.issue(jiraId));
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.data;
+  return executeRead(
+    () =>
+      apiClient.GET('/api/data/jira/issues/{issueKey}/', {
+        params: { path: { issueKey: jiraId } },
+        signal,
+      }),
+    signal,
+  );
 };
 
 export const transitionJiraIssue = async (
   jiraId: string,
   transitionId: string,
 ) => {
-  const response = await fetch(ENDPOINTS.jira.issueTransition(jiraId), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ transitionId }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
+  await executeMutation(() =>
+    apiClient.POST('/api/data/jira/issues/{issueKey}/transition', {
+      params: { path: { issueKey: jiraId } },
+      body: { transitionId },
+    }),
+  );
 };
 
 export const addJiraIssueComment = async ({
   jiraId,
   mrUrl,
-  mrTitle,
 }: {
   jiraId: string;
   mrUrl: string;
-  mrTitle: string;
 }) => {
-  const response = await fetch(ENDPOINTS.jira.issueComment(jiraId), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ mrUrl, mrTitle }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
+  await executeMutation(() =>
+    apiClient.POST('/api/data/jira/issues/{issueKey}/comment', {
+      params: { path: { issueKey: jiraId } },
+      body: { mrUrl },
+    }),
+  );
 };

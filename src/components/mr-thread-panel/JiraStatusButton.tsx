@@ -53,7 +53,9 @@ const statusDotColors: Record<string, string> = {
   'To Do': 'bg-blue-500',
 };
 
-const getStatusColor = (status: JiraIssueDetails['fields']['status']) =>
+const getStatusColor = (
+  status: NonNullable<JiraIssueDetails['fields']['status']>,
+) =>
   statusNameColors[status.name] ??
   statusCategoryColors[status.statusCategory.colorName] ??
   'bg-gray-100 text-gray-600 border border-gray-200';
@@ -118,10 +120,6 @@ export const JiraStatusButton = ({
         await addJiraIssueComment({
           jiraId: resolvedJiraId,
           mrUrl: window.location.href,
-          mrTitle:
-            document
-              .querySelector("[data-testid='title-content']")
-              ?.textContent?.trim() ?? '',
         }).catch(() => {
           // Comment failure shouldn't block the transition
         });
@@ -136,7 +134,7 @@ export const JiraStatusButton = ({
   };
 
   const recommendedTransitionName = useMemo(() => {
-    if (!details || !targetBranch) return null;
+    if (!details?.fields.status || !targetBranch) return null;
     const status = details.fields.status.name.toLowerCase();
 
     if (targetBranch === 'main' && status === 'to do') {
@@ -170,7 +168,9 @@ export const JiraStatusButton = ({
 
   if (!resolvedJiraId || !targetBranch) return null;
 
-  const statusColor = details ? getStatusColor(details.fields.status) : '';
+  const statusColor = details?.fields.status
+    ? getStatusColor(details.fields.status)
+    : '';
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -192,7 +192,7 @@ export const JiraStatusButton = ({
           </a>
           <div className="flex flex-col items-start leading-tight">
             <span className="text-xs">{resolvedJiraId}</span>
-            {details && (
+            {details?.fields.status && (
               <span
                 className={`text-[10px] font-medium px-1 rounded ${statusColor}`}
               >
@@ -228,14 +228,16 @@ export const JiraStatusButton = ({
                   <span className="text-[10px] font-mono text-muted-foreground">
                     {details.key}
                   </span>
-                  <span
-                    className={cn(
-                      'text-[10px] font-medium px-1.5 py-0.5 rounded-full',
-                      getStatusColor(details.fields.status),
-                    )}
-                  >
-                    {details.fields.status.name}
-                  </span>
+                  {details.fields.status && (
+                    <span
+                      className={cn(
+                        'text-[10px] font-medium px-1.5 py-0.5 rounded-full',
+                        getStatusColor(details.fields.status),
+                      )}
+                    >
+                      {details.fields.status.name}
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs font-medium leading-snug line-clamp-2">
                   {details.fields.summary}
@@ -270,15 +272,17 @@ export const JiraStatusButton = ({
                   </span>
                 </div>
               )}
-              <div className="flex items-center gap-1">
-                <img
-                  src={details.fields.priority.iconUrl}
-                  className="h-3 w-3"
-                />
-                <span className="text-[10px] text-muted-foreground">
-                  {details.fields.priority.name}
-                </span>
-              </div>
+              {details.fields.priority && (
+                <div className="flex items-center gap-1">
+                  <img
+                    src={details.fields.priority.iconUrl}
+                    className="h-3 w-3"
+                  />
+                  <span className="text-[10px] text-muted-foreground">
+                    {details.fields.priority.name}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Transitions */}

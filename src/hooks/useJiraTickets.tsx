@@ -1,9 +1,7 @@
 import { useApi } from '@/hooks/useApi';
 import { type JiraFilter, QUERY_KEYS } from '@/lib/constants';
-import { ENDPOINTS } from '@/lib/endpoints';
 import { getMockJiraIssues, isMockDataEnabled } from '@/lib/mockData';
-import { type ApiResponse } from '@/types/api';
-import { type JiraIssue } from '@/types/jira';
+import { fetchJiraIssues } from '@/services/jira';
 
 interface UseJiraTicketsOptions {
   enabled?: boolean;
@@ -15,16 +13,12 @@ export const useJiraTickets = (
 ) =>
   useApi(
     QUERY_KEYS.jira.issues(filter),
-    async () => {
+    async (signal) => {
       if (isMockDataEnabled) {
-        return {
-          success: true,
-          data: { issues: getMockJiraIssues(filter) },
-        };
+        return { issues: getMockJiraIssues(filter) };
       }
 
-      const response = await fetch(ENDPOINTS.jira.issues(filter));
-      return (await response.json()) as ApiResponse<{ issues: JiraIssue[] }>;
+      return fetchJiraIssues(filter, signal);
     },
     options,
   );

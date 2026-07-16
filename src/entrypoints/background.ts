@@ -2,11 +2,10 @@ import {
   queueNotification,
   shouldNotify,
 } from '@/lib/attention/notificationManager';
+import { connectAttentionStream } from '@/services/attentionStream';
 import { type AttentionItem } from '@/types/attention';
 
-const API_BASE = import.meta.env.VITE_BASE_API_URL as string;
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
-const RECONNECT_DELAY = 3_000;
 
 function notify(batch: AttentionItem[]): void {
   if (batch.length === 1) {
@@ -29,24 +28,6 @@ function notify(batch: AttentionItem[]): void {
   }
 }
 
-function connectSSE(): void {
-  const es = new EventSource(`${API_BASE}/attention/stream`);
-
-  es.addEventListener('upserted', (e: MessageEvent) => {
-    const item = JSON.parse(e.data) as AttentionItem;
-    if (shouldNotify(item)) {
-      queueNotification(item, notify);
-    }
-  });
-
-  es.addEventListener('heartbeat', () => {});
-
-  es.addEventListener('error', () => {
-    es.close();
-    setTimeout(connectSSE, RECONNECT_DELAY);
-  });
-}
-
 export default defineBackground({
   persistent: true,
   main() {
@@ -60,7 +41,13 @@ export default defineBackground({
       browser.runtime.getPlatformInfo().catch(() => {});
     }, 20_000);
 
-    if (!USE_MOCK_DATA) connectSSE();
+    if (!USE_MOCK_DATA) {
+      connectAttentionStream({
+        onUpserted(item) {
+          if (shouldNotify(item)) queueNotification(item, notify);
+        },
+      });
+    }
 
     // Click notification → open new tab
     browser.notifications.onClicked.addListener(() => {

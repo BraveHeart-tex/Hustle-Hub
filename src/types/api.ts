@@ -1,6 +1,4 @@
-export type ApiResponse<T> =
-  | { success: true; data: T }
-  | {
-      success: false;
-      error: { type: 'UNAUTHORIZED' | 'INTERNAL'; message: string };
-    };
+import type { components } from '@/generated/openapi';
+
+export type ApiErrorEnvelope = components['schemas']['ApiError'];
+export type ApiErrorType = ApiErrorEnvelope['error']['type'];

@@ -18,19 +18,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { ENDPOINTS } from '@/lib/endpoints';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
-import {
-  type GitlabTagDetails,
-  type GitlabTagDetailsApiResponse,
-} from '@/types/gitlab';
+import { fetchGitlabTagDetails } from '@/services/gitlab';
+import { type GitlabTagDetails } from '@/types/gitlab';
+
+type TagDetails = NonNullable<GitlabTagDetails>;
 
 type DeploymentWidgetState =
   | { status: 'loading' }
   | { status: 'empty' }
   | { status: 'error'; message: string }
-  | { status: 'success'; details: GitlabTagDetails };
+  | { status: 'success'; details: TagDetails };
 
 const truncateDeploymentId = (deploymentId: string) =>
   deploymentId.length > 16
@@ -50,9 +49,9 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-const getMessageBody = (details: GitlabTagDetails) => {
-  const message = details.message.trim();
-  if (!message || message === details.title.trim()) {
+const getMessageBody = (details: TagDetails) => {
+  const message = details.message?.trim() ?? '';
+  if (!message || message === details.title?.trim()) {
     return null;
   }
 
@@ -61,7 +60,9 @@ const getMessageBody = (details: GitlabTagDetails) => {
 
 const isTagDetailsEmpty = (details: GitlabTagDetails | null | undefined) =>
   !details ||
-  (!details.title.trim() && !details.message.trim() && !details.webUrl.trim());
+  (!details.title?.trim() &&
+    !details.message?.trim() &&
+    !details.webUrl.trim());
 
 const triggerTone = {
   loading:
@@ -89,10 +90,10 @@ const statusLabel = {
 const titleByState = (
   status: DeploymentWidgetState['status'],
   deploymentId: string,
-  details: GitlabTagDetails | null,
+  details: TagDetails | null,
 ) => {
   if (status === 'success' && details) {
-    return details.title;
+    return details.title?.trim() || `Deployment ${deploymentId}`;
   }
 
   if (status === 'empty') {
@@ -120,38 +121,29 @@ export const DeploymentWidgetApp = ({
   });
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
 
     const fetchDetails = async () => {
       setState({ status: 'loading' });
 
       try {
-        const response = await fetch(
-          ENDPOINTS.gitlab.tagDetails({
+        const data = await fetchGitlabTagDetails(
+          {
             projectPath,
             tag: deploymentId,
-          }),
+          },
+          controller.signal,
         );
 
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-
-        const data = (await response.json()) as GitlabTagDetailsApiResponse;
-
-        if (!data.success) {
-          throw new Error(data.error.message);
-        }
-
-        if (!cancelled) {
-          setState(
-            isTagDetailsEmpty(data.data)
-              ? { status: 'empty' }
-              : { status: 'success', details: data.data },
-          );
+        if (!controller.signal.aborted) {
+          if (!data || isTagDetailsEmpty(data)) {
+            setState({ status: 'empty' });
+          } else {
+            setState({ status: 'success', details: data });
+          }
         }
       } catch (error) {
-        if (cancelled) {
+        if (controller.signal.aborted) {
           return;
         }
 
@@ -168,7 +160,7 @@ export const DeploymentWidgetApp = ({
     fetchDetails();
 
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, [deploymentId, projectPath]);
 
@@ -177,6 +169,8 @@ export const DeploymentWidgetApp = ({
   const messageBody = details ? getMessageBody(details) : null;
   const commitSha = details ? getCommitSha(details.webUrl) : null;
   const title = titleByState(state.status, deploymentId, details);
+  const authorName = details?.authorName?.trim() || 'Unknown author';
+  const authorAvatar = details?.authorAvatar?.trim();
 
   return (
     <StrictMode>
@@ -312,29 +306,31 @@ export const DeploymentWidgetApp = ({
               <div className="bg-popover px-4 py-4">
                 <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border/70 bg-muted/35 p-3">
                   <Avatar size="lg" className="ring-2 ring-background">
-                    <AvatarImage
-                      src={
-                        details.authorAvatar.startsWith('https')
-                          ? details.authorAvatar
-                          : `https://gitlab.com${details.authorAvatar}`
-                      }
-                      loading="lazy"
-                      fetchPriority="low"
-                      alt={details.authorName}
-                    />
-                    <AvatarFallback>
-                      {getInitials(details.authorName)}
-                    </AvatarFallback>
+                    {authorAvatar && (
+                      <AvatarImage
+                        src={
+                          authorAvatar.startsWith('https')
+                            ? authorAvatar
+                            : `https://gitlab.com${authorAvatar}`
+                        }
+                        loading="lazy"
+                        fetchPriority="low"
+                        alt={authorName}
+                      />
+                    )}
+                    <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
                   </Avatar>
 
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground">
-                      {details.authorName}
+                      {authorName}
                     </p>
-                    <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Clock3Icon className="h-3.5 w-3.5" />
-                      <span>{formatDate(details.authoredDate)}</span>
-                    </div>
+                    {details.authoredDate && (
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock3Icon className="h-3.5 w-3.5" />
+                        <span>{formatDate(details.authoredDate)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

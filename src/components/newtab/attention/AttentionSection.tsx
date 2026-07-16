@@ -31,10 +31,17 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAttention } from '@/hooks/useAttention';
 import { QUERY_KEYS } from '@/lib/constants';
-import { ENDPOINTS } from '@/lib/endpoints';
 import { isMockDataEnabled } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
-import type { AttentionItem, AttentionPriority } from '@/types/attention';
+import {
+  dismissAttentionItem,
+  snoozeAttentionItem,
+} from '@/services/attention';
+import type {
+  AttentionItem,
+  AttentionPriority,
+  SnoozeDuration,
+} from '@/types/attention';
 
 // ------------------------------------------------------------
 // Priority config
@@ -137,7 +144,7 @@ function AttentionRow({
 }: {
   item: AttentionItem;
   onDismiss: (id: string) => Promise<boolean>;
-  onSnooze: (id: string, duration: string) => Promise<boolean>;
+  onSnooze: (id: string, duration: SnoozeDuration) => Promise<boolean>;
   pendingAction?: string;
   nested?: boolean;
 }) {
@@ -259,7 +266,7 @@ function AttentionEntityRow({
 }: {
   group: AttentionEntityGroup;
   onDismiss: (id: string) => Promise<boolean>;
-  onSnooze: (id: string, duration: string) => Promise<boolean>;
+  onSnooze: (id: string, duration: SnoozeDuration) => Promise<boolean>;
   pendingActions: Record<string, string>;
 }) {
   const [open, setOpen] = useState(false);
@@ -359,7 +366,7 @@ function PriorityGroup({
   priority: AttentionPriority;
   groups: AttentionEntityGroup[];
   onDismiss: (id: string) => Promise<boolean>;
-  onSnooze: (id: string, duration: string) => Promise<boolean>;
+  onSnooze: (id: string, duration: SnoozeDuration) => Promise<boolean>;
   pendingActions: Record<string, string>;
 }) {
   if (groups.length === 0) return null;
@@ -473,31 +480,17 @@ export function AttentionSection() {
     }: {
       id: string;
       action: 'dismiss' | 'snooze';
-      duration?: string;
+      duration?: SnoozeDuration;
     }) => {
       if (isMockDataEnabled) return;
 
-      const response = await fetch(
-        action === 'dismiss'
-          ? ENDPOINTS.attention.dismiss(id)
-          : ENDPOINTS.attention.snooze(id),
-        {
-          method: 'PATCH',
-          headers:
-            action === 'snooze'
-              ? { 'Content-Type': 'application/json' }
-              : undefined,
-          body: action === 'snooze' ? JSON.stringify({ duration }) : undefined,
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          action === 'dismiss'
-            ? 'Could not dismiss the attention item.'
-            : 'Could not snooze the attention item.',
-        );
+      if (action === 'snooze') {
+        if (!duration) throw new Error('Snooze duration is required.');
+        await snoozeAttentionItem(id, duration);
+        return;
       }
+
+      await dismissAttentionItem(id);
     },
   });
 
@@ -533,7 +526,7 @@ export function AttentionSection() {
     async (
       id: string,
       action: 'dismiss' | 'snooze',
-      duration?: string,
+      duration?: SnoozeDuration,
       announce = true,
     ): Promise<boolean> => {
       const pendingAction =
@@ -590,7 +583,7 @@ export function AttentionSection() {
   );
 
   const handleSnooze = useCallback(
-    (id: string, duration: string) =>
+    (id: string, duration: SnoozeDuration) =>
       mutateAttentionItem(id, 'snooze', duration),
     [mutateAttentionItem],
   );
