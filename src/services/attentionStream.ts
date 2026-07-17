@@ -5,6 +5,14 @@ import type { AttentionItem } from '@/types/attention';
 
 const RECONNECT_DELAY = 3_000;
 
+const attentionActionSchema = z.object({
+  type: z.literal('jira_transition'),
+  targetIssueKey: z.string(),
+  targetStatus: z.string(),
+  label: z.string(),
+  confirm: z.boolean().optional(),
+});
+
 const attentionItemSchema = z.object({
   id: z.string(),
   ruleId: z.string(),
@@ -13,6 +21,7 @@ const attentionItemSchema = z.object({
   source: z.enum(['gitlab', 'jira']),
   title: z.string(),
   body: z.string().optional(),
+  action: attentionActionSchema.optional(),
   entityId: z.string(),
   entityUrl: z.string(),
   dedupeKey: z.string().optional(),

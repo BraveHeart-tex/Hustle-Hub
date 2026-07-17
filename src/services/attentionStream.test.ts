@@ -113,6 +113,12 @@ class FakeEventSource {
 
 function makeAttentionItem(): AttentionItem {
   return {
+    action: {
+      label: 'Move to On Preprod',
+      targetIssueKey: 'FE-1662',
+      targetStatus: 'On Preprod',
+      type: 'jira_transition',
+    },
     createdAt: '2026-01-01T00:00:00.000Z',
     entityId: '1',
     entityTitle: 'Entity',

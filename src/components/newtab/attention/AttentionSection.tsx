@@ -35,6 +35,7 @@ import { isMockDataEnabled } from '@/lib/mockData';
 import { cn } from '@/lib/utils';
 import {
   dismissAttentionItem,
+  executeAttentionAction,
   snoozeAttentionItem,
 } from '@/services/attention';
 import type {
@@ -138,12 +139,14 @@ function groupAttentionItems(items: AttentionItem[]): AttentionEntityGroup[] {
 function AttentionRow({
   item,
   onDismiss,
+  onExecuteAction,
   onSnooze,
   pendingAction,
   nested = false,
 }: {
   item: AttentionItem;
   onDismiss: (id: string) => Promise<boolean>;
+  onExecuteAction: (item: AttentionItem) => Promise<boolean>;
   onSnooze: (id: string, duration: SnoozeDuration) => Promise<boolean>;
   pendingAction?: string;
   nested?: boolean;
@@ -228,6 +231,23 @@ function AttentionRow({
           </p>
         )}
 
+        {item.action && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2 h-7 max-w-full justify-start px-2.5 text-xs"
+            loading={pendingAction === 'execute'}
+            disabled={pendingAction !== undefined}
+            onClick={() => void onExecuteAction(item)}
+            aria-label={`${item.action.label} for ${item.action.targetIssueKey}`}
+            title={`${item.action.label} · ${item.action.targetIssueKey}`}
+          >
+            <Ticket aria-hidden="true" className="size-3.5" />
+            <span className="min-w-0 truncate">{item.action.label}</span>
+          </Button>
+        )}
+
         {showSnooze && (
           <div
             id={snoozeOptionsId}
@@ -261,11 +281,13 @@ function AttentionRow({
 function AttentionEntityRow({
   group,
   onDismiss,
+  onExecuteAction,
   onSnooze,
   pendingActions,
 }: {
   group: AttentionEntityGroup;
   onDismiss: (id: string) => Promise<boolean>;
+  onExecuteAction: (item: AttentionItem) => Promise<boolean>;
   onSnooze: (id: string, duration: SnoozeDuration) => Promise<boolean>;
   pendingActions: Record<string, string>;
 }) {
@@ -278,6 +300,7 @@ function AttentionEntityRow({
       <AttentionRow
         item={representativeItem}
         onDismiss={onDismiss}
+        onExecuteAction={onExecuteAction}
         onSnooze={onSnooze}
         pendingAction={pendingActions[representativeItem.id]}
       />
@@ -341,6 +364,7 @@ function AttentionEntityRow({
               key={item.id}
               item={item}
               onDismiss={onDismiss}
+              onExecuteAction={onExecuteAction}
               onSnooze={onSnooze}
               pendingAction={pendingActions[item.id]}
               nested
@@ -360,12 +384,14 @@ function PriorityGroup({
   priority,
   groups,
   onDismiss,
+  onExecuteAction,
   onSnooze,
   pendingActions,
 }: {
   priority: AttentionPriority;
   groups: AttentionEntityGroup[];
   onDismiss: (id: string) => Promise<boolean>;
+  onExecuteAction: (item: AttentionItem) => Promise<boolean>;
   onSnooze: (id: string, duration: SnoozeDuration) => Promise<boolean>;
   pendingActions: Record<string, string>;
 }) {
@@ -399,6 +425,7 @@ function PriorityGroup({
             key={group.key}
             group={group}
             onDismiss={onDismiss}
+            onExecuteAction={onExecuteAction}
             onSnooze={onSnooze}
             pendingActions={pendingActions}
           />
@@ -479,7 +506,7 @@ export function AttentionSection() {
       duration,
     }: {
       id: string;
-      action: 'dismiss' | 'snooze';
+      action: 'dismiss' | 'execute' | 'snooze';
       duration?: SnoozeDuration;
     }) => {
       if (isMockDataEnabled) return;
@@ -487,6 +514,11 @@ export function AttentionSection() {
       if (action === 'snooze') {
         if (!duration) throw new Error('Snooze duration is required.');
         await snoozeAttentionItem(id, duration);
+        return;
+      }
+
+      if (action === 'execute') {
+        await executeAttentionAction(id);
         return;
       }
 
@@ -525,12 +557,12 @@ export function AttentionSection() {
   const mutateAttentionItem = useCallback(
     async (
       id: string,
-      action: 'dismiss' | 'snooze',
+      action: 'dismiss' | 'execute' | 'snooze',
       duration?: SnoozeDuration,
       announce = true,
     ): Promise<boolean> => {
-      const pendingAction =
-        action === 'snooze' ? `snooze:${duration}` : 'dismiss';
+      let pendingAction: string = action;
+      if (action === 'snooze') pendingAction = `snooze:${duration}`;
       const feedbackSequence = announce
         ? ++feedbackSequenceRef.current
         : undefined;
@@ -545,12 +577,13 @@ export function AttentionSection() {
           (current = []) => current.filter((item) => item.id !== id),
         );
         if (announce && feedbackSequence === feedbackSequenceRef.current) {
+          let message = 'Attention item dismissed.';
+          if (action === 'snooze') message = 'Attention item snoozed.';
+          if (action === 'execute') message = 'Attention action completed.';
+
           setMutationFeedback({
             type: 'success',
-            message:
-              action === 'dismiss'
-                ? 'Attention item dismissed.'
-                : 'Attention item snoozed.',
+            message,
           });
         }
         return true;
@@ -585,6 +618,24 @@ export function AttentionSection() {
   const handleSnooze = useCallback(
     (id: string, duration: SnoozeDuration) =>
       mutateAttentionItem(id, 'snooze', duration),
+    [mutateAttentionItem],
+  );
+
+  const handleExecuteAction = useCallback(
+    (item: AttentionItem) => {
+      if (!item.action) return Promise.resolve(false);
+
+      if (
+        item.action.confirm &&
+        !window.confirm(
+          `${item.action.label} for ${item.action.targetIssueKey}?`,
+        )
+      ) {
+        return Promise.resolve(false);
+      }
+
+      return mutateAttentionItem(item.id, 'execute');
+    },
     [mutateAttentionItem],
   );
 
@@ -659,6 +710,7 @@ export function AttentionSection() {
           priority="critical"
           groups={criticalGroups}
           onDismiss={handleDismiss}
+          onExecuteAction={handleExecuteAction}
           onSnooze={handleSnooze}
           pendingActions={pendingActions}
         />
@@ -666,6 +718,7 @@ export function AttentionSection() {
           priority="warning"
           groups={warningGroups}
           onDismiss={handleDismiss}
+          onExecuteAction={handleExecuteAction}
           onSnooze={handleSnooze}
           pendingActions={pendingActions}
         />
@@ -673,6 +726,7 @@ export function AttentionSection() {
           priority="info"
           groups={infoGroups}
           onDismiss={handleDismiss}
+          onExecuteAction={handleExecuteAction}
           onSnooze={handleSnooze}
           pendingActions={pendingActions}
         />
@@ -686,6 +740,7 @@ export function AttentionSection() {
     warningGroups,
     infoGroups,
     handleDismiss,
+    handleExecuteAction,
     handleSnooze,
     hasData,
     isFetching,

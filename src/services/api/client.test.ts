@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError, executeMutation, executeRead } from '@/services/api/client';
-import { snoozeAttentionItem } from '@/services/attention';
+import {
+  executeAttentionAction,
+  snoozeAttentionItem,
+} from '@/services/attention';
 import { fetchGitlabMergeRequests } from '@/services/gitlab';
 
 afterEach(() => {
@@ -44,6 +47,24 @@ describe('API client', () => {
     expect(request.method).toBe('PATCH');
     expect(new URL(request.url).pathname).toBe('/api/attention/item-1/snooze');
     await expect(request.json()).resolves.toEqual({ duration: '30m' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('executes the server-declared attention action without a request body', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      Response.json({
+        success: true,
+        data: makeAttentionItem(),
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await executeAttentionAction('item-1');
+
+    const request = fetchMock.mock.calls[0][0] as Request;
+    expect(request.method).toBe('POST');
+    expect(new URL(request.url).pathname).toBe('/api/attention/item-1/action');
+    await expect(request.text()).resolves.toBe('');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

@@ -55,6 +55,75 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/attention/{id}/action': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Execute the server-declared action for an attention item. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {boolean} */
+              success: true;
+              data: components['schemas']['AttentionItem'];
+            };
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ApiError'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ApiError'];
+          };
+        };
+        /** @description Default Response */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ApiError'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/attention/{id}/snooze': {
     parameters: {
       query?: never;
@@ -698,6 +767,14 @@ export interface components {
       source: 'gitlab' | 'jira';
       title: string;
       body?: string;
+      action?: {
+        /** @constant */
+        type: 'jira_transition';
+        targetIssueKey: string;
+        targetStatus: string;
+        label: string;
+        confirm?: boolean;
+      };
       entityId: string;
       entityUrl: string;
       dedupeKey?: string;
@@ -1006,6 +1083,14 @@ export interface components {
       source: 'gitlab' | 'jira';
       title: string;
       body?: string;
+      action?: {
+        /** @constant */
+        type: 'jira_transition';
+        targetIssueKey: string;
+        targetStatus: string;
+        label: string;
+        confirm?: boolean;
+      };
       entityId: string;
       entityUrl: string;
       dedupeKey?: string;

@@ -12,6 +12,14 @@ export async function fetchAttentionItems(
   return data.items;
 }
 
+export function executeAttentionAction(id: string): Promise<AttentionItem> {
+  return executeMutation(() =>
+    apiClient.POST('/api/attention/{id}/action', {
+      params: { path: { id } },
+    }),
+  );
+}
+
 export function dismissAttentionItem(id: string): Promise<AttentionItem> {
   return executeMutation(() =>
     apiClient.PATCH('/api/attention/{id}/dismiss', {
