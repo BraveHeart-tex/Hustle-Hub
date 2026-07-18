@@ -29,7 +29,13 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   srcDir: 'src',
   manifest: {
-    permissions: ['tabs', 'scripting', 'storage', 'notifications'],
+    permissions: [
+      'tabs',
+      'scripting',
+      'storage',
+      'notifications',
+      'nativeMessaging',
+    ],
     action: {},
     name: 'Hustle Hub',
   },

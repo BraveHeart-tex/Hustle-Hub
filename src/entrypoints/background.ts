@@ -2,8 +2,47 @@ import {
   queueNotification,
   shouldNotify,
 } from '@/lib/attention/notificationManager';
+import {
+  type LaunchClaudeData,
+  type LaunchClaudeResponse,
+  onMessage,
+} from '@/lib/messaging';
 import { connectAttentionStream } from '@/services/attentionStream';
 import { type AttentionItem } from '@/types/attention';
+
+const NATIVE_HOST_NAME = 'com.borakaraca.claude_launcher';
+
+const launchClaude = async (
+  data: LaunchClaudeData,
+): Promise<LaunchClaudeResponse> => {
+  try {
+    // The webextension-polyfill promisifies sendNativeMessage and only accepts
+    // (application, message). Passing a callback throws "Expected at most 2
+    // arguments", so we must await the returned promise instead.
+    const response: LaunchClaudeResponse | undefined =
+      await browser.runtime.sendNativeMessage(NATIVE_HOST_NAME, {
+        type: 'claude.launch',
+        ...data,
+      });
+
+    if (!response?.ok) {
+      console.error('[launchClaude] native host error:', response?.error);
+    }
+
+    return (
+      response ?? {
+        ok: false,
+        error: 'Native launcher returned no response',
+      }
+    );
+  } catch (error) {
+    console.error('[launchClaude] sendNativeMessage threw:', error);
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : 'Native messaging failed',
+    };
+  }
+};
 
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 
@@ -31,6 +70,8 @@ function notify(batch: AttentionItem[]): void {
 export default defineBackground({
   persistent: true,
   main() {
+    onMessage('launchClaude', ({ data }) => launchClaude(data));
+
     browser.runtime.onStartup.addListener(() => {
       console.warn(
         'listening for browser start to prevent inactive service worker',
@@ -42,11 +83,15 @@ export default defineBackground({
     }, 20_000);
 
     if (!USE_MOCK_DATA) {
-      connectAttentionStream({
-        onUpserted(item) {
-          if (shouldNotify(item)) queueNotification(item, notify);
-        },
-      });
+      try {
+        connectAttentionStream({
+          onUpserted(item) {
+            if (shouldNotify(item)) queueNotification(item, notify);
+          },
+        });
+      } catch (error) {
+        console.error('Failed to connect attention stream.', error);
+      }
     }
 
     // Click notification → open new tab
