@@ -67,8 +67,10 @@ const toLaunchErrorMessage = (error: unknown): string => {
 
 export const CodeReviewCommandsShortcut = ({
   container,
+  jiraId,
 }: {
   container: HTMLElement;
+  jiraId?: string;
 }) => {
   const [copied, setCopied] = useState(false);
   const [launchState, setLaunchState] = useState<LaunchState>({
@@ -117,6 +119,7 @@ export const CodeReviewCommandsShortcut = ({
       slug: getProjectSlug(window.location.href),
       prompt,
       permissionMode: 'plan' as const,
+      jiraId,
     };
 
     setLaunchState({ status: 'launching' });

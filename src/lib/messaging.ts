@@ -4,6 +4,7 @@ export interface LaunchClaudeData {
   slug: string;
   prompt: string;
   permissionMode: 'plan' | 'default';
+  jiraId?: string;
 }
 
 export interface LaunchClaudeResponse {

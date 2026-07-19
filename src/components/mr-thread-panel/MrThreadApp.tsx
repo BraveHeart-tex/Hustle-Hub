@@ -28,7 +28,10 @@ export const MrThreadApp = ({
           jiraLink={jiraId && jiraId !== 'FE-1' ? getJiraTaskUrl(jiraId) : ''}
         />
         <ThreadList container={container} userId={gitlabUserId} />
-        <CodeReviewCommandsShortcut container={container} />
+        <CodeReviewCommandsShortcut
+          container={container}
+          jiraId={jiraId && jiraId !== 'FE-1' ? jiraId : ''}
+        />
       </BottomRightPanel>
     </StrictMode>
   );
