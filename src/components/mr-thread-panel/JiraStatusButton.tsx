@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useTargetBranch } from '@/hooks/useTargetBranch';
 import { cn } from '@/lib/utils';
 import { extractFerelId } from '@/lib/utils/misc/extractFerelId';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
