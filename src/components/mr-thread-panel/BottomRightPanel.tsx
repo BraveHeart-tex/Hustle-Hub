@@ -10,7 +10,12 @@ export const BottomRightPanel = ({
   className?: string;
 }) => {
   return (
-    <div className={cn('fixed bottom-6 right-6 z-999999', className)}>
+    <div
+      className={cn(
+        'fixed bottom-6 right-6 z-[var(--z-host-overlay)]',
+        className,
+      )}
+    >
       {children}
     </div>
   );

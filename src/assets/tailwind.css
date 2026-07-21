@@ -82,6 +82,10 @@
   --warning: oklch(0.48 0.12 75);
   --warning-foreground: oklch(0.985 0 0);
   --overlay: oklch(0 0 0 / 50%);
+  /* Single integration layer for host-page injected UI. One documented token
+     instead of scattered maximum z-index values; must sit above GitLab's own
+     chrome. */
+  --z-host-overlay: 999999;
   --elevation-interactive: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --elevation-floating: 0 4px 10px rgb(0 0 0 / 0.12);
   --elevation-overlay:

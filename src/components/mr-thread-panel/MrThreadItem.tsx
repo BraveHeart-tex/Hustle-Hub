@@ -1,4 +1,5 @@
 import { CheckCircle2Icon, MessageSquareIcon, XCircleIcon } from 'lucide-react';
+import { type KeyboardEvent } from 'react';
 
 import { type Thread } from '@/components/mr-thread-panel/mr-thread-panel.types';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,15 @@ export const MrThreadItem = ({
   const scrollToDiscussion = () => onScrollToDiscussion(thread.id, index);
   const toggleReplies = () => onToggleReplies(thread.id);
 
+  // Custom `role="button"` elements must handle both Enter and Space, and
+  // Space must not scroll the popover.
+  const activateOnKey = (action: () => void) => (event: KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  };
+
   return (
     <li
       ref={(el) => {
@@ -49,12 +59,13 @@ export const MrThreadItem = ({
         <div
           role="button"
           tabIndex={0}
+          aria-label={`Go to thread ${index + 1}`}
           onClick={scrollToDiscussion}
-          onKeyDown={(e) => e.key === 'Enter' && scrollToDiscussion()}
-          className="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer"
+          onKeyDown={activateOnKey(scrollToDiscussion)}
+          className="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
         >
           {thread.resolved ? (
-            <CheckCircle2Icon className="h-4 w-4 shrink-0 text-green-500" />
+            <CheckCircle2Icon className="h-4 w-4 shrink-0 text-success" />
           ) : (
             <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
           )}
@@ -73,18 +84,22 @@ export const MrThreadItem = ({
         {/* Right side — unread dot + reply toggle + viewing label */}
         <div className="flex items-center gap-1.5 shrink-0">
           {hasUnreadReply && (
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+            <span className="h-1.5 w-1.5 rounded-full bg-info" />
           )}
 
           {replyCount > 0 && (
             <div
               role="button"
               tabIndex={0}
+              aria-expanded={expanded}
+              aria-label={`${expanded ? 'Hide' : 'Show'} ${replyCount} ${
+                replyCount === 1 ? 'reply' : 'replies'
+              }`}
               onClick={toggleReplies}
-              onKeyDown={(e) => e.key === 'Enter' && toggleReplies()}
-              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-muted cursor-pointer"
+              onKeyDown={activateOnKey(toggleReplies)}
+              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors motion-reduce:transition-none px-1.5 py-0.5 rounded hover:bg-muted cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              <MessageSquareIcon className="h-3 w-3" />
+              <MessageSquareIcon aria-hidden="true" className="h-3 w-3" />
               {replyCount}
             </div>
           )}
@@ -102,9 +117,10 @@ export const MrThreadItem = ({
               key={`${reply.timestamp}-${reply.authorName}-${reply.text}`}
               role="button"
               tabIndex={0}
+              aria-label={`Go to thread ${index + 1}`}
               onClick={scrollToDiscussion}
-              onKeyDown={(e) => e.key === 'Enter' && scrollToDiscussion()}
-              className="flex items-start gap-2 px-4 py-2 border-b border-border/30 last:border-0 cursor-pointer hover:bg-muted/40 transition-colors"
+              onKeyDown={activateOnKey(scrollToDiscussion)}
+              className="flex items-start gap-2 px-4 py-2 border-b border-border/30 last:border-0 cursor-pointer hover:bg-muted/40 transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
             >
               {reply.authorAvatar ? (
                 <img

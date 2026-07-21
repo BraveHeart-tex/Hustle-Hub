@@ -6,6 +6,7 @@ import {
   type ThreadReply,
 } from '@/components/mr-thread-panel/mr-thread-panel.types';
 import { MrThreadItem } from '@/components/mr-thread-panel/MrThreadItem';
+import { SEGMENT_CLASS } from '@/components/mr-thread-panel/segment';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -209,13 +210,13 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
       <PopoverTrigger asChild>
         <Button
           size="sm"
-          variant="outline"
+          variant="ghost"
           onClick={() => setOpen((prev) => !prev)}
-          className="rounded-full shadow-sm gap-1.5 h-auto py-1.5"
+          className={SEGMENT_CLASS}
         >
-          <MessageSquareIcon className="h-3.5 w-3.5 shrink-0" />
+          <MessageSquareIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-xs">{title}</span>
+            <span className="text-xs text-muted-foreground">{title}</span>
             <span className="text-[10px] text-muted-foreground font-medium">
               {unresolvedCount > 0 && `${unresolvedCount} open`}
               {unresolvedCount > 0 && resolvedCount > 0 && ' · '}
@@ -241,7 +242,7 @@ export const ThreadList = ({ container, userId }: ThreadListProps) => {
               </span>
             )}
             {resolvedCount > 0 && (
-              <span className="text-[10px] font-medium bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-medium bg-success/10 text-success px-1.5 py-0.5 rounded-full">
                 {resolvedCount} resolved
               </span>
             )}

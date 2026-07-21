@@ -2,6 +2,7 @@ import { ExternalLinkIcon, Loader2Icon, SparklesIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { JiraIcon } from '@/components/misc/JiraIcon';
+import { SEGMENT_CLASS } from '@/components/mr-thread-panel/segment';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +14,6 @@ import { useIsReadOnly } from '@/hooks/useIsReadOnly';
 import { useTargetBranch } from '@/hooks/useTargetBranch';
 import { cn } from '@/lib/utils';
 import { extractFerelId } from '@/lib/utils/misc/extractFerelId';
-import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import {
   addJiraIssueComment,
   fetchJiraIssueDetails,
@@ -22,48 +22,76 @@ import {
   transitionJiraIssue,
 } from '@/services/jira';
 
-const statusNameColors: Record<string, string> = {
-  'Code Review': 'bg-purple-100 text-purple-700 border border-purple-200',
-  'In Progress': 'bg-amber-100 text-amber-700 border border-amber-200',
-  Blocked: 'bg-red-100 text-red-700 border border-red-200',
-  QA: 'bg-cyan-100 text-cyan-700 border border-cyan-200',
-  Testing: 'bg-cyan-100 text-cyan-700 border border-cyan-200',
-  UAT: 'bg-indigo-100 text-indigo-700 border border-indigo-200',
-  Done: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-  Canceled: 'bg-gray-100 text-gray-500 border border-gray-200',
-  Backlog: 'bg-slate-100 text-slate-600 border border-slate-200',
-  'To Do': 'bg-blue-100 text-blue-700 border border-blue-200',
+// Jira workflow statuses translated into the operational semantic roles.
+// Color always pairs with the status name text, so it never carries meaning
+// on its own, and every tone maps to a token with light/dark parity.
+type StatusTone = 'neutral' | 'info' | 'warning' | 'success' | 'critical';
+
+interface JiraStatusLike {
+  name: string;
+  statusCategory: { colorName: string };
+}
+
+const toneDotClass: Record<StatusTone, string> = {
+  neutral: 'bg-muted-foreground/50',
+  info: 'bg-info',
+  warning: 'bg-warning',
+  success: 'bg-success',
+  critical: 'bg-destructive',
 };
 
-const statusCategoryColors: Record<string, string> = {
-  'blue-gray': 'bg-blue-100 text-blue-700 border border-blue-200',
-  yellow: 'bg-amber-100 text-amber-700 border border-amber-200',
-  green: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-  'medium-gray': 'bg-gray-100 text-gray-600 border border-gray-200',
+const statusToneByName: Record<string, StatusTone> = {
+  'code review': 'info',
+  'on review': 'info',
+  'in progress': 'info',
+  qa: 'info',
+  testing: 'info',
+  uat: 'info',
+  blocked: 'critical',
+  done: 'success',
+  canceled: 'neutral',
+  cancelled: 'neutral',
+  backlog: 'neutral',
+  'to do': 'neutral',
 };
 
-const statusDotColors: Record<string, string> = {
-  'Code Review': 'bg-purple-500',
-  'In Progress': 'bg-amber-500',
-  Blocked: 'bg-red-500',
-  QA: 'bg-cyan-500',
-  Testing: 'bg-cyan-500',
-  UAT: 'bg-indigo-500',
-  Done: 'bg-emerald-500',
-  Canceled: 'bg-gray-400',
-  Backlog: 'bg-slate-400',
-  'To Do': 'bg-blue-500',
+// Jira's own status-category color names, used when a specific status name
+// isn't mapped above.
+const statusToneByCategory: Record<string, StatusTone> = {
+  green: 'success',
+  yellow: 'info',
+  'blue-gray': 'neutral',
+  'medium-gray': 'neutral',
 };
 
-const getStatusColor = (
-  status: NonNullable<JiraIssueDetails['fields']['status']>,
-) =>
-  statusNameColors[status.name] ??
-  statusCategoryColors[status.statusCategory.colorName] ??
-  'bg-gray-100 text-gray-600 border border-gray-200';
+const getStatusTone = (status: JiraStatusLike): StatusTone =>
+  statusToneByName[status.name.toLowerCase()] ??
+  statusToneByCategory[status.statusCategory.colorName] ??
+  'neutral';
 
-const getStatusDot = (statusName: string) =>
-  statusDotColors[statusName] ?? 'bg-gray-300';
+const StatusLabel = ({
+  status,
+  className,
+}: {
+  status: JiraStatusLike;
+  className?: string;
+}) => (
+  <span
+    className={cn(
+      'inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground',
+      className,
+    )}
+  >
+    <span
+      aria-hidden="true"
+      className={cn(
+        'size-1.5 shrink-0 rounded-full',
+        toneDotClass[getStatusTone(status)],
+      )}
+    />
+    {status.name}
+  </span>
+);
 
 export const JiraStatusButton = ({
   jiraId,
@@ -173,36 +201,28 @@ export const JiraStatusButton = ({
 
   if (!resolvedJiraId || !targetBranch) return null;
 
-  const statusColor = details?.fields.status
-    ? getStatusColor(details.fields.status)
-    : '';
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           size="sm"
-          variant="outline"
+          variant="ghost"
           onClick={() => setOpen((prev) => !prev)}
-          className="rounded-full shadow-sm gap-1.5 h-auto py-1.5"
+          className={SEGMENT_CLASS}
         >
-          <a
-            href={details?.key ? getJiraTaskUrl(details?.key || '') : '#'}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className={cn('shrink-0', !details?.key && 'pointer-events-none')}
-          >
-            <JiraIcon className="h-3.5 w-3.5 shrink-0 text-blue-500" />
-          </a>
+          {/* Decorative: the segment opens the popover, which carries the
+              external "open in Jira" link. A nested <a> here would be invalid
+              inside a <button>. */}
+          <JiraIcon
+            aria-hidden="true"
+            className="h-3.5 w-3.5 shrink-0 text-blue-500"
+          />
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-xs">{resolvedJiraId}</span>
+            <span className="text-xs text-muted-foreground">
+              {resolvedJiraId}
+            </span>
             {details?.fields.status && (
-              <span
-                className={`text-[10px] font-medium px-1 rounded ${statusColor}`}
-              >
-                {details.fields.status.name}
-              </span>
+              <StatusLabel status={details.fields.status} />
             )}
             {!details && (
               <span className="text-[10px] text-muted-foreground">
@@ -220,7 +240,9 @@ export const JiraStatusButton = ({
         className="w-80 p-0 overflow-hidden"
       >
         {error && (
-          <div className="px-3 py-4 text-xs text-destructive">{error}</div>
+          <div role="alert" className="px-3 py-4 text-xs text-destructive">
+            {error}
+          </div>
         )}
 
         {details ? (
@@ -234,14 +256,7 @@ export const JiraStatusButton = ({
                     {details.key}
                   </span>
                   {details.fields.status && (
-                    <span
-                      className={cn(
-                        'text-[10px] font-medium px-1.5 py-0.5 rounded-full',
-                        getStatusColor(details.fields.status),
-                      )}
-                    >
-                      {details.fields.status.name}
-                    </span>
+                    <StatusLabel status={details.fields.status} />
                   )}
                 </div>
                 <p className="text-xs font-medium leading-snug line-clamp-2">
@@ -252,9 +267,10 @@ export const JiraStatusButton = ({
                 href={jiraLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`Open ${details.key} in Jira`}
                 className="shrink-0 text-muted-foreground hover:text-foreground transition-colors mt-0.5"
               >
-                <ExternalLinkIcon className="h-3.5 w-3.5" />
+                <ExternalLinkIcon aria-hidden="true" className="h-3.5 w-3.5" />
               </a>
             </div>
 
@@ -307,30 +323,30 @@ export const JiraStatusButton = ({
                       key={transition.id}
                       onClick={() => handleTransition(transition)}
                       disabled={transitioning !== null}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-muted/60 transition-colors disabled:opacity-50 group"
+                      aria-busy={transitioning === transition.id}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50 transition-colors motion-reduce:transition-none disabled:opacity-50 group"
                     >
                       <span
+                        aria-hidden="true"
                         className={cn(
                           'h-2 w-2 rounded-full shrink-0',
-                          getStatusDot(transition.to.name),
+                          toneDotClass[getStatusTone(transition.to)],
                         )}
                       />
                       <div className="text-xs flex-1 flex items-center gap-2">
                         <span>{transition.name}</span>
                         {isRecommended && (
-                          <SparklesIcon className="h-3 w-3 text-emerald-500 shrink-0" />
+                          <SparklesIcon className="h-3 w-3 text-success shrink-0" />
                         )}
                       </div>
-                      <span
-                        className={cn(
-                          'text-[10px] font-medium px-1.5 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity',
-                          getStatusColor(transition.to),
-                        )}
-                      >
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                         {transition.to.name}
                       </span>
                       {transitioning === transition.id && (
-                        <Loader2Icon className="h-3 w-3 animate-spin text-muted-foreground" />
+                        <Loader2Icon
+                          aria-hidden="true"
+                          className="h-3 w-3 animate-spin text-muted-foreground motion-reduce:animate-none"
+                        />
                       )}
                     </button>
                   );
@@ -339,8 +355,12 @@ export const JiraStatusButton = ({
             )}
           </div>
         ) : (
-          <div className="flex items-center justify-center py-8">
-            <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
+          <div role="status" className="flex items-center justify-center py-8">
+            <Loader2Icon
+              aria-hidden="true"
+              className="h-5 w-5 animate-spin text-muted-foreground motion-reduce:animate-none"
+            />
+            <span className="sr-only">Loading issue details</span>
           </div>
         )}
       </PopoverContent>

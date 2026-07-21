@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from 'react';
 
 import { ClaudeIcon } from '@/components/misc/ClaudeIcon';
+import { SEGMENT_CLASS } from '@/components/mr-thread-panel/segment';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -166,63 +167,95 @@ export const CodeReviewCommandsShortcut = ({
   if (!branchInfo.source || !branchInfo.target) return null;
   if (!selectedTemplate) return null;
 
+  // Launch state lives only in the button label and a `title`; mirror it into a
+  // polite live region so screen readers hear the outcome (including the error
+  // message, which the tooltip alone would never announce).
+  const launchAnnouncement =
+    launchState.status === 'launching'
+      ? 'Launching Claude Code'
+      : launchState.status === 'launched'
+        ? 'Claude Code launched'
+        : launchState.status === 'error'
+          ? `Launch failed: ${launchState.message}`
+          : '';
+
   return (
-    <div className="flex items-center gap-1">
+    <>
       <Button
         size="sm"
-        variant="outline"
+        variant="ghost"
         onClick={copyPrompt}
-        className="rounded-full shadow-sm gap-2 h-8 px-3 border-border/60 hover:border-border hover:bg-muted/50 transition-all"
+        title="Copy review prompt"
+        className={SEGMENT_CLASS}
       >
         {copied ? (
           <>
-            <CheckIcon className="h-3.5 w-3.5 text-green-600" />
-            <span className="text-xs font-medium">Copied</span>
+            <CheckIcon className="h-3.5 w-3.5 text-success" />
+            <span className="text-xs font-medium sr-only md:not-sr-only">
+              Copied
+            </span>
           </>
         ) : (
           <>
             <TerminalIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs font-medium">Copy Review Prompt</span>
+            <span className="text-xs font-medium sr-only md:not-sr-only">
+              Copy Review Prompt
+            </span>
           </>
         )}
       </Button>
 
+      {/* The one primary action. Signal Ink fill marks the dominant control
+          (DESIGN "One Active Voice"); state icons inherit the button
+          foreground, and the error state flips the whole segment to
+          destructive so contrast holds in both themes. */}
       <Button
         size="sm"
-        variant="outline"
+        variant="default"
         onClick={launchClaude}
         disabled={launchState.status === 'launching'}
         title={
           launchState.status === 'error' ? launchState.message : 'Launch Claude'
         }
         className={cn(
-          'rounded-full shadow-sm gap-2 h-8 px-3 border-border/60 hover:border-border hover:bg-muted/50 transition-all',
+          SEGMENT_CLASS,
           launchState.status === 'error' &&
-            'border-red-500/60 text-red-600 hover:border-red-500',
+            'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         )}
       >
         {launchState.status === 'launching' && (
           <>
-            <Loader2Icon className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-            <span className="text-xs font-medium">Launching</span>
+            <Loader2Icon
+              aria-hidden="true"
+              className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none"
+            />
+            <span className="text-xs font-medium sr-only md:not-sr-only">
+              Launching
+            </span>
           </>
         )}
         {launchState.status === 'launched' && (
           <>
-            <CheckIcon className="h-3.5 w-3.5 text-green-600" />
-            <span className="text-xs font-medium">Launched</span>
+            <CheckIcon className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium sr-only md:not-sr-only">
+              Launched
+            </span>
           </>
         )}
         {launchState.status === 'error' && (
           <>
-            <AlertTriangleIcon className="h-3.5 w-3.5 text-red-600" />
-            <span className="text-xs font-medium">Failed</span>
+            <AlertTriangleIcon className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium sr-only md:not-sr-only">
+              Failed
+            </span>
           </>
         )}
         {launchState.status === 'idle' && (
           <>
             <ClaudeIcon />
-            <span className="text-xs font-medium">Launch Claude</span>
+            <span className="text-xs font-medium sr-only md:not-sr-only">
+              Launch Claude
+            </span>
           </>
         )}
       </Button>
@@ -232,11 +265,15 @@ export const CodeReviewCommandsShortcut = ({
           <PopoverTrigger asChild>
             <Button
               size="sm"
-              variant="outline"
-              className="rounded-full shadow-sm h-8 px-2 border-border/60 hover:border-border hover:bg-muted/50 transition-all"
+              variant="ghost"
+              className={SEGMENT_CLASS}
+              aria-label={`Change review template (current: ${selectedTemplate.name})`}
               title={`Template: ${selectedTemplate.name}`}
             >
-              <ChevronDownIcon className="h-3.5 w-3.5 text-muted-foreground" />
+              <ChevronDownIcon
+                aria-hidden="true"
+                className="h-3.5 w-3.5 text-muted-foreground"
+              />
             </Button>
           </PopoverTrigger>
           <PopoverContent
@@ -255,8 +292,9 @@ export const CodeReviewCommandsShortcut = ({
                   setSelectedId(item.id);
                   setPickerOpen(false);
                 }}
+                aria-current={item.id === selectedTemplate.id}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors hover:bg-muted/60',
+                  'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors motion-reduce:transition-none hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50',
                   item.id === selectedTemplate.id && 'bg-muted/40',
                 )}
               >
@@ -279,6 +317,10 @@ export const CodeReviewCommandsShortcut = ({
           </PopoverContent>
         </Popover>
       )}
-    </div>
+
+      <span role="status" aria-live="polite" className="sr-only">
+        {launchAnnouncement}
+      </span>
+    </>
   );
 };
