@@ -1,6 +1,5 @@
 import {
   AlertTriangleIcon,
-  BotIcon,
   CheckIcon,
   ChevronDownIcon,
   Loader2Icon,
@@ -8,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import { ClaudeIcon } from '@/components/misc/ClaudeIcon';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -221,7 +221,7 @@ export const CodeReviewCommandsShortcut = ({
         )}
         {launchState.status === 'idle' && (
           <>
-            <BotIcon className="h-3.5 w-3.5 text-muted-foreground" />
+            <ClaudeIcon />
             <span className="text-xs font-medium">Launch Claude</span>
           </>
         )}
