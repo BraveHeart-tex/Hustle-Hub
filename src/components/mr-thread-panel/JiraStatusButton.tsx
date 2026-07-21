@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useIsReadOnly } from '@/hooks/useIsReadOnly';
 import { useTargetBranch } from '@/hooks/useTargetBranch';
 import { cn } from '@/lib/utils';
 import { extractFerelId } from '@/lib/utils/misc/extractFerelId';
@@ -68,10 +69,12 @@ export const JiraStatusButton = ({
   jiraId,
   jiraLink,
   container,
+  gitlabUserId,
 }: {
   jiraId: string;
   jiraLink: string;
   container?: HTMLElement | null;
+  gitlabUserId: string;
 }) => {
   const [open, setOpen] = useState(false);
   const [details, setDetails] = useState<JiraIssueDetails | null>(null);
@@ -82,6 +85,7 @@ export const JiraStatusButton = ({
 
   const fetchedRef = useRef(false);
   const targetBranch = useTargetBranch();
+  const readOnly = useIsReadOnly(gitlabUserId);
 
   const resolvedJiraId = useMemo(() => {
     if (targetBranch === 'main') {
@@ -287,7 +291,7 @@ export const JiraStatusButton = ({
             </div>
 
             {/* Transitions */}
-            {details.transitions.length > 0 && (
+            {!readOnly && details.transitions.length > 0 && (
               <div className="py-1">
                 <p className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                   Move to
