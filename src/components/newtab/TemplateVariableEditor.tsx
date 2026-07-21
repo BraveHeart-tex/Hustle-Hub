@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
-export interface TemplateVariableDefinition {
+interface TemplateVariableDefinition {
   key: string;
   label: string;
   description: string;

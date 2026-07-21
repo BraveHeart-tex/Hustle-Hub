@@ -6,7 +6,6 @@ import { BottomRightPanel } from '@/components/mr-thread-panel/BottomRightPanel'
 import { CodeReviewCommandsShortcut } from '@/components/mr-thread-panel/CodeReviewCommandsShortcut';
 import { JiraStatusButton } from '@/components/mr-thread-panel/JiraStatusButton';
 import { ThreadList } from '@/components/mr-thread-panel/ThreadList';
-import { MrWarnings } from '@/components/mr-warnings/MrWarnings';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 
 export const MrThreadApp = ({
@@ -21,7 +20,6 @@ export const MrThreadApp = ({
   return (
     <StrictMode>
       <BottomRightPanel className="flex items-center gap-2">
-        <MrWarnings container={container} />
         <JiraStatusButton
           container={container}
           jiraId={jiraId && jiraId !== 'FE-1' ? jiraId : ''}

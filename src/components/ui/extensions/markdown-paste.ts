@@ -24,7 +24,7 @@ const INLINE_MARKDOWN_PATTERNS = [
 const BULLET_LIST_PATTERN = /^ {0,3}[-+*][\t ]+\S/gm;
 const ORDERED_LIST_PATTERN = /^ {0,3}\d{1,9}[.)][\t ]+\S/gm;
 
-export function isLikelyMarkdown(text: string): boolean {
+function isLikelyMarkdown(text: string): boolean {
   if (!text.trim()) {
     return false;
   }
@@ -43,7 +43,7 @@ export function isLikelyMarkdown(text: string): boolean {
   return INLINE_MARKDOWN_PATTERNS.some((pattern) => pattern.test(text));
 }
 
-export function normalizeTaskListMarkup(html: string): string {
+function normalizeTaskListMarkup(html: string): string {
   const template = document.createElement('template');
   template.innerHTML = html;
 
