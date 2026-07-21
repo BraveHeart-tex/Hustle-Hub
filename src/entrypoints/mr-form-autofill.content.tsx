@@ -337,6 +337,7 @@ const getReleaseJiraIssueKey = async (jiraId: string | null) => {
 const getReleaseDescription = (ferelKey: string, jiraIssueKey: string) => {
   return [
     `FEREL: ${getJiraTaskUrl(ferelKey)}`,
+    '\n',
     `Jira Task: ${getJiraTaskUrl(jiraIssueKey)}`,
   ].join('\n');
 };
