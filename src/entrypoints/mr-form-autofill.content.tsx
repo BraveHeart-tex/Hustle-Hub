@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
+import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 
 import { AutofillProgressApp } from '@/components/autofill-progress/AutofillProgressApp';
 import { ReviewerControlsApp } from '@/components/reviewer-presets/ReviewerControlsApp';

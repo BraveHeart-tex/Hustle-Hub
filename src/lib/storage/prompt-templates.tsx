@@ -1,3 +1,6 @@
+import { useCallback, useEffect, useState } from 'react';
+import { storage } from 'wxt/utils/storage';
+
 import { type StrictReviewTemplate } from '@/types/prompt-templates';
 
 export const STRICT_REVIEW_TEMPLATE_VARIABLES = [

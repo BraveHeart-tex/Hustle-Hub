@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { storage } from 'wxt/utils/storage';
 
 import {
   GITLAB_CATEGORIES,
@@ -7,14 +8,11 @@ import {
   type JiraFilter,
 } from '@/lib/constants';
 
-export const jiraFilterStorage = storage.defineItem<JiraFilter>(
-  'local:jiraFilter',
-  {
-    fallback: JIRA_FILTERS.LITERALLY_WORKING_ON,
-  },
-);
+const jiraFilterStorage = storage.defineItem<JiraFilter>('local:jiraFilter', {
+  fallback: JIRA_FILTERS.LITERALLY_WORKING_ON,
+});
 
-export const gitlabCategoryStorage = storage.defineItem<GitlabCategory>(
+const gitlabCategoryStorage = storage.defineItem<GitlabCategory>(
   'local:gitlabCategory',
   {
     fallback: GITLAB_CATEGORIES.REVIEW_REQUESTED,

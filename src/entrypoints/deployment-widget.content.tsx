@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 
 import { DeploymentWidgetApp } from '@/components/deployment-widget/DeploymentWidgetApp';
 import { defineContentScript } from '#imports';

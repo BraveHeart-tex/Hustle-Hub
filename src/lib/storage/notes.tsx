@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { storage } from 'wxt/utils/storage';
 
 import { type NotePriority } from '@/lib/constants';
 import { type Note } from '@/types/notes';

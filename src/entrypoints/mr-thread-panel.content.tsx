@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 
 import { MrThreadApp } from '@/components/mr-thread-panel/MrThreadApp';
 import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';

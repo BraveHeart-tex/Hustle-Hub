@@ -5,12 +5,34 @@ import type { AttentionItem } from '@/types/attention';
 
 const RECONNECT_DELAY = 3_000;
 
+const jiraStatusIds = [
+  '3',
+  '10003',
+  '10004',
+  '10016',
+  '10050',
+  '10052',
+  '10053',
+  '10068',
+  '10071',
+  '10072',
+  '10400',
+  '10402',
+  '10403',
+  '10404',
+  '10405',
+  '10406',
+  '10407',
+] as const;
+
 const attentionActionSchema = z.object({
   type: z.literal('jira_transition'),
   targetIssueKey: z.string(),
   targetStatus: z.string(),
+  targetStatusId: z.enum(jiraStatusIds),
   label: z.string(),
   confirm: z.boolean().optional(),
+  allowedSourceStatusIds: z.array(z.enum(jiraStatusIds)),
 });
 
 const attentionItemSchema = z.object({

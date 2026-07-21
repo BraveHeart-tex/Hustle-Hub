@@ -1,3 +1,6 @@
+import { browser } from 'wxt/browser';
+import { defineBackground } from 'wxt/utils/define-background';
+
 import {
   queueNotification,
   shouldNotify,

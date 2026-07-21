@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import { storage } from 'wxt/utils/storage';
+
 import {
   type GitlabReviewer,
   type ReviewerPreset,

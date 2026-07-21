@@ -1,7 +1,7 @@
 import '@/assets/tailwind.css';
 
 import { UsersIcon } from 'lucide-react';
-import { StrictMode } from 'react';
+import { StrictMode, useEffect, useMemo, useState } from 'react';
 
 import { BottomRightPanel } from '@/components/mr-thread-panel/BottomRightPanel';
 import { ReviewerChipWithPreview } from '@/components/reviewer-presets/ReviewerChipWithPreview';

@@ -1,3 +1,5 @@
+import { defineContentScript } from 'wxt/utils/define-content-script';
+
 import { dispatchUrlChange } from '@/lib/events/url-change';
 
 export default defineContentScript({
