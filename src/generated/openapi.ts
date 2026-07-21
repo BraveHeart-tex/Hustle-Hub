@@ -772,8 +772,46 @@ export interface components {
         type: 'jira_transition';
         targetIssueKey: string;
         targetStatus: string;
+        /** @enum {string} */
+        targetStatusId:
+          | '3'
+          | '10003'
+          | '10004'
+          | '10016'
+          | '10050'
+          | '10052'
+          | '10053'
+          | '10068'
+          | '10071'
+          | '10072'
+          | '10400'
+          | '10402'
+          | '10403'
+          | '10404'
+          | '10405'
+          | '10406'
+          | '10407';
         label: string;
         confirm?: boolean;
+        allowedSourceStatusIds: (
+          | '3'
+          | '10003'
+          | '10004'
+          | '10016'
+          | '10050'
+          | '10052'
+          | '10053'
+          | '10068'
+          | '10071'
+          | '10072'
+          | '10400'
+          | '10402'
+          | '10403'
+          | '10404'
+          | '10405'
+          | '10406'
+          | '10407'
+        )[];
       };
       entityId: string;
       entityUrl: string;
@@ -1088,8 +1126,46 @@ export interface components {
         type: 'jira_transition';
         targetIssueKey: string;
         targetStatus: string;
+        /** @enum {string} */
+        targetStatusId:
+          | '3'
+          | '10003'
+          | '10004'
+          | '10016'
+          | '10050'
+          | '10052'
+          | '10053'
+          | '10068'
+          | '10071'
+          | '10072'
+          | '10400'
+          | '10402'
+          | '10403'
+          | '10404'
+          | '10405'
+          | '10406'
+          | '10407';
         label: string;
         confirm?: boolean;
+        allowedSourceStatusIds: (
+          | '3'
+          | '10003'
+          | '10004'
+          | '10016'
+          | '10050'
+          | '10052'
+          | '10053'
+          | '10068'
+          | '10071'
+          | '10072'
+          | '10400'
+          | '10402'
+          | '10403'
+          | '10404'
+          | '10405'
+          | '10406'
+          | '10407'
+        )[];
       };
       entityId: string;
       entityUrl: string;

@@ -28,6 +28,7 @@ const viteEnvSchema = z.object({
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   srcDir: 'src',
+  imports: false,
   manifest: {
     permissions: [
       'tabs',
