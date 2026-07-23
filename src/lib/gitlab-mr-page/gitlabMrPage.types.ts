@@ -50,6 +50,7 @@ export interface GitLabMrInactiveSnapshot {
 }
 
 export interface GitLabMrLoadingSnapshot {
+  readonly hostAppearance: 'dark' | 'light' | null;
   readonly identity: GitLabMrIdentity;
   readonly status: 'loading';
 }

@@ -31,6 +31,7 @@ describe('createGitLabMrPage', () => {
 
     const initialSnapshot = page.getSnapshot();
     expect(initialSnapshot).toEqual({
+      hostAppearance: 'dark',
       identity: {
         href: mergeRequestHref,
         mergeRequestIid: '42',
@@ -163,6 +164,7 @@ describe('createGitLabMrPage', () => {
     host.emitNavigation();
 
     expect(page.getSnapshot()).toEqual({
+      hostAppearance: 'dark',
       identity: {
         href: 'https://gitlab.com/group/project/-/merge_requests/43',
         mergeRequestIid: '43',

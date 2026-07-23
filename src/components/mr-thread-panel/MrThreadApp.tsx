@@ -6,25 +6,31 @@ import { BottomRightPanel } from '@/components/mr-thread-panel/BottomRightPanel'
 import { CodeReviewCommandsShortcut } from '@/components/mr-thread-panel/CodeReviewCommandsShortcut';
 import { JiraStatusButton } from '@/components/mr-thread-panel/JiraStatusButton';
 import { ThreadList } from '@/components/mr-thread-panel/ThreadList';
-import { useHostDarkMode } from '@/hooks/useHostDarkMode';
+import { useGitLabMrPageSnapshot } from '@/lib/gitlab-mr-page/gitlabMrPageReact';
+import { extractJiraId } from '@/lib/utils/misc/extractJiraId';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 
 export const MrThreadApp = ({
   container,
   gitlabUserId,
-  jiraId,
 }: {
   container: HTMLElement;
   gitlabUserId: string;
-  jiraId?: string;
 }) => {
-  const isDark = useHostDarkMode();
+  const pageSnapshot = useGitLabMrPageSnapshot();
+  const facts = pageSnapshot.status === 'ready' ? pageSnapshot : null;
+  const hostAppearance =
+    pageSnapshot.status === 'ready' || pageSnapshot.status === 'loading'
+      ? pageSnapshot.hostAppearance
+      : null;
+  const jiraId = extractJiraId(facts?.title ?? '');
+  const usableJiraId = jiraId && jiraId !== 'FE-1' ? jiraId : '';
 
   // `container` is the Shadow-DOM root that also hosts the portaled popovers,
   // so toggling `dark` here themes both the launchers and their popovers.
   useEffect(() => {
-    container.classList.toggle('dark', isDark);
-  }, [container, isDark]);
+    container.classList.toggle('dark', hostAppearance === 'dark');
+  }, [container, hostAppearance]);
 
   return (
     <StrictMode>
@@ -35,13 +41,17 @@ export const MrThreadApp = ({
           <JiraStatusButton
             container={container}
             gitlabUserId={gitlabUserId}
-            jiraId={jiraId && jiraId !== 'FE-1' ? jiraId : ''}
-            jiraLink={jiraId && jiraId !== 'FE-1' ? getJiraTaskUrl(jiraId) : ''}
+            jiraId={usableJiraId}
+            jiraLink={usableJiraId ? getJiraTaskUrl(usableJiraId) : ''}
+            assigneeIds={facts?.assigneeIds ?? null}
+            description={facts?.description ?? null}
+            mrUrl={facts?.identity.href ?? null}
+            targetBranch={facts?.targetBranch ?? null}
           />
           <ThreadList container={container} userId={gitlabUserId} />
           <CodeReviewCommandsShortcut
             container={container}
-            jiraId={jiraId && jiraId !== 'FE-1' ? jiraId : ''}
+            jiraId={usableJiraId}
           />
         </div>
       </BottomRightPanel>

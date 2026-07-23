@@ -30,7 +30,7 @@ interface DiscussionRefDetails {
 export function createGitLabMrPage(host: GitLabMrHost): GitLabMrPage {
   const initialIdentity = parseIdentity(host.getHref());
   let snapshot: GitLabMrPageSnapshot = initialIdentity
-    ? createLoadingSnapshot(initialIdentity)
+    ? createLoadingSnapshot(initialIdentity, readHostAppearance(host))
     : createInactiveSnapshot();
   let epoch = initialIdentity ? 1 : 0;
   let scheduledEpoch: number | null = null;
@@ -99,7 +99,7 @@ export function createGitLabMrPage(host: GitLabMrHost): GitLabMrPage {
       epoch += 1;
       discussionRefs.clear();
       clearHighlight();
-      commit(createLoadingSnapshot(currentIdentity));
+      commit(createLoadingSnapshot(currentIdentity, readHostAppearance(host)));
       return;
     }
 
@@ -285,9 +285,7 @@ function readFacts(
             ),
         )
       : null,
-    hostAppearance: document.documentElement.classList.contains('gl-dark')
-      ? 'dark'
-      : 'light',
+    hostAppearance: readHostAppearance(host),
     sourceBranch: readAttribute(
       document.querySelector('.js-source-branch-copy'),
       'data-clipboard-text',
@@ -302,6 +300,15 @@ function readAuthorId(document: Document): string | null {
     document.querySelector(AUTHOR_SELECTORS.join(', ')),
     'data-user-id',
   );
+}
+function readHostAppearance(host: GitLabMrHost): 'dark' | 'light' | null {
+  try {
+    return host.getDocument().documentElement.classList.contains('gl-dark')
+      ? 'dark'
+      : 'light';
+  } catch {
+    return null;
+  }
 }
 function readDescription(document: Document): string | null {
   const description = document.querySelector(
@@ -388,8 +395,9 @@ function createInactiveSnapshot(): GitLabMrPageSnapshot {
 }
 function createLoadingSnapshot(
   identity: GitLabMrIdentity,
+  hostAppearance: 'dark' | 'light' | null,
 ): GitLabMrPageSnapshot {
-  return deepFreeze({ identity, status: 'loading' });
+  return deepFreeze({ hostAppearance, identity, status: 'loading' });
 }
 function createUnavailableSnapshot(
   identity: GitLabMrIdentity,

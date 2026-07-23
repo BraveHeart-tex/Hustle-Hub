@@ -1,6 +1,6 @@
 export const computeReadOnly = (
   userId: string,
-  assigneeIds: string[],
+  assigneeIds: readonly string[],
 ): boolean => {
   if (!userId) return false;
   if (assigneeIds.length === 0) return false;

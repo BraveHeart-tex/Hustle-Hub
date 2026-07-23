@@ -10,9 +10,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useIsReadOnly } from '@/hooks/useIsReadOnly';
-import { useTargetBranch } from '@/hooks/useTargetBranch';
 import { cn } from '@/lib/utils';
+import { computeReadOnly } from '@/lib/utils/misc/computeReadOnly';
 import { extractFerelId } from '@/lib/utils/misc/extractFerelId';
 import {
   addJiraIssueComment,
@@ -98,11 +97,19 @@ export const JiraStatusButton = ({
   jiraLink,
   container,
   gitlabUserId,
+  assigneeIds,
+  description,
+  mrUrl,
+  targetBranch,
 }: {
   jiraId: string;
   jiraLink: string;
   container?: HTMLElement | null;
   gitlabUserId: string;
+  assigneeIds: readonly string[] | null;
+  description: string | null;
+  mrUrl: string | null;
+  targetBranch: string | null;
 }) => {
   const [open, setOpen] = useState(false);
   const [details, setDetails] = useState<JiraIssueDetails | null>(null);
@@ -112,39 +119,60 @@ export const JiraStatusButton = ({
   const [error, setError] = useState<string | null>(null);
 
   const fetchedRef = useRef(false);
-  const targetBranch = useTargetBranch();
-  const readOnly = useIsReadOnly(gitlabUserId);
+  const requestEpochRef = useRef(0);
+  const readOnly =
+    assigneeIds === null || computeReadOnly(gitlabUserId, assigneeIds);
 
   const resolvedJiraId = useMemo(() => {
     if (targetBranch === 'main') {
-      const ferelId = extractFerelId(document);
+      const ferelId = extractFerelId(description);
       if (ferelId) return ferelId;
       return null;
     }
     return jiraId;
-  }, [targetBranch, jiraId]);
+  }, [description, targetBranch, jiraId]);
+
+  useEffect(() => {
+    requestEpochRef.current += 1;
+    fetchedRef.current = false;
+    setDetails(null);
+    setError(null);
+    setLoading(false);
+    setTransitioning(null);
+  }, [mrUrl, resolvedJiraId]);
 
   const fetchTaskDetails = useCallback(() => {
     if (!resolvedJiraId) return;
+    const requestEpoch = requestEpochRef.current;
     setLoading(true);
     fetchJiraIssueDetails(resolvedJiraId)
-      .then((data) => setDetails(data))
-      .catch(() => setError('Failed to load issue details'))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (requestEpoch === requestEpochRef.current) setDetails(data);
+      })
+      .catch(() => {
+        if (requestEpoch === requestEpochRef.current) {
+          setError('Failed to load issue details');
+        }
+      })
+      .finally(() => {
+        if (requestEpoch === requestEpochRef.current) setLoading(false);
+      });
   }, [resolvedJiraId]);
 
   useEffect(() => {
     if (fetchedRef.current || !targetBranch || !resolvedJiraId) return;
     fetchedRef.current = true;
     fetchTaskDetails();
-  }, [fetchTaskDetails, resolvedJiraId, targetBranch]);
+  }, [fetchTaskDetails, mrUrl, resolvedJiraId, targetBranch]);
 
   const handleTransition = async (transition: JiraTransition) => {
     if (!resolvedJiraId) return;
 
+    const requestEpoch = requestEpochRef.current;
     setTransitioning(transition.id);
     try {
       await transitionJiraIssue(resolvedJiraId, transition.id);
+      if (requestEpoch !== requestEpochRef.current) return;
 
       if (
         targetBranch === 'main' &&
@@ -152,7 +180,7 @@ export const JiraStatusButton = ({
       ) {
         await addJiraIssueComment({
           jiraId: resolvedJiraId,
-          mrUrl: window.location.href,
+          mrUrl: mrUrl ?? '',
         }).catch(() => {
           // Comment failure shouldn't block the transition
         });
@@ -160,9 +188,11 @@ export const JiraStatusButton = ({
 
       fetchTaskDetails();
     } catch {
-      setError('Failed to update status');
+      if (requestEpoch === requestEpochRef.current) {
+        setError('Failed to update status');
+      }
     } finally {
-      setTransitioning(null);
+      if (requestEpoch === requestEpochRef.current) setTransitioning(null);
     }
   };
 

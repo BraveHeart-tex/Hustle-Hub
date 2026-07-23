@@ -28,11 +28,6 @@ export default defineContentScript({
     const page = createGitLabMrPage(createGitLabMrDomHost());
     ctx.onInvalidated(() => page.dispose());
 
-    const mrTitle =
-      document.querySelector("[data-testid='title-content']")?.textContent ||
-      '';
-    const jiraId = mrTitle.match(/([A-Z][A-Z0-9]+-\d+)/)?.[1];
-
     const gitlabUserId = import.meta.env.VITE_GITLAB_USER_ID;
     if (!gitlabUserId) {
       console.warn('No VITE_GITLAB_USER_ID found in .env');
@@ -52,11 +47,7 @@ export default defineContentScript({
 
         root.render(
           <GitLabMrPageProvider value={page}>
-            <MrThreadApp
-              container={container}
-              gitlabUserId={gitlabUserId}
-              jiraId={jiraId}
-            />
+            <MrThreadApp container={container} gitlabUserId={gitlabUserId} />
           </GitLabMrPageProvider>,
         );
 
