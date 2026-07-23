@@ -21,12 +21,6 @@ over the DevTools protocol. This project supports two dev modes, toggled by the
    WXT_MCP=1 yarn dev
    ```
 
-2. Launch (or reuse) the debug Chrome:
-
-   ```
-   scripts/browser-mcp.sh
-   ```
-
    This opens Chrome with the `.wxt/chrome-mcp-profile` profile, loads the built
    extension from `.output/chrome-mv3-dev`, and exposes remote debugging on
    `http://localhost:9222`. It is idempotent - if the debug Chrome is already

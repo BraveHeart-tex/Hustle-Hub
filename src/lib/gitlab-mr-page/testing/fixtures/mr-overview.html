@@ -1,11 +1,21 @@
 <!doctype html>
-<html>
+<html class="gl-dark">
   <body>
     <main>
       <h1 data-testid="title-content">Example merge request</h1>
+      <div data-testid="description-content">
+        <textarea class="js-task-list-field" data-value="FEREL-42"></textarea>
+      </div>
       <div data-testid="issuable-authored-by">
         <a data-user-id="100" href="/ada">Ada Lovelace</a>
       </div>
+      <div data-testid="assignees-widget">
+        <a data-user-id="100" href="/ada">Ada Lovelace</a>
+      </div>
+      <button class="js-source-branch-copy" data-clipboard-text="feature/test">
+        Copy source branch
+      </button>
+      <span data-testid="widget-target-branch">main</span>
       <section id="notes-list"></section>
     </main>
   </body>
