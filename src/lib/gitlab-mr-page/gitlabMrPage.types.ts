@@ -1,4 +1,9 @@
-export type GitLabMrPageStatus = 'inactive' | 'loading' | 'ready';
+export type GitLabMrPageStatus =
+  | 'disposed'
+  | 'inactive'
+  | 'loading'
+  | 'ready'
+  | 'unavailable';
 
 export interface GitLabMrIdentity {
   readonly href: string;
@@ -51,19 +56,39 @@ export interface GitLabMrLoadingSnapshot {
 
 export interface GitLabMrReadySnapshot extends GitLabMrPageFacts {
   readonly identity: GitLabMrIdentity;
-  readonly freshness: 'current';
+  readonly freshness: 'current' | 'stale';
   readonly status: 'ready';
 }
 
 export type GitLabMrPageSnapshot =
   | Readonly<GitLabMrInactiveSnapshot>
   | Readonly<GitLabMrLoadingSnapshot>
-  | Readonly<GitLabMrReadySnapshot>;
+  | Readonly<GitLabMrReadySnapshot>
+  | Readonly<GitLabMrUnavailableSnapshot>
+  | Readonly<GitLabMrDisposedSnapshot>;
+
+export interface GitLabMrUnavailableSnapshot {
+  readonly identity: GitLabMrIdentity;
+  readonly status: 'unavailable';
+}
+
+export interface GitLabMrDisposedSnapshot {
+  readonly status: 'disposed';
+}
+
+export type GitLabMrDiscussionRevealResult =
+  | { readonly status: 'revealed' }
+  | { readonly status: 'discussion-missing' }
+  | { readonly status: 'foreign-reference' }
+  | { readonly status: 'stale-reference' }
+  | { readonly status: 'page-unavailable' }
+  | { readonly status: 'disposed' };
 
 export type GitLabMrPageListener = () => void;
 
 export interface GitLabMrPage {
   dispose(): void;
   getSnapshot(): GitLabMrPageSnapshot;
+  revealDiscussion(ref: DiscussionRef): GitLabMrDiscussionRevealResult;
   subscribe(listener: GitLabMrPageListener): () => void;
 }

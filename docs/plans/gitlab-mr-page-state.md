@@ -5,7 +5,7 @@
 | Checkpoint | Status  | Commit | Verification |
 | ---------- | ------- | ------ | ------------ |
 | 1          | Done    | ✅     | ✅           |
-| 2          | Pending | —      | —            |
+| 2          | Done    | ✅     | ✅           |
 | 3          | Pending | —      | —            |
 | 4          | Pending | —      | —            |
 | 5          | Pending | —      | —            |
