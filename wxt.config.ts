@@ -4,9 +4,14 @@ import { defineConfig } from 'wxt';
 import { z } from 'zod';
 
 const viteEnvSchema = z.object({
-  VITE_RELEASE_REVIEWER_USER_ID: z
-    .string()
-    .regex(/^\d+$/, 'Must be a numeric user ID'),
+  VITE_RELEASE_REVIEWER_USER_IDS: z.string().refine(
+    (value) =>
+      value
+        .split(',')
+        .map((reviewerId) => reviewerId.trim())
+        .every((reviewerId) => /^\d+$/.test(reviewerId)),
+    'Must be a comma-separated list of numeric user IDs',
+  ),
   VITE_BASE_API_URL: z.url().describe('Backend origin URL'),
   VITE_JIRA_BASE_URL: z
     .url()

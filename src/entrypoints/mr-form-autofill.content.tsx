@@ -343,23 +343,31 @@ const getReleaseDescription = (ferelKey: string, jiraIssueKey: string) => {
   ].join('\n');
 };
 
-const selectReleaseReviewer = async (reviewerId: string) => {
-  if (!reviewerId) return false;
+const selectReleaseReviewers = async (reviewerIds: string[]) => {
+  if (reviewerIds.length === 0) return false;
 
   const openedDropdown = await clickWhenAvailable(SELECTORS.reviewerDropdown);
   if (!openedDropdown) return false;
 
-  const selectedReviewer = await clickWhenAvailable(
-    SELECTORS.reviewerDropdownOption(reviewerId),
-    DROPDOWN_OPTION_TIMEOUT,
-  );
+  let selectedEveryReviewer = true;
 
-  if (selectedReviewer) {
+  for (const reviewerId of reviewerIds) {
+    const selectedReviewer = await clickWhenAvailable(
+      SELECTORS.reviewerDropdownOption(reviewerId),
+      DROPDOWN_OPTION_TIMEOUT,
+    );
+
+    if (!selectedReviewer) {
+      selectedEveryReviewer = false;
+      continue;
+    }
+
     await delay(150);
-    await clickWhenAvailable(SELECTORS.reviewerDropdownCloseIcon);
   }
 
-  return selectedReviewer;
+  await clickWhenAvailable(SELECTORS.reviewerDropdownCloseIcon);
+
+  return selectedEveryReviewer;
 };
 
 const applyProductionLabelAndDescription = async (
@@ -430,12 +438,19 @@ export default defineContentScript({
     const { ferelKeyPromise, titlePromise } = fillReleaseBasics(
       releaseJiraId ?? '',
     );
-    const reviewerId = import.meta.env.VITE_RELEASE_REVIEWER_USER_ID;
+    const reviewerIds = String(
+      import.meta.env.VITE_RELEASE_REVIEWER_USER_IDS ?? '',
+    )
+      .split(',')
+      .map((reviewerId) => reviewerId.trim())
+      .filter((reviewerId, index, ids) => {
+        return reviewerId.length > 0 && ids.indexOf(reviewerId) === index;
+      });
 
     await Promise.allSettled([
       runStep('assign', assignCurrentUser),
       titlePromise,
-      runStep('reviewer', () => selectReleaseReviewer(reviewerId)),
+      runStep('reviewer', () => selectReleaseReviewers(reviewerIds)),
     ]);
 
     await applyProductionLabelAndDescription(

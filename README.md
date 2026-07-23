@@ -58,7 +58,7 @@ Create a local `.env` file with:
 VITE_BASE_API_URL="https://your-api.example.com"
 VITE_JIRA_BASE_URL="https://your-jira.example.com"
 VITE_GITLAB_USER_ID="123456"
-VITE_RELEASE_REVIEWER_USER_ID="123456"
+VITE_RELEASE_REVIEWER_USER_IDS="123456,234567"
 ```
 
 To run the new-tab dashboard with realistic local fixtures instead of the
@@ -82,7 +82,11 @@ VITE_DEPLOYMENT_WIDGET_PROJECT_PATH="group/subgroup/project"
 paths already include `/api`. Existing values ending in `/api` are normalized
 for backward compatibility.
 
-`VITE_GITLAB_USER_ID` and `VITE_RELEASE_REVIEWER_USER_ID` must be numeric user IDs. `VITE_DEPLOYMENT_WIDGET_MATCH` must be a valid browser-extension match pattern. WXT validates these values at startup/build time in `wxt.config.ts`. If the deployment widget vars are omitted, the widget is disabled.
+`VITE_GITLAB_USER_ID` must be a numeric user ID, and
+`VITE_RELEASE_REVIEWER_USER_IDS` must be a comma-separated list of numeric user
+IDs. `VITE_DEPLOYMENT_WIDGET_MATCH` must be a valid browser-extension match
+pattern. WXT validates these values at startup/build time in `wxt.config.ts`.
+If the deployment widget vars are omitted, the widget is disabled.
 
 Match patterns are not secrets. They are removed from source code here, but they still appear in the built extension manifest because browsers require content-script matches there.
 
