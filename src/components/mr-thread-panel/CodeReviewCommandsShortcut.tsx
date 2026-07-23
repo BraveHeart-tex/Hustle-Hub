@@ -5,7 +5,7 @@ import {
   Loader2Icon,
   TerminalIcon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { ClaudeIcon } from '@/components/misc/ClaudeIcon';
 import { SEGMENT_CLASS } from '@/components/mr-thread-panel/segment';
@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useGitLabMrPageSnapshot } from '@/lib/gitlab-mr-page/gitlabMrPageReact';
 import { sendMessage } from '@/lib/messaging';
 import {
   pickTemplateForUrl,
@@ -22,15 +23,7 @@ import {
   useStrictReviewTemplates,
 } from '@/lib/storage/prompt-templates';
 import { cn } from '@/lib/utils';
-
-const getSourceBranch = (doc: Document): string =>
-  doc.querySelector<HTMLButtonElement>('.js-source-branch-copy')?.dataset
-    .clipboardText ?? '';
-
-const getTargetBranch = (doc: Document): string => {
-  const refs = doc.querySelectorAll<HTMLAnchorElement>('.ref-container');
-  return refs[1]?.title ?? '';
-};
+import type { StrictReviewTemplate } from '@/types/prompt-templates';
 
 // GitLab MR URL: https://gitlab.com/<group>/<subgroup>/<project>/-/merge_requests/123
 // The project slug is everything before `/-/merge_requests`.
@@ -67,6 +60,15 @@ const toLaunchErrorMessage = (error: unknown): string => {
     : 'Could not launch Claude Code';
 };
 
+export const getSelectedTemplate = (
+  templates: StrictReviewTemplate[],
+  selectedId: string | null,
+  href: string,
+): StrictReviewTemplate | undefined => {
+  const autoTemplate = pickTemplateForUrl(templates, href);
+  return templates.find((item) => item.id === selectedId) ?? autoTemplate;
+};
+
 export const CodeReviewCommandsShortcut = ({
   container,
   jiraId,
@@ -78,29 +80,29 @@ export const CodeReviewCommandsShortcut = ({
   const [launchState, setLaunchState] = useState<LaunchState>({
     status: 'idle',
   });
-  const [branchInfo, setBranchInfo] = useState({ target: '', source: '' });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { templates } = useStrictReviewTemplates();
+  const pageSnapshot = useGitLabMrPageSnapshot();
 
-  useEffect(() => {
-    setBranchInfo({
-      target: getTargetBranch(document),
-      source: getSourceBranch(document),
-    });
-  }, []);
+  const sourceBranch =
+    pageSnapshot.status === 'ready' ? pageSnapshot.sourceBranch : null;
+  const targetBranch =
+    pageSnapshot.status === 'ready' ? pageSnapshot.targetBranch : null;
+  const href =
+    pageSnapshot.status === 'ready' ? pageSnapshot.identity.href : '';
+  const source = sourceBranch ?? '';
+  const target = targetBranch ?? '';
 
-  const autoTemplate = pickTemplateForUrl(templates, window.location.href);
-  const selectedTemplate =
-    templates.find((item) => item.id === selectedId) ?? autoTemplate;
+  const selectedTemplate = getSelectedTemplate(templates, selectedId, href);
 
   const copyPrompt = () => {
     if (!selectedTemplate) return;
 
     const text = renderTemplate(selectedTemplate.template, {
-      source: branchInfo.source,
-      target: branchInfo.target,
-      url: window.location.href,
+      source,
+      target,
+      url: href,
     });
 
     navigator.clipboard.writeText(text);
@@ -112,13 +114,13 @@ export const CodeReviewCommandsShortcut = ({
     if (!selectedTemplate) return;
 
     const prompt = renderTemplate(selectedTemplate.template, {
-      source: branchInfo.source,
-      target: branchInfo.target,
-      url: window.location.href,
+      source,
+      target,
+      url: href,
     });
 
     const payload = {
-      slug: getProjectSlug(window.location.href),
+      slug: getProjectSlug(href),
       prompt,
       permissionMode: 'plan' as const,
       jiraId,
@@ -164,7 +166,7 @@ export const CodeReviewCommandsShortcut = ({
     }
   };
 
-  if (!branchInfo.source || !branchInfo.target) return null;
+  if (!sourceBranch || !targetBranch) return null;
   if (!selectedTemplate) return null;
 
   // Launch state lives only in the button label and a `title`; mirror it into a
@@ -307,7 +309,7 @@ export const CodeReviewCommandsShortcut = ({
                   )}
                 />
                 <span className="truncate">{item.name}</span>
-                {item.id === autoTemplate?.id && (
+                {item.id === pickTemplateForUrl(templates, href)?.id && (
                   <span className="ml-auto text-[10px] text-muted-foreground">
                     auto
                   </span>

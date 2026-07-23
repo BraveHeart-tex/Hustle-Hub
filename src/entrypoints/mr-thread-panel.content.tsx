@@ -3,6 +3,9 @@ import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 
 import { MrThreadApp } from '@/components/mr-thread-panel/MrThreadApp';
 import { GITLAB_HIGHLIGHTED_THREAD_CLASS } from '@/lib/constants';
+import { createGitLabMrDomHost } from '@/lib/gitlab-mr-page/gitlabMrDomHost';
+import { createGitLabMrPage } from '@/lib/gitlab-mr-page/gitlabMrPage';
+import { GitLabMrPageProvider } from '@/lib/gitlab-mr-page/gitlabMrPageReact';
 import { defineContentScript } from '#imports';
 
 export default defineContentScript({
@@ -21,6 +24,9 @@ export default defineContentScript({
       }`,
       0,
     );
+
+    const page = createGitLabMrPage(createGitLabMrDomHost());
+    ctx.onInvalidated(() => page.dispose());
 
     const mrTitle =
       document.querySelector("[data-testid='title-content']")?.textContent ||
@@ -44,25 +50,14 @@ export default defineContentScript({
 
         const root = createRoot(app);
 
-        let lastUrl = location.href;
-        const observer = new MutationObserver(() => {
-          const url = location.href;
-          if (url !== lastUrl) {
-            lastUrl = url;
-            window.dispatchEvent(new Event('url-change'));
-          }
-        });
-
-        observer.observe(document, { subtree: true, childList: true });
-
-        ctx.onInvalidated(() => observer.disconnect());
-
         root.render(
-          <MrThreadApp
-            container={container}
-            gitlabUserId={gitlabUserId}
-            jiraId={jiraId}
-          />,
+          <GitLabMrPageProvider value={page}>
+            <MrThreadApp
+              container={container}
+              gitlabUserId={gitlabUserId}
+              jiraId={jiraId}
+            />
+          </GitLabMrPageProvider>,
         );
 
         return root;
