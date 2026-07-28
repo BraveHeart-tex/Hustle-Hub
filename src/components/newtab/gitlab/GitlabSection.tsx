@@ -1,4 +1,10 @@
-import { AlertCircle, GitMerge, RefreshCw } from 'lucide-react';
+import {
+  AlertCircle,
+  ChevronDown,
+  GitMerge,
+  RefreshCw,
+  ThumbsUp,
+} from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
@@ -9,6 +15,11 @@ import { GITLAB_CATEGORY_SHORTCUTS } from '@/components/newtab/keyboardShortcuts
 import { useTwoKeyFilterShortcuts } from '@/components/newtab/useTwoKeyFilterShortcuts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   Select,
   SelectContent,
@@ -89,6 +100,14 @@ export function GitlabSection() {
 
   const isDraftCategory = category === GITLAB_CATEGORIES.DRAFTS;
   const isAssignedCategory = category === GITLAB_CATEGORIES.ASSIGNED_TO_ME;
+  const isReviewRequestedCategory = !isDraftCategory && !isAssignedCategory;
+
+  const approvedByYouMrs = isReviewRequestedCategory
+    ? filteredMrs.filter((mergeRequest) => mergeRequest.approvedByCurrentUser)
+    : [];
+  const visibleMrs = isReviewRequestedCategory
+    ? filteredMrs.filter((mergeRequest) => !mergeRequest.approvedByCurrentUser)
+    : filteredMrs;
 
   let activeQueries = [reviewQuery];
   if (isAssignedCategory) {
@@ -222,7 +241,7 @@ export function GitlabSection() {
       );
     }
 
-    if (filteredMrs.length === 0) {
+    if (visibleMrs.length === 0) {
       return (
         <div className="flex items-center gap-2 py-2">
           <GitMerge
@@ -235,7 +254,7 @@ export function GitlabSection() {
       );
     }
 
-    return filteredMrs.map((mergeRequest) => (
+    return visibleMrs.map((mergeRequest) => (
       <MRItem
         mr={mergeRequest}
         key={`${mergeRequest.projectId}:${mergeRequest.iid}`}
@@ -243,7 +262,7 @@ export function GitlabSection() {
     ));
   };
 
-  const hasUrgentMr = filteredMrs.some(
+  const hasUrgentMr = visibleMrs.some(
     (mergeRequest) =>
       mergeRequest.needsCurrentUserAction ||
       mergeRequest.conflicts ||
@@ -251,7 +270,7 @@ export function GitlabSection() {
   );
   const sectionState = isLoading
     ? 'loading'
-    : filteredMrs.length === 0
+    : visibleMrs.length === 0
       ? 'empty'
       : hasUrgentMr
         ? 'urgent'
@@ -364,6 +383,33 @@ export function GitlabSection() {
 
       <CardContent className="flex-1 divide-y divide-border/60 overflow-auto">
         {renderContent()}
+        {approvedByYouMrs.length > 0 && (
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="group flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2 text-xs text-muted-foreground outline-none motion-safe:transition-colors hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50 dark:hover:bg-accent/50"
+              >
+                <span className="flex items-center gap-1">
+                  <ThumbsUp aria-hidden="true" className="size-3" />
+                  Approved by you ({approvedByYouMrs.length})
+                </span>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="size-3.5 motion-safe:transition-transform motion-safe:duration-200 group-data-[state=open]:rotate-180"
+                />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="divide-y divide-border/60 overflow-hidden border-t border-border/60 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0">
+              {approvedByYouMrs.map((mergeRequest) => (
+                <MRItem
+                  mr={mergeRequest}
+                  key={`${mergeRequest.projectId}:${mergeRequest.iid}`}
+                />
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        )}
       </CardContent>
     </Card>
   );

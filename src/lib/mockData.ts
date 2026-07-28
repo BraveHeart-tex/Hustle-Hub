@@ -301,6 +301,31 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
     projectId: '101',
     diffStatsSummary: { additions: 96, deletions: 34 },
   },
+  {
+    ...commonMergeRequestFields,
+    id: 'gid://gitlab/MergeRequest/905',
+    iid: '905',
+    title: 'WEB-1901 Debounce address autocomplete requests',
+    createdAt: daysAgo(3),
+    sourceBranch: 'feature/WEB-1901-address-autocomplete-debounce',
+    draft: false,
+    mergeStatus: 'needs_review',
+    webUrl:
+      'https://gitlab.example.com/commerce/storefront/-/merge_requests/905',
+    userNotesCount: 3,
+    author: { username: 'sam.rivera', avatarUrl: avatars.sam },
+    approvedByCurrentUser: true,
+    approvedBy: 1,
+    approvalsRequired: 2,
+    labels: [{ color: '#1f75cb', title: 'frontend' }],
+    reviewers: [reviewer(12, avatars.alex, true), reviewer(27, avatars.sam)],
+    needsCurrentUserAction: false,
+    conflicts: false,
+    headPipelineStatus: 'SUCCESS',
+    projectName: 'storefront',
+    projectId: '101',
+    diffStatsSummary: { additions: 58, deletions: 12 },
+  },
 ];
 
 const assignedMergeRequests: GitlabMergeRequest[] = [
