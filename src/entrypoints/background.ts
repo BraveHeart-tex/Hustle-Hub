@@ -9,6 +9,7 @@ import {
   type LaunchClaudeData,
   type LaunchClaudeResponse,
   onMessage,
+  sendMessage,
 } from '@/lib/messaging';
 import { connectAttentionStream } from '@/services/attentionStream';
 import { type AttentionItem } from '@/types/attention';
@@ -88,8 +89,15 @@ export default defineBackground({
     if (!USE_MOCK_DATA) {
       try {
         connectAttentionStream({
+          onSnapshot(items) {
+            void sendMessage('attentionSnapshot', items).catch(() => {});
+          },
           onUpserted(item) {
             if (shouldNotify(item)) queueNotification(item, notify);
+            void sendMessage('attentionUpserted', item).catch(() => {});
+          },
+          onResolved(item) {
+            void sendMessage('attentionResolved', item).catch(() => {});
           },
         });
       } catch (error) {

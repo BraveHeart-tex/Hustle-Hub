@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 
 import { QUERY_KEYS } from '@/lib/constants';
 import { isMockDataEnabled } from '@/lib/mockData';
-import { connectAttentionStream } from '@/services/attentionStream';
+import { subscribeToAttentionStream } from '@/services/attentionStreamRelay';
 import type { AttentionItem, AttentionSource } from '@/types/attention';
 
 export function useAttentionStream(): void {
@@ -11,8 +11,7 @@ export function useAttentionStream(): void {
 
   useEffect(() => {
     if (isMockDataEnabled) return;
-
-    return connectAttentionStream({
+    return subscribeToAttentionStream({
       onSnapshot(items) {
         queryClient.setQueryData(QUERY_KEYS.attention.list, items);
         refreshRelatedQueries(queryClient, [
