@@ -5,7 +5,7 @@ import {
   RefreshCw,
   ThumbsUp,
 } from 'lucide-react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 
 import { GitlabIcon } from '@/components/misc/GitlabIcon';
 import { FilterButton } from '@/components/newtab/FilterButton';
@@ -32,6 +32,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { GITLAB_CATEGORIES, GITLAB_FILTERS } from '@/lib/constants';
 import { useGitlabCategory } from '@/lib/storage/filters';
+import { isReleaseMr } from '@/lib/utils/misc/isReleaseMr';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { type GitlabMergeRequest } from '@/types/gitlab';
 
@@ -47,6 +48,46 @@ const deduplicateMergeRequests = (mergeRequests: GitlabMergeRequest[]) => {
 
   return Array.from(mergeRequestsById.values());
 };
+
+function MrGroup({
+  label,
+  mergeRequests,
+  icon,
+  defaultOpen = false,
+}: {
+  label: string;
+  mergeRequests: GitlabMergeRequest[];
+  icon?: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <Collapsible defaultOpen={defaultOpen}>
+      <CollapsibleTrigger asChild>
+        <button
+          type="button"
+          className="group sticky top-0 z-10 flex w-full items-center gap-1.5 bg-card px-3 py-2 text-xs font-medium text-muted-foreground outline-none motion-safe:transition-colors hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50 dark:hover:bg-accent/50"
+        >
+          <ChevronDown
+            aria-hidden="true"
+            className="size-3.5 shrink-0 motion-safe:transition-transform motion-safe:duration-200 group-data-[state=closed]:-rotate-90"
+          />
+          {icon}
+          <span className="uppercase tracking-wide">{label}</span>
+          <span aria-hidden="true">·</span>
+          <span>{mergeRequests.length}</span>
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="divide-y divide-border/60 overflow-hidden border-t border-border/60 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0">
+        {mergeRequests.map((mergeRequest) => (
+          <MRItem
+            mr={mergeRequest}
+            key={`${mergeRequest.projectId}:${mergeRequest.iid}`}
+          />
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 export function GitlabSection() {
   const reviewQuery = useGitlabMrs(GITLAB_FILTERS.REVIEW);
@@ -254,6 +295,24 @@ export function GitlabSection() {
       );
     }
 
+    const releaseMrs = visibleMrs.filter(isReleaseMr);
+    const regularMrs = visibleMrs.filter(
+      (mergeRequest) => !isReleaseMr(mergeRequest),
+    );
+
+    if (releaseMrs.length > 0 && regularMrs.length > 0) {
+      return (
+        <>
+          <MrGroup label="Releases" mergeRequests={releaseMrs} defaultOpen />
+          <MrGroup
+            label="Merge requests"
+            mergeRequests={regularMrs}
+            defaultOpen
+          />
+        </>
+      );
+    }
+
     return visibleMrs.map((mergeRequest) => (
       <MRItem
         mr={mergeRequest}
@@ -384,31 +443,11 @@ export function GitlabSection() {
       <CardContent className="flex-1 divide-y divide-border/60 overflow-auto">
         {renderContent()}
         {approvedByYouMrs.length > 0 && (
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <button
-                type="button"
-                className="group flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2 text-xs text-muted-foreground outline-none motion-safe:transition-colors hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50 dark:hover:bg-accent/50"
-              >
-                <span className="flex items-center gap-1">
-                  <ThumbsUp aria-hidden="true" className="size-3" />
-                  Approved by you ({approvedByYouMrs.length})
-                </span>
-                <ChevronDown
-                  aria-hidden="true"
-                  className="size-3.5 motion-safe:transition-transform motion-safe:duration-200 group-data-[state=open]:rotate-180"
-                />
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="divide-y divide-border/60 overflow-hidden border-t border-border/60 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0">
-              {approvedByYouMrs.map((mergeRequest) => (
-                <MRItem
-                  mr={mergeRequest}
-                  key={`${mergeRequest.projectId}:${mergeRequest.iid}`}
-                />
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
+          <MrGroup
+            label="Approved by you"
+            mergeRequests={approvedByYouMrs}
+            icon={<ThumbsUp aria-hidden="true" className="size-3" />}
+          />
         )}
       </CardContent>
     </Card>
