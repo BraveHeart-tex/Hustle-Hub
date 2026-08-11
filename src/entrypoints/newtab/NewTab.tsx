@@ -52,7 +52,7 @@ const DashboardPage = () => {
         </div>
 
         <div className="dashboard-section xl:sticky xl:top-6">
-          <JiraSection className="h-full" />
+          <JiraSection />
         </div>
       </div>
     </>

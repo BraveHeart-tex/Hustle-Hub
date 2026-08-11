@@ -204,7 +204,10 @@ export function JiraSection({ className }: JiraSectionProps) {
   return (
     <Card
       data-section-state={sectionState}
-      className={cn('flex flex-col overflow-hidden', className)}
+      className={cn(
+        'flex max-h-[calc(100vh-110px)] flex-col overflow-hidden',
+        className,
+      )}
     >
       <CardHeader className="pb-3 shrink-0">
         <CardTitle className="w-full flex items-center justify-between">
