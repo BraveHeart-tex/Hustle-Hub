@@ -31,7 +31,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGitlabMrs } from '@/hooks/useGitlabMrs';
 import { GITLAB_CATEGORIES, GITLAB_FILTERS } from '@/lib/constants';
-import { useGitlabCategory } from '@/lib/storage/filters';
+import {
+  useGitlabCategory,
+  useGitlabGroupOpenState,
+} from '@/lib/storage/filters';
+import { isNeedsReboundMr } from '@/lib/utils/misc/isNeedsReboundMr';
 import { isReleaseMr } from '@/lib/utils/misc/isReleaseMr';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { type GitlabMergeRequest } from '@/types/gitlab';
@@ -54,14 +58,22 @@ function MrGroup({
   mergeRequests,
   icon,
   defaultOpen = false,
+  needsReboundCount,
 }: {
   label: string;
   mergeRequests: GitlabMergeRequest[];
   icon?: ReactNode;
   defaultOpen?: boolean;
+  needsReboundCount?: number;
 }) {
+  const [openState, setGroupOpen] = useGitlabGroupOpenState();
+  const isOpen = openState[label] ?? defaultOpen;
+
   return (
-    <Collapsible defaultOpen={defaultOpen}>
+    <Collapsible
+      open={isOpen}
+      onOpenChange={(nextOpen) => setGroupOpen(label, nextOpen)}
+    >
       <CollapsibleTrigger asChild>
         <button
           type="button"
@@ -75,6 +87,14 @@ function MrGroup({
           <span className="uppercase tracking-wide">{label}</span>
           <span aria-hidden="true">·</span>
           <span>{mergeRequests.length}</span>
+          {needsReboundCount != null && needsReboundCount > 0 && (
+            <span
+              aria-label={`${needsReboundCount} need rebound`}
+              className="ml-auto inline-flex items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-destructive-foreground"
+            >
+              {needsReboundCount}
+            </span>
+          )}
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent className="divide-y divide-border/60 overflow-hidden border-t border-border/60 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0">
@@ -295,30 +315,35 @@ export function GitlabSection() {
       );
     }
 
-    const releaseMrs = visibleMrs.filter(isReleaseMr);
+    const releaseMrs = visibleMrs
+      .filter(isReleaseMr)
+      .toSorted(
+        (a, b) => Number(isNeedsReboundMr(b)) - Number(isNeedsReboundMr(a)),
+      );
     const regularMrs = visibleMrs.filter(
       (mergeRequest) => !isReleaseMr(mergeRequest),
     );
+    const needsReboundCount = releaseMrs.filter(isNeedsReboundMr).length;
 
-    if (releaseMrs.length > 0 && regularMrs.length > 0) {
-      return (
-        <>
-          <MrGroup label="Releases" mergeRequests={releaseMrs} defaultOpen />
+    return (
+      <>
+        {releaseMrs.length > 0 && (
+          <MrGroup
+            label="Releases"
+            mergeRequests={releaseMrs}
+            defaultOpen
+            needsReboundCount={needsReboundCount}
+          />
+        )}
+        {regularMrs.length > 0 && (
           <MrGroup
             label="Merge requests"
             mergeRequests={regularMrs}
             defaultOpen
           />
-        </>
-      );
-    }
-
-    return visibleMrs.map((mergeRequest) => (
-      <MRItem
-        mr={mergeRequest}
-        key={`${mergeRequest.projectId}:${mergeRequest.iid}`}
-      />
-    ));
+        )}
+      </>
+    );
   };
 
   const hasUrgentMr = visibleMrs.some(

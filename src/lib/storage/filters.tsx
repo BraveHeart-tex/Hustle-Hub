@@ -54,3 +54,29 @@ export const useGitlabCategory = () => {
 
   return [category, updateCategory] as const;
 };
+
+const gitlabGroupOpenStateStorage = storage.defineItem<Record<string, boolean>>(
+  'local:gitlabGroupOpenState',
+  { fallback: {} },
+);
+
+export const useGitlabGroupOpenState = () => {
+  const [openState, setOpenState] = useState<Record<string, boolean>>(
+    gitlabGroupOpenStateStorage.fallback || {},
+  );
+
+  useEffect(() => {
+    gitlabGroupOpenStateStorage.getValue().then(setOpenState);
+    return gitlabGroupOpenStateStorage.watch(setOpenState);
+  }, []);
+
+  const setGroupOpen = (groupLabel: string, isOpen: boolean) => {
+    setOpenState((currentState) => {
+      const nextState = { ...currentState, [groupLabel]: isOpen };
+      gitlabGroupOpenStateStorage.setValue(nextState);
+      return nextState;
+    });
+  };
+
+  return [openState, setGroupOpen] as const;
+};
