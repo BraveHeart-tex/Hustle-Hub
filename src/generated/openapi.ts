@@ -854,6 +854,7 @@ export interface components {
         hasApproved: boolean;
       }[];
       conflicts: boolean;
+      needsRebase: boolean;
       headPipelineStatus?: string;
       projectName: string;
       projectId: string;
@@ -1208,6 +1209,7 @@ export interface components {
         hasApproved: boolean;
       }[];
       conflicts: boolean;
+      needsRebase: boolean;
       headPipelineStatus?: string;
       projectName: string;
       projectId: string;

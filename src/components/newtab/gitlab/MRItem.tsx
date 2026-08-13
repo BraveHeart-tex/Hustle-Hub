@@ -6,6 +6,7 @@ import {
   FolderGit2,
   GitBranch,
   MessageSquare,
+  RefreshCwIcon,
   ThumbsUp,
 } from 'lucide-react';
 
@@ -36,12 +37,15 @@ export const MRItem = ({ mr }: MRItemProps) => {
   const hasProblem = mr.conflicts || mr.headPipelineStatus === 'FAILED';
   const shouldHighlightProblem = hasProblem && !mr.draft;
   const problemLabel = mr.conflicts ? 'Conflicts' : 'Failed pipeline';
+  const shouldHighlightRebase = mr.needsRebase && !mr.draft && !hasProblem;
 
   return (
     <article
       className={cn(
         'group relative px-3 py-3 motion-safe:transition-colors hover:bg-muted/50 dark:hover:bg-accent/50',
-        mr.needsCurrentUserAction && !hasProblem && 'bg-warning/5',
+        (mr.needsCurrentUserAction || shouldHighlightRebase) &&
+          !hasProblem &&
+          'bg-warning/5',
         shouldHighlightProblem && 'bg-destructive/5',
       )}
     >
@@ -61,6 +65,12 @@ export const MRItem = ({ mr }: MRItemProps) => {
             <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
               <AlertCircleIcon aria-hidden="true" className="size-3" />
               {problemLabel}
+            </span>
+          )}
+          {shouldHighlightRebase && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-warning">
+              <RefreshCwIcon aria-hidden="true" className="size-3" />
+              Needs rebase
             </span>
           )}
           <span className="ml-auto shrink-0 font-mono text-xs text-muted-foreground">

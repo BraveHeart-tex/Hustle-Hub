@@ -223,6 +223,7 @@ const reviewer = (id: number, avatarUrl: string, hasApproved = false) => ({
 const commonMergeRequestFields = {
   targetBranch: 'main',
   autoMergeEnabled: false,
+  needsRebase: false,
 } as const;
 
 const reviewMergeRequests: GitlabMergeRequest[] = [
@@ -321,6 +322,7 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
     reviewers: [reviewer(12, avatars.alex, true), reviewer(27, avatars.sam)],
     needsCurrentUserAction: false,
     conflicts: false,
+    needsRebase: true,
     headPipelineStatus: 'SUCCESS',
     projectName: 'storefront',
     projectId: '101',

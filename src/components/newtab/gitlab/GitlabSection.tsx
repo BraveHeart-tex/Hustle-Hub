@@ -350,6 +350,7 @@ export function GitlabSection() {
     (mergeRequest) =>
       mergeRequest.needsCurrentUserAction ||
       mergeRequest.conflicts ||
+      mergeRequest.needsRebase ||
       mergeRequest.headPipelineStatus === 'FAILED',
   );
   const sectionState = isLoading
