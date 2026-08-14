@@ -36,6 +36,7 @@ import {
   useGitlabGroupOpenState,
 } from '@/lib/storage/filters';
 import { isNeedsReboundMr } from '@/lib/utils/misc/isNeedsReboundMr';
+import { isOwnGitlabMr } from '@/lib/utils/misc/isOwnGitlabMr';
 import { isReleaseMr } from '@/lib/utils/misc/isReleaseMr';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 import { type GitlabMergeRequest } from '@/types/gitlab';
@@ -350,7 +351,11 @@ export function GitlabSection() {
     (mergeRequest) =>
       mergeRequest.needsCurrentUserAction ||
       mergeRequest.conflicts ||
-      mergeRequest.needsRebase ||
+      (mergeRequest.needsRebase &&
+        isOwnGitlabMr(
+          mergeRequest.author.id,
+          import.meta.env.VITE_GITLAB_USER_ID,
+        )) ||
       mergeRequest.headPipelineStatus === 'FAILED',
   );
   const sectionState = isLoading

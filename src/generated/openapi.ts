@@ -837,6 +837,7 @@ export interface components {
       webUrl: string;
       userNotesCount: number;
       author: {
+        id: number;
         username: string;
         avatarUrl: string;
       };
@@ -1192,6 +1193,7 @@ export interface components {
       webUrl: string;
       userNotesCount: number;
       author: {
+        id: number;
         username: string;
         avatarUrl: string;
       };

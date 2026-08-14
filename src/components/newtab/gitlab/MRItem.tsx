@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/formatters/formatDate';
+import { isOwnGitlabMr } from '@/lib/utils/misc/isOwnGitlabMr';
 import { type GitlabMergeRequest } from '@/types/gitlab';
 
 interface MRItemProps {
@@ -37,7 +38,11 @@ export const MRItem = ({ mr }: MRItemProps) => {
   const hasProblem = mr.conflicts || mr.headPipelineStatus === 'FAILED';
   const shouldHighlightProblem = hasProblem && !mr.draft;
   const problemLabel = mr.conflicts ? 'Conflicts' : 'Failed pipeline';
-  const shouldHighlightRebase = mr.needsRebase && !mr.draft && !hasProblem;
+  const shouldHighlightRebase =
+    mr.needsRebase &&
+    !mr.draft &&
+    !hasProblem &&
+    isOwnGitlabMr(mr.author.id, import.meta.env.VITE_GITLAB_USER_ID);
 
   return (
     <article

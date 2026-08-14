@@ -239,7 +239,7 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
     webUrl:
       'https://gitlab.example.com/commerce/storefront/-/merge_requests/842',
     userNotesCount: 6,
-    author: { username: 'maya.chen', avatarUrl: avatars.maya },
+    author: { id: 47, username: 'maya.chen', avatarUrl: avatars.maya },
     approvedBy: 1,
     approvalsRequired: 2,
     labels: [
@@ -266,7 +266,7 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
     webUrl:
       'https://gitlab.example.com/platform/web-foundation/-/merge_requests/317',
     userNotesCount: 11,
-    author: { username: 'deniz.kaya', avatarUrl: avatars.deniz },
+    author: { id: 18, username: 'deniz.kaya', avatarUrl: avatars.deniz },
     approvedBy: 0,
     approvalsRequired: 2,
     labels: [{ color: '#6f42c1', title: 'platform' }],
@@ -290,7 +290,7 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
     webUrl:
       'https://gitlab.example.com/commerce/storefront/-/merge_requests/838',
     userNotesCount: 2,
-    author: { username: 'sam.rivera', avatarUrl: avatars.sam },
+    author: { id: 27, username: 'sam.rivera', avatarUrl: avatars.sam },
     approvedBy: 0,
     approvalsRequired: 2,
     labels: [{ color: '#0e8a16', title: 'ux' }],
@@ -314,7 +314,7 @@ const reviewMergeRequests: GitlabMergeRequest[] = [
     webUrl:
       'https://gitlab.example.com/commerce/storefront/-/merge_requests/905',
     userNotesCount: 3,
-    author: { username: 'sam.rivera', avatarUrl: avatars.sam },
+    author: { id: 28408582, username: 'sam.rivera', avatarUrl: avatars.sam },
     approvedByCurrentUser: true,
     approvedBy: 1,
     approvalsRequired: 2,
@@ -343,7 +343,7 @@ const assignedMergeRequests: GitlabMergeRequest[] = [
     webUrl:
       'https://gitlab.example.com/commerce/storefront/-/merge_requests/846',
     userNotesCount: 4,
-    author: { username: 'alex.morgan', avatarUrl: avatars.alex },
+    author: { id: 12, username: 'alex.morgan', avatarUrl: avatars.alex },
     approvedBy: 2,
     approvalsRequired: 2,
     labels: [
@@ -375,7 +375,7 @@ const assignedMergeRequests: GitlabMergeRequest[] = [
     webUrl:
       'https://gitlab.example.com/commerce/release-tools/-/merge_requests/119',
     userNotesCount: 1,
-    author: { username: 'alex.morgan', avatarUrl: avatars.alex },
+    author: { id: 12, username: 'alex.morgan', avatarUrl: avatars.alex },
     approvedBy: 1,
     approvalsRequired: 2,
     labels: [{ color: '#c5def5', title: 'release' }],
@@ -399,7 +399,7 @@ const assignedMergeRequests: GitlabMergeRequest[] = [
     webUrl:
       'https://gitlab.example.com/commerce/storefront/-/merge_requests/839',
     userNotesCount: 3,
-    author: { username: 'alex.morgan', avatarUrl: avatars.alex },
+    author: { id: 12, username: 'alex.morgan', avatarUrl: avatars.alex },
     approvedBy: 0,
     approvalsRequired: 2,
     labels: [{ color: '#1f75cb', title: 'frontend' }],
