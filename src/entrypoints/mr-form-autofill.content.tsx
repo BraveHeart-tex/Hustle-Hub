@@ -322,7 +322,14 @@ const fillReleaseBasics = (jiraId: string) => {
 
     if (!titleInput) return false;
 
-    setInputValue(titleInput, `Production Release for ${jiraId}`);
+    const commitMessageWithoutScope = getCommitMessageWithoutScope(
+      titleInput.value,
+    );
+    const title = commitMessageWithoutScope
+      ? `Production Release For ${jiraId}: ${capitalizeFirstLetter(commitMessageWithoutScope)}`
+      : `Production Release For ${jiraId}`;
+
+    setInputValue(titleInput, title);
     return true;
   });
 

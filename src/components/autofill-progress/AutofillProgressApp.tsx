@@ -8,7 +8,7 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import { StrictMode, useSyncExternalStore } from 'react';
+import { StrictMode, useEffect, useState, useSyncExternalStore } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -50,22 +50,53 @@ const StepRow = ({ step }: { step: ProgressStep }) => {
   );
 };
 
+const AUTO_DISMISS_DELAY_MS = 2500;
+const FADE_OUT_DURATION_MS = 300;
+
 export const AutofillProgressApp = () => {
   const { visible, steps } = useSyncExternalStore(
     progressStore.subscribe,
     progressStore.getSnapshot,
   );
 
-  if (!visible || steps.length === 0) return null;
-
   const isRunning = steps.some(
     (step) => step.status === 'pending' || step.status === 'running',
   );
+
+  const [fadingOut, setFadingOut] = useState(false);
+
+  useEffect(() => {
+    if (!visible || isRunning) {
+      setFadingOut(false);
+      return;
+    }
+
+    const fadeTimer = setTimeout(() => {
+      setFadingOut(true);
+    }, AUTO_DISMISS_DELAY_MS);
+
+    return () => clearTimeout(fadeTimer);
+  }, [visible, isRunning]);
+
+  useEffect(() => {
+    if (!fadingOut) return;
+
+    const dismissTimer = setTimeout(() => {
+      progressStore.dismiss();
+    }, FADE_OUT_DURATION_MS);
+
+    return () => clearTimeout(dismissTimer);
+  }, [fadingOut]);
+
+  if (!visible || steps.length === 0) return null;
+
   const title = isRunning ? 'Autofilling MR…' : 'Autofill complete';
 
   return (
     <StrictMode>
-      <div className="fixed bottom-24 right-6 z-999999">
+      <div
+        className={`fixed bottom-24 right-6 z-999999 transition-opacity duration-300 ${fadingOut ? 'opacity-0' : 'opacity-100'}`}
+      >
         <div className="w-64 rounded-xl border bg-card text-card-foreground shadow-sm">
           <div className="flex items-center justify-between gap-2 border-b px-3 py-2">
             <span className="text-xs font-semibold">{title}</span>
