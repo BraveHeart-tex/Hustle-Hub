@@ -7,6 +7,7 @@ import { ReviewerControlsApp } from '@/components/reviewer-presets/ReviewerContr
 import { progressStore, runStep } from '@/lib/autofill-progress/progressStore';
 import { waitForElement } from '@/lib/utils/dom/waitForElement';
 import { extractJiraId } from '@/lib/utils/misc/extractJiraId';
+import { getCommitMessageWithoutScope } from '@/lib/utils/misc/getCommitMessageWithoutScope';
 import { getJiraTaskUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { fetchFerelKey, fetchJiraIssueDetails } from '@/services/jira';
 import { defineContentScript } from '#imports';
@@ -230,22 +231,6 @@ const capitalizeFirstLetter = (value: string) => {
   if (!value) return value;
 
   return value.charAt(0).toUpperCase() + value.slice(1);
-};
-
-const getCommitMessageWithoutScope = (commitMessage: string) => {
-  const trimmedCommitMessage = commitMessage.trim();
-  const alreadyFormattedTitleMatch =
-    trimmedCommitMessage.match(/^[A-Z]+-\d+:\s*(.+)$/);
-
-  if (alreadyFormattedTitleMatch) return alreadyFormattedTitleMatch[1].trim();
-
-  const conventionalCommitMatch = trimmedCommitMessage.match(
-    /^[a-z]+(?:\([^)]+\))?!?:\s*(.+)$/i,
-  );
-
-  if (!conventionalCommitMatch) return trimmedCommitMessage;
-
-  return conventionalCommitMatch[1].trim();
 };
 
 const getFeatureMergeRequestTitle = (
