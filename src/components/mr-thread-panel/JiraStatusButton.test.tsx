@@ -35,6 +35,7 @@ describe('JiraStatusButton', () => {
     const container = render({
       assigneeIds: ['100'],
       description: 'Release: FEREL-42',
+      mrKey: 'group/project#42',
       mrUrl: 'https://gitlab.com/group/project/-/merge_requests/42',
       targetBranch: 'main',
     });
@@ -61,6 +62,7 @@ describe('JiraStatusButton', () => {
     const container = render({
       assigneeIds: null,
       description: null,
+      mrKey: 'group/project#42',
       mrUrl: 'https://gitlab.com/group/project/-/merge_requests/42',
       targetBranch: 'develop',
     });
@@ -84,6 +86,7 @@ describe('JiraStatusButton', () => {
     const container = render({
       assigneeIds: ['100'],
       description: null,
+      mrKey: 'group/project#42',
       mrUrl: 'https://gitlab.com/group/project/-/merge_requests/42',
       targetBranch: 'develop',
     });
@@ -92,6 +95,7 @@ describe('JiraStatusButton', () => {
     rerender({
       assigneeIds: ['100'],
       description: null,
+      mrKey: 'group/project#43',
       mrUrl: 'https://gitlab.com/group/project/-/merge_requests/43',
       targetBranch: 'develop',
     });
@@ -107,12 +111,40 @@ describe('JiraStatusButton', () => {
 
     expect(container.textContent).not.toContain('Stale status');
   });
+
+  it('does not refetch when only the MR URL changes within the same MR', async () => {
+    mocks.fetchJiraIssueDetails.mockResolvedValue({
+      fields: {
+        status: { name: 'To Do', statusCategory: { colorName: 'blue-gray' } },
+      },
+      transitions: [],
+    });
+    render({
+      assigneeIds: ['100'],
+      description: null,
+      mrKey: 'group/project#42',
+      mrUrl: 'https://gitlab.com/group/project/-/merge_requests/42',
+      targetBranch: 'develop',
+    });
+    await flushPromises();
+
+    rerender({
+      assigneeIds: ['100'],
+      description: null,
+      mrKey: 'group/project#42',
+      mrUrl: 'https://gitlab.com/group/project/-/merge_requests/42/pipelines',
+      targetBranch: 'develop',
+    });
+    await flushPromises();
+
+    expect(mocks.fetchJiraIssueDetails).toHaveBeenCalledTimes(1);
+  });
 });
 
 function render(
   facts: Pick<
     ComponentProps<typeof JiraStatusButton>,
-    'assigneeIds' | 'description' | 'mrUrl' | 'targetBranch'
+    'assigneeIds' | 'description' | 'mrKey' | 'mrUrl' | 'targetBranch'
   >,
 ): HTMLElement {
   const { document, window } = parseHTML('<html><body></body></html>');
@@ -141,7 +173,7 @@ function render(
 function rerender(
   facts: Pick<
     ComponentProps<typeof JiraStatusButton>,
-    'assigneeIds' | 'description' | 'mrUrl' | 'targetBranch'
+    'assigneeIds' | 'description' | 'mrKey' | 'mrUrl' | 'targetBranch'
   >,
 ): void {
   act(() => {

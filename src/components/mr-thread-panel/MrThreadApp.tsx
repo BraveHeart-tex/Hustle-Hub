@@ -45,6 +45,11 @@ export const MrThreadApp = ({
             jiraLink={usableJiraId ? getJiraTaskUrl(usableJiraId) : ''}
             assigneeIds={facts?.assigneeIds ?? null}
             description={facts?.description ?? null}
+            mrKey={
+              facts
+                ? `${facts.identity.projectPath}#${facts.identity.mergeRequestIid}`
+                : null
+            }
             mrUrl={facts?.identity.href ?? null}
             targetBranch={facts?.targetBranch ?? null}
           />

@@ -99,6 +99,7 @@ export const JiraStatusButton = ({
   gitlabUserId,
   assigneeIds,
   description,
+  mrKey,
   mrUrl,
   targetBranch,
 }: {
@@ -108,6 +109,7 @@ export const JiraStatusButton = ({
   gitlabUserId: string;
   assigneeIds: readonly string[] | null;
   description: string | null;
+  mrKey: string | null;
   mrUrl: string | null;
   targetBranch: string | null;
 }) => {
@@ -139,7 +141,7 @@ export const JiraStatusButton = ({
     setError(null);
     setLoading(false);
     setTransitioning(null);
-  }, [mrUrl, resolvedJiraId]);
+  }, [mrKey, resolvedJiraId]);
 
   const fetchTaskDetails = useCallback(() => {
     if (!resolvedJiraId) return;
@@ -163,7 +165,7 @@ export const JiraStatusButton = ({
     if (fetchedRef.current || !targetBranch || !resolvedJiraId) return;
     fetchedRef.current = true;
     fetchTaskDetails();
-  }, [fetchTaskDetails, mrUrl, resolvedJiraId, targetBranch]);
+  }, [fetchTaskDetails, mrKey, resolvedJiraId, targetBranch]);
 
   const handleTransition = async (transition: JiraTransition) => {
     if (!resolvedJiraId) return;
