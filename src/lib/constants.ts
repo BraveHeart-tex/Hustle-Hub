@@ -1,6 +1,6 @@
 import type { paths } from '@/generated/openapi';
 
-export type JiraFilter = NonNullable<
+type JiraFilterParam = NonNullable<
   NonNullable<
     paths['/api/data/jira/issues/']['get']['parameters']['query']
   >['filter']
@@ -8,9 +8,10 @@ export type JiraFilter = NonNullable<
 
 export const JIRA_FILTERS = {
   LITERALLY_WORKING_ON: 'literally_working_on',
-  FOR_YOU: 'for_you',
   FRONTEND_RELEASES: 'frontend_releases',
-} as const satisfies Record<string, JiraFilter>;
+} as const satisfies Record<string, JiraFilterParam>;
+
+export type JiraFilter = (typeof JIRA_FILTERS)[keyof typeof JIRA_FILTERS];
 
 export const QUERY_KEYS = {
   calendar: {

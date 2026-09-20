@@ -440,7 +440,7 @@ export interface paths {
       parameters: {
         query?: {
           /** @description Which JQL filter to apply. */
-          filter?: 'for_you' | 'frontend_releases' | 'literally_working_on';
+          filter?: 'frontend_releases' | 'literally_working_on';
         };
         header?: never;
         path?: never;
@@ -604,6 +604,15 @@ export interface paths {
           };
         };
         /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ApiError'];
+          };
+        };
+        /** @description Default Response */
         500: {
           headers: {
             [name: string]: unknown;
@@ -674,6 +683,15 @@ export interface paths {
           };
         };
         /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ApiError'];
+          };
+        };
+        /** @description Default Response */
         500: {
           headers: {
             [name: string]: unknown;
@@ -725,12 +743,86 @@ export interface paths {
           };
         };
         /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ApiError'];
+          };
+        };
+        /** @description Default Response */
         500: {
           headers: {
             [name: string]: unknown;
           };
           content: {
             'application/json': components['schemas']['ApiError'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/health/': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Liveness and dependency check. Returns 503 when Redis is not reachable. */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {boolean} */
+              success: true;
+              data: {
+                /** @enum {string} */
+                status: 'ok' | 'degraded';
+                /** @enum {string} */
+                redis: 'ready' | 'unavailable';
+                uptimeSeconds: number;
+              };
+            };
+          };
+        };
+        /** @description Default Response */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {boolean} */
+              success: true;
+              data: {
+                /** @enum {string} */
+                status: 'ok' | 'degraded';
+                /** @enum {string} */
+                redis: 'ready' | 'unavailable';
+                uptimeSeconds: number;
+              };
+            };
           };
         };
       };
@@ -859,6 +951,7 @@ export interface components {
       headPipelineStatus?: string;
       projectName: string;
       projectId: string;
+      projectPath: string;
       autoMergeEnabled?: boolean;
       diffStatsSummary: {
         additions: number;
@@ -882,13 +975,13 @@ export interface components {
           active: boolean;
           avatarUrls: {
             /** Format: uri */
-            '16x16': string;
+            '16x16'?: string;
             /** Format: uri */
-            '24x24': string;
+            '24x24'?: string;
             /** Format: uri */
-            '32x32': string;
+            '32x32'?: string;
             /** Format: uri */
-            '48x48': string;
+            '48x48'?: string;
           };
           displayName: string;
           /** Format: email */
@@ -901,6 +994,7 @@ export interface components {
           total: number;
         };
         created: string;
+        /** @default null */
         priority: {
           /** Format: uri */
           iconUrl: string;
@@ -908,8 +1002,9 @@ export interface components {
           name: string;
           /** Format: uri */
           self: string;
-        };
+        } | null;
         status: {
+          /** @default  */
           description: string;
           /** Format: uri */
           iconUrl: string;
@@ -974,6 +1069,7 @@ export interface components {
       fields: {
         summary: string;
         status: {
+          /** @default  */
           description: string;
           /** Format: uri */
           iconUrl: string;
@@ -1004,13 +1100,13 @@ export interface components {
           active: boolean;
           avatarUrls: {
             /** Format: uri */
-            '16x16': string;
+            '16x16'?: string;
             /** Format: uri */
-            '24x24': string;
+            '24x24'?: string;
             /** Format: uri */
-            '32x32': string;
+            '32x32'?: string;
             /** Format: uri */
-            '48x48': string;
+            '48x48'?: string;
           };
           displayName: string;
           /** Format: email */
@@ -1033,6 +1129,7 @@ export interface components {
       fields: {
         summary: string;
         status: {
+          /** @default  */
           description: string;
           /** Format: uri */
           iconUrl: string;
@@ -1063,13 +1160,13 @@ export interface components {
           active: boolean;
           avatarUrls: {
             /** Format: uri */
-            '16x16': string;
+            '16x16'?: string;
             /** Format: uri */
-            '24x24': string;
+            '24x24'?: string;
             /** Format: uri */
-            '32x32': string;
+            '32x32'?: string;
             /** Format: uri */
-            '48x48': string;
+            '48x48'?: string;
           };
           displayName: string;
           /** Format: email */
@@ -1084,6 +1181,7 @@ export interface components {
       id: string;
       name: string;
       to: {
+        /** @default  */
         description: string;
         /** Format: uri */
         iconUrl: string;
@@ -1215,6 +1313,7 @@ export interface components {
       headPipelineStatus?: string;
       projectName: string;
       projectId: string;
+      projectPath: string;
       autoMergeEnabled?: boolean;
       diffStatsSummary: {
         additions: number;
@@ -1238,13 +1337,13 @@ export interface components {
           active: boolean;
           avatarUrls: {
             /** Format: uri */
-            '16x16': string;
+            '16x16'?: string;
             /** Format: uri */
-            '24x24': string;
+            '24x24'?: string;
             /** Format: uri */
-            '32x32': string;
+            '32x32'?: string;
             /** Format: uri */
-            '48x48': string;
+            '48x48'?: string;
           };
           displayName: string;
           /** Format: email */
@@ -1257,6 +1356,7 @@ export interface components {
           total: number;
         };
         created: string;
+        /** @default null */
         priority: {
           /** Format: uri */
           iconUrl: string;
@@ -1264,8 +1364,9 @@ export interface components {
           name: string;
           /** Format: uri */
           self: string;
-        };
+        } | null;
         status: {
+          /** @default  */
           description: string;
           /** Format: uri */
           iconUrl: string;
@@ -1330,6 +1431,7 @@ export interface components {
       fields: {
         summary: string;
         status: {
+          /** @default  */
           description: string;
           /** Format: uri */
           iconUrl: string;
@@ -1360,13 +1462,13 @@ export interface components {
           active: boolean;
           avatarUrls: {
             /** Format: uri */
-            '16x16': string;
+            '16x16'?: string;
             /** Format: uri */
-            '24x24': string;
+            '24x24'?: string;
             /** Format: uri */
-            '32x32': string;
+            '32x32'?: string;
             /** Format: uri */
-            '48x48': string;
+            '48x48'?: string;
           };
           displayName: string;
           /** Format: email */
@@ -1389,6 +1491,7 @@ export interface components {
       fields: {
         summary: string;
         status: {
+          /** @default  */
           description: string;
           /** Format: uri */
           iconUrl: string;
@@ -1419,13 +1522,13 @@ export interface components {
           active: boolean;
           avatarUrls: {
             /** Format: uri */
-            '16x16': string;
+            '16x16'?: string;
             /** Format: uri */
-            '24x24': string;
+            '24x24'?: string;
             /** Format: uri */
-            '32x32': string;
+            '32x32'?: string;
             /** Format: uri */
-            '48x48': string;
+            '48x48'?: string;
           };
           displayName: string;
           /** Format: email */
@@ -1440,6 +1543,7 @@ export interface components {
       id: string;
       name: string;
       to: {
+        /** @default  */
         description: string;
         /** Format: uri */
         iconUrl: string;

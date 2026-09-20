@@ -17,7 +17,6 @@ const GITLAB_SEARCH_FILTERS: GitlabFilter[] = [
 ];
 
 const JIRA_SEARCH_FILTERS: JiraFilter[] = [
-  JIRA_FILTERS.FOR_YOU,
   JIRA_FILTERS.LITERALLY_WORKING_ON,
   JIRA_FILTERS.FRONTEND_RELEASES,
 ];
@@ -43,10 +42,9 @@ export const useWorkItemSearch = (query = '', enabled = true) => {
   const queryOptions = { enabled };
   const assignedMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[0], queryOptions);
   const reviewMrs = useGitlabMrs(GITLAB_SEARCH_FILTERS[1], queryOptions);
-  const jiraForYou = useJiraTickets(JIRA_SEARCH_FILTERS[0], queryOptions);
-  const jiraWorkingOn = useJiraTickets(JIRA_SEARCH_FILTERS[1], queryOptions);
+  const jiraWorkingOn = useJiraTickets(JIRA_SEARCH_FILTERS[0], queryOptions);
   const jiraFrontendReleases = useJiraTickets(
-    JIRA_SEARCH_FILTERS[2],
+    JIRA_SEARCH_FILTERS[1],
     queryOptions,
   );
 
@@ -71,7 +69,6 @@ export const useWorkItemSearch = (query = '', enabled = true) => {
 
     const jiraMap = new Map<string, NoteLinkedWorkItem>();
     [
-      jiraForYou.data?.issues ?? [],
       jiraWorkingOn.data?.issues ?? [],
       jiraFrontendReleases.data?.issues ?? [],
     ].forEach((issues) =>
@@ -93,7 +90,6 @@ export const useWorkItemSearch = (query = '', enabled = true) => {
     };
   }, [
     assignedMrs.data,
-    jiraForYou.data,
     jiraFrontendReleases.data,
     jiraWorkingOn.data,
     reviewMrs.data,
@@ -116,13 +112,11 @@ export const useWorkItemSearch = (query = '', enabled = true) => {
     isLoading:
       assignedMrs.isLoading ||
       reviewMrs.isLoading ||
-      jiraForYou.isLoading ||
       jiraWorkingOn.isLoading ||
       jiraFrontendReleases.isLoading,
     isError:
       assignedMrs.isError ||
       reviewMrs.isError ||
-      jiraForYou.isError ||
       jiraWorkingOn.isError ||
       jiraFrontendReleases.isError,
   };

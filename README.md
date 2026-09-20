@@ -8,7 +8,7 @@ Hustle Hub is a personal browser-extension dashboard for daily engineering work.
 
 - Shows attention items from the backend attention stream.
 - Lists GitLab merge requests waiting for your review and your draft merge requests.
-- Lists Jira tickets across For You, Literally Working On, and Frontend Releases filters.
+- Lists Jira tickets across Literally Working On and Frontend Releases filters.
 - Provides one-command refresh for active dashboard data.
 - Includes global search for Jira tickets and GitLab merge requests with `Cmd/Ctrl + K`.
 
@@ -17,7 +17,7 @@ Hustle Hub is a personal browser-extension dashboard for daily engineering work.
 Shortcuts only run when focus is not inside an input, textarea, select, or editable field.
 
 - `j` opens the Jira filter menu.
-- With Jira open: `f` selects For You, `l` selects Literally Working On, `r` selects Frontend Releases.
+- With Jira open: `l` selects Literally Working On, `r` selects Frontend Releases.
 - `g` opens the GitLab filter menu.
 - With GitLab open: `r` selects Review requested, `d` selects Draft merge requests.
 - The two-key forms also work directly: `j f`, `j l`, `j r`, `g d`, `g r`.

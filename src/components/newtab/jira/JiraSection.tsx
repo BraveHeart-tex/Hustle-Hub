@@ -22,7 +22,7 @@ import { useJiraTickets } from '@/hooks/useJiraTickets';
 import { JIRA_FILTERS } from '@/lib/constants';
 import { useJiraFilter } from '@/lib/storage/filters';
 import { cn } from '@/lib/utils';
-import { getJiraForYouUrl } from '@/lib/utils/misc/getJiraTaskUrl';
+import { getJiraBaseUrl } from '@/lib/utils/misc/getJiraTaskUrl';
 import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
 interface JiraSectionProps {
@@ -213,7 +213,7 @@ export function JiraSection({ className }: JiraSectionProps) {
         <CardTitle className="w-full flex items-center justify-between">
           <div className="flex items-center gap-2 text-lg">
             <a
-              href={getJiraForYouUrl()}
+              href={getJiraBaseUrl()}
               target="_blank"
               rel="noreferrer"
               aria-label="Open Jira"

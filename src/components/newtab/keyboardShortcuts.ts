@@ -28,12 +28,6 @@ export const GITLAB_CATEGORY_SHORTCUTS = [
 
 export const JIRA_FILTER_SHORTCUTS = [
   {
-    label: 'For You',
-    shortcutKeys: ['j', 'f'],
-    key: 'f',
-    value: JIRA_FILTERS.FOR_YOU,
-  },
-  {
     label: 'Literally Working On',
     shortcutKeys: ['j', 'l'],
     key: 'l',

@@ -7,10 +7,14 @@ import {
   JIRA_FILTERS,
   type JiraFilter,
 } from '@/lib/constants';
+import { isValueOf } from '@/lib/utils/misc/isValueOf';
 
 const jiraFilterStorage = storage.defineItem<JiraFilter>('local:jiraFilter', {
   fallback: JIRA_FILTERS.LITERALLY_WORKING_ON,
 });
+
+const toJiraFilter = (value: unknown): JiraFilter =>
+  isValueOf(JIRA_FILTERS, value) ? value : JIRA_FILTERS.LITERALLY_WORKING_ON;
 
 const gitlabCategoryStorage = storage.defineItem<GitlabCategory>(
   'local:gitlabCategory',
@@ -25,8 +29,10 @@ export const useJiraFilter = () => {
   );
 
   useEffect(() => {
-    jiraFilterStorage.getValue().then(setFilter);
-    return jiraFilterStorage.watch(setFilter);
+    jiraFilterStorage
+      .getValue()
+      .then((value) => setFilter(toJiraFilter(value)));
+    return jiraFilterStorage.watch((value) => setFilter(toJiraFilter(value)));
   }, []);
 
   const updateFilter = (newFilter: JiraFilter) => {
